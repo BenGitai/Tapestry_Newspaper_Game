@@ -137,3 +137,97 @@
   gap: 8px;
   margin-top: 6px;
 }
+
+.deskGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-bottom: 6px;
+}
+
+.deskHead {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  border-bottom: 1px solid var(--c-ink);
+  padding: 2px 0;
+}
+
+.deskHead b {
+  font-family: var(--f-display);
+  font-size: 14px;
+}
+
+.deskHead span {
+  font-family: var(--f-mono);
+  font-size: 8.5px;
+  text-transform: uppercase;
+  color: var(--c-ink-muted);
+}
+
+.headTag {
+  font-family: var(--f-mono);
+  font-style: normal;
+  font-size: 8.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  background: var(--c-ink);
+  color: var(--c-newsprint);
+  padding: 1px 5px;
+  margin-left: 6px;
+  vertical-align: middle;
+}
+
+.headStats {
+  display: flex;
+  gap: 18px;
+  font-family: var(--f-mono);
+  font-size: 10.5px;
+  text-transform: uppercase;
+}
+
+.headStats b {
+  font-weight: 500;
+  font-size: 13px;
+  margin-left: 4px;
+}
+
+.duties {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.duty {
+  display: grid;
+  grid-template-columns: 18px 1fr;
+  gap: 6px;
+  align-items: start;
+  font-size: 12px;
+  line-height: 1.35;
+}
+
+.duty input {
+  accent-color: var(--c-ink);
+  margin-top: 2px;
+}
+
+.duty b {
+  font-family: var(--f-mono);
+  font-size: 10px;
+  text-transform: uppercase;
+  font-weight: 500;
+}
+
+.warnLine {
+  font-size: 12px;
+  color: var(--c-stamp-red);
+  margin: 4px 0;
+}
+
+.mutedLine {
+  font-size: 12px;
+  font-style: italic;
+  color: var(--c-ink-soft);
+  margin: 4px 0;
+}

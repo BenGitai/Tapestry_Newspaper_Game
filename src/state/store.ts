@@ -6,7 +6,8 @@ import { activePages, findStoryBlock, removeBlock, storyBlockId, type EditResult
 import { advanceIssue, createGame, formatIssueDate, issueCount, issueDate, type Hire } from '../sim/newGame.ts';
 import { articleForStory, commission as commissionStory, updateArticle, type NewsroomEdit } from '../sim/newsroom.ts';
 import { checkReferences, hire as hireReporter, release as releaseReporter, setAssignment as queueAssignment, type StaffEdit } from '../sim/staff.ts';
-import type { Article, GameState, IssueDraft, PageId, PaperSetup, StaffAssignment } from '../sim/types.ts';
+import type { Article, DeskDuties, GameState, IssueDraft, PageId, PaperSetup, StaffAssignment } from '../sim/types.ts';
+import { promote as promoteToHead, setDuties as setHeadDuties, stepDown as stepDownHead, type DeskEdit } from '../sim/desks.ts';
 import { addNewsstand as buyNewsstand, openBureau as buyBureau, type DistrictEdit } from '../sim/paperStats.ts';
 import { resolveIssue } from '../sim/simulate.ts';
 import { saves, type SlotId } from './save.ts';
@@ -59,6 +60,9 @@ interface Store {
   hire(reporterId: string): void;
   release(reporterId: string): void;
   checkReferences(reporterId: string): void;
+  promote(reporterId: string): void;
+  stepDown(reporterId: string): void;
+  setDuties(reporterId: string, duties: DeskDuties): void;
 
   // city
   addNewsstand(districtId: string): void;
@@ -75,7 +79,7 @@ interface Store {
 
 export const useStore = create<Store>((set, get) => {
   /** Apply a whole-game change from the sim; show the reason if it was refused. */
-  const apply = (fn: (g: GameState) => StaffEdit | NewsroomEdit | DistrictEdit | GameState): boolean => {
+  const apply = (fn: (g: GameState) => StaffEdit | NewsroomEdit | DistrictEdit | DeskEdit | GameState): boolean => {
     const game = get().game;
     if (!game) return false;
     const r = fn(game);
@@ -214,6 +218,9 @@ export const useStore = create<Store>((set, get) => {
         return next;
       }),
     checkReferences: (reporterId) => apply((g) => checkReferences(g, reporterId)),
+    promote: (reporterId) => apply((g) => promoteToHead(g, loadGameData().world, reporterId)),
+    stepDown: (reporterId) => apply((g) => stepDownHead(g, reporterId)),
+    setDuties: (reporterId, duties) => apply((g) => setHeadDuties(g, reporterId, duties)),
 
     addNewsstand: (districtId) => apply((g) => buyNewsstand(g, loadGameData().world, districtId)),
     openBureau: (districtId) => apply((g) => buyBureau(g, loadGameData().world, districtId)),

@@ -1,8 +1,9 @@
 // Staff: manage your reporters (assignment, workload, training) and recruit new ones.
 import { useState } from 'react';
-import type { Reporter } from '../../data/schemas.ts';
+import { DESKS, type Desk, type Reporter } from '../../data/schemas.ts';
 import { loadGameData } from '../../data/worldData.ts';
-import { MAX_STAFF, REFERENCE_CHECK_COST } from '../../sim/balance.ts';
+import { HEAD, MAX_STAFF, REFERENCE_CHECK_COST } from '../../sim/balance.ts';
+import { canPromote, DEFAULT_DUTIES, deskMembers, DUTY_HELP, DUTY_LABEL, editingSkill, headActive, headOf, leadershipSkill, memberDesk } from '../../sim/desks.ts';
 import {
   currentAttributes,
   DESK_LABEL,
@@ -10,11 +11,12 @@ import {
   isScouted,
   payroll,
   reporterById,
+  salaryOf,
   severance,
   shownAssignment,
   signingFee,
 } from '../../sim/staff.ts';
-import type { GameState, StaffMember } from '../../sim/types.ts';
+import type { DeskDuties, GameState, StaffMember } from '../../sim/types.ts';
 import { useStore } from '../../state/store.ts';
 import { assignmentSummary, AssignmentEditor, AttributeTable, ReporterHeader, StrengthsLine } from '../../components/staff/StaffParts.tsx';
 import styles from './Hub.module.css';
@@ -40,21 +42,35 @@ export function StaffTab() {
             </span>
           </div>
           <div className={styles.scroll}>
-            {game.staff.map((m) => {
-              const r = reporterById(world, m.reporterId);
-              if (!r) return null;
-              return (
-                <button key={m.reporterId} className={`${s.staffRow} ${selected === m.reporterId && !candidate ? s.on : ''}`} onClick={() => { setSelected(m.reporterId); setCandidate(null); }}>
-                  <b>{r.name}</b>
-                  <span>{assignmentSummary(shownAssignment(m))}</span>
-                  <span className={s.rowMeta}>
-                    {filingCapacity(r, m, game.setup.frequency)} in/issue · morale {Math.round(m.morale)}
-                    {m.pendingAssignment ? ' · changes next issue' : ''}
-                    {m.hiredIssue > game.issueNumber ? ' · starts next issue' : ''}
+            {deskGroups(game).map((group) => (
+              <div key={group.key} className={s.deskGroup}>
+                <div className={s.deskHead}>
+                  <b>{group.label}</b>
+                  <span>
+                    {group.members.length} on desk
+                    {group.desk ? (headOf(game, group.desk) ? (headActive(game, world, group.desk) ? ' · has a head' : ' · head inactive') : group.members.length >= HEAD.minDesk ? ' · can promote a head' : '') : ''}
                   </span>
-                </button>
-              );
-            })}
+                </div>
+                {group.members.map((m) => {
+                  const r = reporterById(world, m.reporterId);
+                  if (!r) return null;
+                  return (
+                    <button key={m.reporterId} className={`${s.staffRow} ${selected === m.reporterId && !candidate ? s.on : ''}`} onClick={() => { setSelected(m.reporterId); setCandidate(null); }}>
+                      <b>
+                        {r.name}
+                        {m.role === 'head' ? <em className={s.headTag}>Desk head</em> : null}
+                      </b>
+                      <span>{m.role === 'head' ? 'Edits and runs the desk' : assignmentSummary(shownAssignment(m))}</span>
+                      <span className={s.rowMeta}>
+                        {filingCapacity(r, m, game.setup.frequency)} in/issue · morale {Math.round(m.morale)} · ${salaryOf(world, m)}
+                        {m.pendingAssignment ? ' · changes next issue' : ''}
+                        {m.hiredIssue > game.issueNumber ? ' · starts next issue' : ''}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+            ))}
           </div>
         </div>
       </section>
@@ -145,10 +161,12 @@ function ManageReporter({ game, member }: { game: GameState; member: StaffMember
           </div>
           <div className={s.stat}>
             <span>Salary</span>
-            <b>${r.salary_per_issue}/issue</b>
+            <b>${salaryOf(world, member)}/issue</b>
           </div>
         </div>
       </div>
+
+      <DeskPanel game={game} member={member} reporter={r} />
 
       <div className={styles.label}>Assignment {startsLater ? '' : '· changes apply from next issue'}</div>
       <AssignmentEditor reporter={r} member={member} value={shownAssignment(member)} onChange={(a) => setAssignment(r.id, a)} frequency={game.setup.frequency} />
@@ -226,5 +244,94 @@ function CandidateFile({ game, reporter, onHired }: { game: GameState; reporter:
         </button>
       </div>
     </div>
+  );
+}
+
+/** Staff grouped by the desk they work, heads first; World & national last. */
+function deskGroups(game: GameState): { key: string; label: string; desk?: Desk; members: StaffMember[] }[] {
+  const { world } = loadGameData();
+  const groups = new Map<string, { key: string; label: string; desk?: Desk; members: StaffMember[] }>();
+  for (const m of game.staff) {
+    const desk = memberDesk(world, m);
+    const key = desk ?? 'world';
+    if (!groups.has(key)) groups.set(key, { key, label: desk ? `${DESK_LABEL[desk]} desk` : 'World & national', desk, members: [] });
+    groups.get(key)!.members.push(m);
+  }
+  const order = [...DESKS, 'world'];
+  return [...groups.values()]
+    .sort((a, b) => order.indexOf(a.key) - order.indexOf(b.key))
+    .map((g) => ({ ...g, members: [...g.members].sort((a, b) => Number(b.role === 'head') - Number(a.role === 'head')) }));
+}
+
+function DeskPanel({ game, member, reporter }: { game: GameState; member: StaffMember; reporter: Reporter }) {
+  const promote = useStore((st) => st.promote);
+  const stepDown = useStore((st) => st.stepDown);
+  const setDuties = useStore((st) => st.setDuties);
+  const { world } = loadGameData();
+  const editing = editingSkill(reporter, member);
+  const leadership = leadershipSkill(reporter, member);
+
+  if (member.role === 'head' && member.headOf) {
+    const desk = member.headOf;
+    const duties = member.duties ?? DEFAULT_DUTIES;
+    const active = headActive(game, world, desk);
+    const crew = deskMembers(game, world, desk).filter((m) => m.role !== 'head');
+    return (
+      <>
+        <div className={styles.label}>Head of the {DESK_LABEL[desk]} desk</div>
+        <div className={s.headStats}>
+          <span>
+            Editing <b>{editing}</b>
+          </span>
+          <span>
+            Leadership <b>{leadership}</b>
+          </span>
+          <span>
+            Reporters <b>{crew.length}</b>
+          </span>
+        </div>
+        {!active ? <p className={s.warnLine}>The desk has fewer than {HEAD.minDesk} journalists. The head can’t do much until you add reporters to it.</p> : null}
+        <p className={styles.note}>Choose what to delegate. Their reporters also train faster and stay happier.</p>
+        <div className={s.duties}>
+          {(Object.keys(DUTY_LABEL) as (keyof DeskDuties)[]).map((k) => (
+            <label key={k} className={s.duty}>
+              <input type="checkbox" checked={duties[k]} onChange={(e) => setDuties(reporter.id, { ...duties, [k]: e.target.checked })} />
+              <span>
+                <b>{DUTY_LABEL[k]}</b> {DUTY_HELP[k]}
+              </span>
+            </label>
+          ))}
+        </div>
+        <button className={styles.linkBtn} onClick={() => stepDown(reporter.id)}>
+          Step down to reporter (morale −{HEAD.demotionMorale})
+        </button>
+      </>
+    );
+  }
+
+  const check = canPromote(game, world, reporter.id);
+  return (
+    <>
+      <div className={styles.label}>Desk head</div>
+      <div className={s.headStats}>
+        <span>
+          Editing <b>{editing}</b>
+        </span>
+        <span>
+          Leadership <b>{leadership}</b>
+        </span>
+      </div>
+      {check.ok ? (
+        <p className={styles.note}>
+          Promote {reporter.name} to head the {DESK_LABEL[check.desk]} desk? They mostly stop writing ({Math.round(HEAD.writingShare * 100)}% of their output)
+          and are paid ×{HEAD.salaryMultiplier} (${salaryOf(world, { ...member, role: 'head' })}/issue).{' '}
+          <button className={styles.linkBtn} onClick={() => promote(reporter.id)}>
+            Promote
+          </button>
+        </p>
+      ) : (
+        <p className={s.mutedLine}>{check.reason}.</p>
+      )}
+    </>
   );
 }

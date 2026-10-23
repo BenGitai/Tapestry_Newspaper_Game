@@ -3,7 +3,7 @@
 // until the paper is printed (correction risk, award chance). Built from the
 // story's content and the reporter's attributes.
 import type { CityWorld, Story } from '../data/schemas.ts';
-import { FOCUS, SCORECARD, WORKLOAD } from './balance.ts';
+import { FOCUS, HEAD, SCORECARD, WORKLOAD } from './balance.ts';
 import { currentAttributes, isOnDesk, reporterById } from './staff.ts';
 import type { Article, Attributes, StaffMember } from './types.ts';
 
@@ -42,7 +42,15 @@ export function isSensational(article: Pick<Article, 'angle'>, story: Pick<Story
   return story.sensitivity === 'high' && attrs.tact <= s.sensationalTact;
 }
 
-export function scorecard(article: Article, story: Story, world: CityWorld, member: StaffMember | undefined, freshness = 1): Scorecard {
+/** The desk head editing this article (Fix and Upgrade duties), if any. */
+export interface Editor {
+  editing: number;
+  fix: boolean;
+  upgrade: boolean;
+  name: string;
+}
+
+export function scorecard(article: Article, story: Story, world: CityWorld, member: StaffMember | undefined, freshness = 1, editor?: Editor): Scorecard {
   const s = SCORECARD;
   const reporter = article.reporterId ? reporterById(world, article.reporterId) : undefined;
   const base = reporter ? currentAttributes(reporter, member) : WIRE_COPY;
@@ -50,7 +58,7 @@ export function scorecard(article: Article, story: Story, world: CityWorld, memb
   const attrs: Attributes = {
     ...base,
     accuracy: Math.min(20, base.accuracy + (article.onFocus ? FOCUS.attributeBonus : 0)),
-    impact: Math.min(20, base.impact + (article.onFocus ? FOCUS.attributeBonus : 0)),
+    impact: Math.min(20, base.impact + (article.onFocus ? FOCUS.attributeBonus : 0) + (editor?.upgrade ? Math.round((HEAD.upgradeImpact * editor.editing) / 20) : 0)),
     flair: Math.min(20, base.flair + (article.onInterest ? FOCUS.interestFlair : 0)),
   };
   const notes: string[] = [];
@@ -73,11 +81,16 @@ export function scorecard(article: Article, story: Story, world: CityWorld, memb
       (styleMatch ? r.styleMatch : 0) +
       (offBeat ? r.offBeat : 0) +
       (article.onFocus ? FOCUS.readershipFocus : 0) +
-      (article.onInterest ? FOCUS.readershipInterest : 0)) *
+      (article.onInterest ? FOCUS.readershipInterest : 0) +
+      (editor?.upgrade ? (HEAD.upgradeReadership * editor.editing) / 20 : 0)) *
       freshness,
   );
 
-  const sensational = isSensational(article, story, attrs);
+  const toneDown = !!editor?.fix && editor.editing >= HEAD.fixSensationalEditing;
+  const sensational = isSensational(article, story, attrs) && !toneDown;
+  if (toneDown && isSensational(article, story, attrs)) notes.push(`${editor!.name} toned down the sensational edge.`);
+  if (editor?.fix) notes.push(`Edited by ${editor.name}: fewer errors get through.`);
+  if (editor?.upgrade) notes.push(`Sharpened by ${editor.name}.`);
   if (sensational) notes.push(story.sensitivity === 'high' ? 'Sensational treatment of a sensitive story. Expect anger.' : 'Sensational: big reactions either way.');
 
   const upsets =
@@ -97,7 +110,8 @@ export function scorecard(article: Article, story: Story, world: CityWorld, memb
   if (offBeat) trust -= 0.05;
 
   const workloadRisk = member ? WORKLOAD[member.assignment.workload].correctionRisk : 1;
-  const correctionRisk = clamp(((20 - attrs.accuracy) / 20) * s.correctionBase * workloadRisk * (offBeat ? 1.3 : 1));
+  const fixCut = editor?.fix ? 1 - (HEAD.fixCorrection * editor.editing) / 20 : 1;
+  const correctionRisk = clamp(((20 - attrs.accuracy) / 20) * s.correctionBase * workloadRisk * (offBeat ? 1.3 : 1) * fixCut);
   const awardChance = clamp(
     (attrs.impact / 20) *
       (story.importance / 5) *

@@ -8,7 +8,11 @@
 - Balance (`npm run simulate`, 10 daily issues, suggested staff): a founder ends with about $12–20k, enough to grow staff. A 20-person payroll costs about $2k per issue, so a big newsroom is a later-game goal you earn with circulation.
 - Tests: 103 passing.
 
-**Next (pending design answers):** desk heads.
+- **Desk heads** (`src/sim/desks.ts`). Promotion needs 3 or more journalists on the desk. There are four delegable duties (Filter, Fix, Upgrade, Run the desk) plus mentoring.
+  - The start of each issue now runs head assignments, then filing, then head commissions, then filtering.
+  - The Staff tab groups people by desk, with promote and step-down controls and duty toggles. The newsroom shows HEAD and "desk pick" badges.
+- **Runner:** a new "Grow + desk heads" strategy reaches 23–24 staff by issue 10 and stays solvent. Readers barely beat a 4-reporter paper, though, because page space is the bottleneck. A bigger newsroom gives more choice, not more volume. A future step could be more pages, or sales that reward quality more.
+- **Tests:** 113 passing.
 
 ## 2026-10-23 · Ten issues, generated news, more copy, sub-focus
 

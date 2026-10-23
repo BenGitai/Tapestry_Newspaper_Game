@@ -159,7 +159,10 @@ function RosterCard({ game, member, on, onClick }: { game: GameState; member: St
   return (
     <button className={`${n.roster} ${on ? n.rosterOn : ''}`} onClick={onClick}>
       <div className={n.rosterName}>
-        <b>{r.name}</b>
+        <b>
+          {r.name}
+          {member.role === 'head' ? <em className={n.headBadge}> head</em> : null}
+        </b>
         <span>{starts ? 'starts next issue' : `${filed} filed · ${waiting} waiting`}</span>
       </div>
       <div className={n.rosterAssign}>{assignmentSummary(shownAssignment(member))}</div>
@@ -200,6 +203,7 @@ function ArticleSlip({ game, article, on, tilt, onOpen }: { game: GameState; art
         <span>
           {bylineOf(article)} · {STYLE_SHORT[article.style]} · {ANGLE_LABEL[article.angle]} · {article.inches} in
           {article.onFocus ? <em className={n.focus}> · ★ focus</em> : null}
+          {article.deskPick ? <em className={n.focus}> · desk pick</em> : null}
         </span>
         <span>
           {article.commissioned ? <em className={n.commissioned}>Commissioned · </em> : null}

@@ -26,6 +26,7 @@ import { angleTaste, averageTrust, leanFit, reach, stanceLean, totalReaders } fr
 import { rivalFrontPage } from './rival.ts';
 import { rng, seedFor } from './rng.ts';
 import { scorecard, type Scorecard } from './scorecard.ts';
+import { editorEffect } from './desks.ts';
 import { currentAttributes, payroll, reporterById } from './staff.ts';
 import type { Article, DistrictResult, GameState, IssueResult, PageId, RevealedOutcome, StoryBlock } from './types.ts';
 
@@ -58,7 +59,7 @@ export function printedPieces(game: GameState, world: CityWorld, stories: StoryS
         page,
         prominence: prominenceOf(page, b),
         fit: FIT_EFFECT[fitOf({ base_column_inches: article.inches }, b).status],
-        card: scorecard(article, story, world, member, f.value),
+        card: scorecard(article, story, world, member, f.value, editorEffect(game, world, story)),
         stale: article.issueFiled < game.issueNumber,
       });
     }

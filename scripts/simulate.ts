@@ -8,7 +8,8 @@ import { leanLabel } from '../src/sim/paperStats.ts';
 import { averageTrust, totalReaders } from '../src/sim/readers.ts';
 import { adsAvailable, resolveIssue } from '../src/sim/simulate.ts';
 import { advanceIssue } from '../src/sim/newGame.ts';
-import { defaultAssignment } from '../src/sim/staff.ts';
+import { defaultAssignment, hire, payroll } from '../src/sim/staff.ts';
+import { promote, setDuties } from '../src/sim/desks.ts';
 import type { Angle, GameState, PaperSetup, Tier } from '../src/sim/types.ts';
 
 const { world, stories } = loadGameData();
@@ -22,6 +23,8 @@ interface Strategy {
   wireCopy: boolean;
   print: boolean;
   setup?: Partial<PaperSetup>;
+  /** Hire whenever cash allows, and promote desk heads with every duty delegated. */
+  grow?: boolean;
 }
 
 const STRATEGIES: Strategy[] = [
@@ -35,6 +38,7 @@ const STRATEGIES: Strategy[] = [
   { name: 'Left stance, hard', angle: 'hard', ads: 1, wireCopy: true, print: true, setup: { stance: 'left' } },
   { name: 'Right stance, hard', angle: 'hard', ads: 1, wireCopy: true, print: true, setup: { stance: 'right' } },
   { name: 'Print nothing', ads: 0, wireCopy: false, print: false },
+  { name: 'Grow + desk heads', ads: 2, wireCopy: true, print: true, grow: true },
 ];
 
 function makeUpPaper(game: GameState, s: Strategy): GameState {
@@ -88,7 +92,28 @@ function play(s: Strategy, origin: PaperSetup['origin']): GameState {
   for (let i = 0; i < issues; i++) {
     g = resolveIssue(makeUpPaper(g, s), world, stories).game;
     if (g.endReason) break;
+    if (s.grow) g = growNewsroom(g);
     if (i < issues - 1) g = advanceIssue(g, world, stories);
+  }
+  return g;
+}
+
+/** Hire the best-value candidate while cash stays above a cushion, then promote heads. */
+function growNewsroom(game: GameState): GameState {
+  let g = game;
+  const cushion = 2500;
+  for (;;) {
+    const market = world.staff_pool.filter((r) => !g.staff.some((m) => m.reporterId === r.id));
+    const value = (r: (typeof market)[number]) => Object.values(r.attributes).reduce((a, b) => a + b, 0) / r.salary_per_issue;
+    const best = [...market].sort((a, b) => value(b) - value(a))[0];
+    if (!best || g.cash - best.salary_per_issue * 2 < cushion + payroll(world, g.staff) * 2) break;
+    const h = hire(g, world, best.id, 60);
+    if (!h.ok) break;
+    g = h.game;
+  }
+  for (const m of g.staff) {
+    const p = promote(g, world, m.reporterId);
+    if (p.ok) g = setDuties(p.game, m.reporterId, { filter: false, fix: true, upgrade: true, runDesk: true });
   }
   return g;
 }
@@ -96,11 +121,11 @@ function play(s: Strategy, origin: PaperSetup['origin']): GameState {
 const pad = (v: string | number, n: number) => String(v).padStart(n);
 for (const origin of ['founded', 'inherited', 'bought'] as const) {
   console.log(`\n=== Origin: ${world.origins[origin].name} (start ${world.origins[origin].starting_readers} readers, $${world.origins[origin].cash}) ===`);
-  console.log(`${'strategy'.padEnd(22)} ${pad('readers', 8)} ${pad('cash', 8)} ${pad('trust', 6)} ${pad('awards', 7)} ${pad('corr', 5)}  seen as`);
+  console.log(`${'strategy'.padEnd(22)} ${pad('readers', 8)} ${pad('cash', 8)} ${pad('trust', 6)} ${pad('awards', 7)} ${pad('corr', 5)} ${pad('staff', 6)}  seen as`);
   for (const s of STRATEGIES) {
     const g = play(s, origin);
     console.log(
-      `${s.name.padEnd(22)} ${pad(totalReaders(g.districts), 8)} ${pad(g.cash, 8)} ${pad(Math.round(averageTrust(g.districts)), 6)} ${pad(g.awards, 7)} ${pad(g.corrections, 5)}  ${leanLabel(g.perceivedLean)}${g.endReason ? ' (bankrupt)' : ''}`,
+      `${s.name.padEnd(22)} ${pad(totalReaders(g.districts), 8)} ${pad(g.cash, 8)} ${pad(Math.round(averageTrust(g.districts)), 6)} ${pad(g.awards, 7)} ${pad(g.corrections, 5)} ${pad(g.staff.length, 6)}  ${leanLabel(g.perceivedLean)}${g.endReason ? ' (bankrupt)' : ''}`,
     );
   }
 }

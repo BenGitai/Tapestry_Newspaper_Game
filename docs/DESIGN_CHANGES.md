@@ -74,5 +74,18 @@ Changes how many stories come through per issue. Daily gets one wire day per iss
   - On their interest: +2 flair and better readership.
   - Morale: +2 per issue when the focus is their interest, −1 otherwise.
 
+## Bigger newsrooms and desk heads (2026-10-23, fourth update)
+- **Starting budgets** buy 4–5 average or 3–4 good reporters (up to 5 at start). The newsroom cap is 24, and the hiring market has 36 candidates.
+- **Desk heads.** Promote a reporter to head their desk once the desk has 3 or more journalists. One head per desk, covering the whole desk with no limit.
+  - Heads write at a quarter of their old output and are paid ×1.5.
+  - They have Editing and Leadership, derived from their attributes.
+  - You choose what to delegate:
+    - **Filter:** picks the desk's best fresh articles for print, and spikes stale or overtaken ones.
+    - **Fix:** fewer corrections. A good editor tones down sensational pieces.
+    - **Upgrade:** better readership and impact.
+    - **Run the desk:** sets reporters' focuses to cover the beat and commissions uncovered desk stories.
+  - Reporters under an active head train faster and gain morale.
+  - A head goes inactive if the desk drops below 3, and must step down before they can be released.
+
 ## Future (not in the demo)
 - **Generated local news.** The full game should generate local sports and local politics rather than take them from real news. Real news remains the source for everything else.

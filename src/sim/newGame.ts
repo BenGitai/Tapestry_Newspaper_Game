@@ -4,6 +4,8 @@ import type { StorySource } from '../data/StorySource.ts';
 import { ADVERTISERS, STARTING_STAFF } from './balance.ts';
 import { emptyDraft } from './layout.ts';
 import { initialDistricts, stanceLean } from './readers.ts';
+import { filterDesk, mentoring, runDeskAssignments, runDeskCommissions } from './desks.ts';
+import { loadGameData } from '../data/worldData.ts';
 import { fileBeatArticles, settleAfterPrint } from './newsroom.ts';
 import { advanceStaff, deskForCategory, newStaffMember, payroll, reporterById, startingPayrollCap } from './staff.ts';
 import type { CoverageCategory, GameState, PaperSetup, StaffAssignment } from './types.ts';
@@ -87,7 +89,19 @@ export function createGame(setup: PaperSetup, world: CityWorld, stories: StorySo
     archive: [],
     finished: false,
   };
-  return fileBeatArticles(game, world, stories);
+  return startIssue(game, world, stories);
+}
+
+/**
+ * Start of an issue: desk heads that run their desk set focuses, reporters
+ * file, heads commission what's still uncovered, then heads filter the pile.
+ */
+export function startIssue(game: GameState, world: CityWorld, stories: StorySource): GameState {
+  const subtopics = loadGameData().subtopics;
+  let g = runDeskAssignments(game, world, (c) => subtopics[c].map((s) => s.id));
+  g = fileBeatArticles(g, world, stories);
+  g = runDeskCommissions(g, world, stories);
+  return filterDesk(g, world, stories);
 }
 
 /**
@@ -101,10 +115,10 @@ export function advanceIssue(game: GameState, world: CityWorld, stories: StorySo
   const next: GameState = {
     ...settled,
     issueNumber: settled.issueNumber + 1,
-    staff: advanceStaff(settled.staff, publishedBy, world),
+    staff: advanceStaff(settled.staff, publishedBy, world, mentoring(settled, world)),
     draft: emptyDraft(),
   };
-  return fileBeatArticles(next, world, stories);
+  return startIssue(next, world, stories);
 }
 
 export { formatIssueDate, issueCount, issueDate, issueDays } from './calendar.ts';

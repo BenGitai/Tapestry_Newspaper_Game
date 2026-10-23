@@ -5,6 +5,7 @@ import {
   FILING_CAPACITY,
   FOCUS,
   FREQUENCY_CAPACITY,
+  HEAD,
   MAX_STAFF,
   MORALE,
   REFERENCE_CHECK_COST,
@@ -91,7 +92,8 @@ export function filingCapacity(reporter: Reporter, member?: StaffMember, frequen
   const asg = member?.assignment;
   const workload = asg ? WORKLOAD[asg.workload].capacity : 1;
   const pace = asg ? STYLE[asg.style].pace : 1;
-  return Math.round((FILING_CAPACITY.base + a.speed * FILING_CAPACITY.perSpeed) * workload * pace * FREQUENCY_CAPACITY[frequency]);
+  const head = member?.role === 'head' ? HEAD.writingShare : 1;
+  return Math.round((FILING_CAPACITY.base + a.speed * FILING_CAPACITY.perSpeed) * workload * pace * FREQUENCY_CAPACITY[frequency] * head);
 }
 
 export function strengthsAndWeaknesses(attrs: Attributes): { strengths: (keyof Attributes)[]; weaknesses: (keyof Attributes)[] } {
@@ -151,8 +153,14 @@ export function shownAssignment(m: StaffMember): StaffAssignment {
 // Money
 // ---------------------------------------------------------------------------
 
-export function payroll(world: CityWorld, staff: { reporterId: string }[]): number {
-  return staff.reduce((sum, m) => sum + (reporterById(world, m.reporterId)?.salary_per_issue ?? 0), 0);
+export function payroll(world: CityWorld, staff: { reporterId: string; role?: StaffMember['role'] }[]): number {
+  return staff.reduce((sum, m) => sum + salaryOf(world, m), 0);
+}
+
+/** Salary per issue, with the desk-head raise. */
+export function salaryOf(world: CityWorld, m: { reporterId: string; role?: StaffMember['role'] }): number {
+  const base = reporterById(world, m.reporterId)?.salary_per_issue ?? 0;
+  return Math.round(base * (m.role === 'head' ? HEAD.salaryMultiplier : 1));
 }
 
 export function startingPayrollCap(origin: OriginId): number {
@@ -197,7 +205,8 @@ export function release(game: GameState, world: CityWorld, reporterId: string): 
   if (!r || !game.staff.some((m) => m.reporterId === reporterId)) return { ok: false, reason: 'Not on staff' };
   if (game.staff.length <= 1) return { ok: false, reason: 'You need at least one reporter' };
   const cost = severance(r);
-  if (game.cash < cost) return { ok: false, reason: `Severance for ${r.name} is $${cost}` };
+  if (game.cash < cost) return { ok: false, reason: `Severance for ${r.name} is ${cost}` };
+  if (game.staff.find((m) => m.reporterId === reporterId)?.role === 'head') return { ok: false, reason: `${r.name} heads a desk. Have them step down first.` };
   return { ok: true, game: { ...game, cash: game.cash - cost, staff: game.staff.filter((m) => m.reporterId !== reporterId) } };
 }
 
@@ -228,17 +237,24 @@ export function focusMorale(asg: StaffAssignment, reporter: Reporter | undefined
 }
 
 /** Between issues: apply queued assignments, training and morale changes. */
-export function advanceStaff(staff: StaffMember[], publishedBy: Record<string, number>, world?: CityWorld): StaffMember[] {
+export function advanceStaff(staff: StaffMember[], publishedBy: Record<string, number>, world?: CityWorld, mentors: Record<string, number> = {}): StaffMember[] {
   return staff.map((m) => {
     const asg = m.assignment;
     const growth = { ...m.growth };
-    if (asg.training !== 'none') growth[asg.training] = (growth[asg.training] ?? 0) + TRAINING_PER_ISSUE;
+    // A desk head's leadership (1-20) speeds up their reporters' training.
+    const mentor = mentors[m.reporterId];
+    const trainingRate = TRAINING_PER_ISSUE * (mentor ? 1 + (HEAD.mentorTraining * mentor) / 20 : 1);
+    if (asg.training !== 'none') growth[asg.training] = (growth[asg.training] ?? 0) + trainingRate;
     const reporter = world ? reporterById(world, m.reporterId) : undefined;
     const morale = Math.max(
       MORALE.min,
       Math.min(
         MORALE.max,
-        m.morale + WORKLOAD[asg.workload].moralePerIssue + (publishedBy[m.reporterId] ?? 0) * MORALE.perPublished + focusMorale(asg, reporter),
+        m.morale +
+          WORKLOAD[asg.workload].moralePerIssue +
+          (publishedBy[m.reporterId] ?? 0) * MORALE.perPublished +
+          focusMorale(asg, reporter) +
+          (mentor ? HEAD.mentorMorale : 0),
       ),
     );
     return { ...m, growth, morale, assignment: m.pendingAssignment ?? m.assignment, pendingAssignment: undefined };

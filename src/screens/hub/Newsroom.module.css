@@ -343,3 +343,16 @@
 .focus {
   color: var(--c-rust);
 }
+
+.headBadge {
+  font-family: var(--f-mono);
+  font-style: normal;
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  background: var(--c-ink);
+  color: var(--c-newsprint);
+  padding: 1px 5px;
+  margin-left: 6px;
+  vertical-align: middle;
+}

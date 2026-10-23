@@ -2,6 +2,7 @@
 import type { Story } from '../../data/schemas.ts';
 import { loadGameData } from '../../data/worldData.ts';
 import { freshness } from '../../sim/newsroom.ts';
+import { editorEffect } from '../../sim/desks.ts';
 import { grade, heatLabel, scorecard, trustLabel, type Scorecard } from '../../sim/scorecard.ts';
 import { initials, reporterById } from '../../sim/staff.ts';
 import type { Article, GameState } from '../../sim/types.ts';
@@ -16,7 +17,7 @@ export function articleScorecard(game: GameState, article: Article): { card: Sco
   if (!story) return undefined;
   const member = game.staff.find((m) => m.reporterId === article.reporterId);
   const f = freshness(article, game, stories);
-  return { card: scorecard(article, story, world, member, f.value), fresh: f.value, superseded: f.superseded, story };
+  return { card: scorecard(article, story, world, member, f.value, editorEffect(game, world, story)), fresh: f.value, superseded: f.superseded, story };
 }
 
 export function bylineOf(article: Pick<Article, 'reporterId' | 'storyId'>): string {

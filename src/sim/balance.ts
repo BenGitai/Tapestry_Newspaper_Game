@@ -361,3 +361,35 @@ export const FOCUS = {
   moraleWhenInterest: 2,
   moraleWhenOther: -1,
 } as const;
+
+// ---------------------------------------------------------------------------
+// Desk heads
+// ---------------------------------------------------------------------------
+
+export const HEAD = {
+  /** A desk needs this many journalists (head included) to have a working head. */
+  minDesk: 3,
+  /** Desk heads are paid this much more than their reporter salary. */
+  salaryMultiplier: 1.5,
+  /** Desk heads still write, but only this share of their old output. */
+  writingShare: 0.25,
+  /** Fix: correction risk is cut by up to this share (scaled by editing / 20). */
+  fixCorrection: 0.6,
+  /** Fix: an editor at least this good tones down sensational pieces. */
+  fixSensationalEditing: 12,
+  /** Upgrade: readership and impact bonus at editing 20 (scaled by editing / 20). */
+  upgradeReadership: 0.1,
+  upgradeImpact: 3,
+  /** Filter: picks this share of the desk's fresh articles for print... */
+  pickShare: 0.5,
+  /** ...and spikes articles whose freshness has fallen to this or below. */
+  spikeBelowFreshness: 0.5,
+  /** Run the desk: commissions uncovered desk stories at least this important. */
+  commissionMinImportance: 2,
+  /** Mentoring: desk reporters train faster by up to this share (leadership / 20)... */
+  mentorTraining: 0.6,
+  /** ...and gain this much morale per issue. */
+  mentorMorale: 1,
+  promotionMorale: 10,
+  demotionMorale: 12,
+} as const;

@@ -63,8 +63,20 @@ export interface StaffAssignment {
   training: keyof Attributes | 'none';
 }
 
+/** What a desk head does for you. Each duty can be delegated or kept. */
+export interface DeskDuties {
+  filter: boolean;
+  fix: boolean;
+  upgrade: boolean;
+  runDesk: boolean;
+}
+
 export interface StaffMember {
   reporterId: string;
+  /** Reporters write; desk heads run a desk (and write a little). */
+  role?: 'reporter' | 'head';
+  headOf?: import('../data/schemas.ts').Desk;
+  duties?: DeskDuties;
   hiredIssue: number;
   /** 0-100. */
   morale: number;
@@ -104,6 +116,8 @@ export interface Article {
   selected: boolean;
   status: ArticleStatus;
   issuePublished?: number;
+  /** Picked for print by the desk head (Filter duty). */
+  deskPick?: boolean;
 }
 
 // ---------------------------------------------------------------------------
