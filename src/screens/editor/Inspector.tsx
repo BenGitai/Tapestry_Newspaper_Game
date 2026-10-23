@@ -1,6 +1,6 @@
-// Right side: notes on the selected item, or a summary of the issue when nothing is selected.
+// Right side of the layout tab: notes on the selected item, or a summary of the issue.
 import { articleSource } from '../../data/ArticleSource.ts';
-import { ANGLES, ATTRIBUTE_KEYS, type Angle, type Reporter } from '../../data/schemas.ts';
+import { ANGLES } from '../../data/schemas.ts';
 import { displayName, loadGameData } from '../../data/worldData.ts';
 import { EXTRA_PAGE_COST_PER_COPY, PROMINENCE } from '../../sim/balance.ts';
 import {
@@ -8,28 +8,26 @@ import {
   adPay,
   adRevenue,
   FIT_LABEL,
-  filingCapacity,
   findBlock,
+  findStoryBlock,
   fitOf,
   pageLabel,
   pageUsage,
   placementLabel,
   prominenceOf,
   removeBlock,
-  reporterLoad,
   setTier,
   textInches,
   togglePhoto,
 } from '../../sim/layout.ts';
-import { isOnDesk, reporterById } from '../../sim/staff.ts';
+import { articleForStory, selectedForPrint } from '../../sim/newsroom.ts';
+import { payroll } from '../../sim/staff.ts';
 import type { PageId, StoryBlock, Tier } from '../../sim/types.ts';
-import { useStore, wireStories } from '../../state/store.ts';
-import { bylineFor } from '../../components/paper/PageSheet.tsx';
+import { useStore } from '../../state/store.ts';
+import { ANGLE_LABEL, articleScorecard, bylineOf, ScoutingReport, STYLE_SHORT } from '../../components/newsroom/ArticleParts.tsx';
 import styles from './Editor.module.css';
 
-const ANGLE_LABEL: Record<Angle, string> = { puff: 'Puff', straight: 'Straight', hard: 'Hard-hitting' };
 const TIER_LABEL: Record<Tier, string> = { lead: 'Lead', secondary: 'Secondary', brief: 'Brief' };
-const ATTR_LABEL: Record<string, string> = { speed: 'Speed', accuracy: 'Accuracy', impact: 'Impact', charge: 'Charge', flair: 'Flair', tact: 'Tact' };
 
 export function Inspector() {
   const game = useStore((s) => s.game);
@@ -37,7 +35,7 @@ export function Inspector() {
   const sendToPress = useStore((s) => s.sendToPress);
   if (!game) return null;
   const found = selectedId ? findBlock(game.draft, selectedId) : undefined;
-  const placed = wireStories(game).filter((s) => game.draft.pages.front.concat(game.draft.pages.a2, game.draft.pages.a3).some((b) => b.kind === 'story' && b.storyId === s.id));
+  const placed = selectedForPrint(game).filter((a) => findStoryBlock(game.draft, a.storyId)).length;
 
   return (
     <div className={styles.inspector}>
@@ -50,7 +48,7 @@ export function Inspector() {
           <IssueNotes />
         )}
       </div>
-      <button className={styles.press} onClick={sendToPress} disabled={placed.length === 0} title={placed.length === 0 ? 'Put at least one story on the page' : undefined}>
+      <button className={styles.press} onClick={sendToPress} disabled={placed === 0} title={placed === 0 ? 'Put at least one article on the page' : undefined}>
         Send to press
       </button>
     </div>
@@ -60,34 +58,47 @@ export function Inspector() {
 function StoryNotes({ block, page }: { block: StoryBlock; page: PageId }) {
   const game = useStore((s) => s.game)!;
   const edit = useStore((s) => s.edit);
-  const assign = useStore((s) => s.assignReporter);
-  const setAngle = useStore((s) => s.setAngle);
-  const { stories, world } = loadGameData();
-  const story = stories.storyById(block.storyId);
-  if (!story) return null;
-  const a = game.draft.assignments[story.id] ?? { reporterId: null, angle: 'straight' as Angle };
-  const fit = fitOf(story, block);
-  const staff = game.staff.map((id) => reporterById(world, id)).filter((r): r is Reporter => !!r);
-  const reporter = a.reporterId ? reporterById(world, a.reporterId) : undefined;
-  const article = articleSource().get({ storyId: story.id, journalistId: a.reporterId, angle: a.angle, tier: block.tier }, story);
-  const inches = textInches(block);
+  const setAngle = useStore((s) => s.setArticleAngle);
+  const selectArticle = useStore((s) => s.selectArticle);
+  const setHubTab = useStore((s) => s.setHubTab);
+  const article = articleForStory(game, block.storyId);
+  const sc = article && articleScorecard(game, article);
+  if (!article || !sc) return null;
+  const story = sc.story;
+  const sized = { ...story, base_column_inches: article.inches };
+  const fit = fitOf(sized, block);
+  const copy = articleSource().get({ storyId: story.id, journalistId: article.reporterId, angle: article.angle, tier: block.tier }, story);
 
   return (
     <>
       <div className={styles.kicker}>Selected · {placementLabel(page, block)}</div>
-      <h2 className={styles.noteHead}>{story.wire_headline}</h2>
+      <h2 className={styles.noteHead}>{copy.headline}</h2>
+      <div className={styles.smallRow}>
+        <span>
+          {bylineOf(article)} · {STYLE_SHORT[article.style]}
+        </span>
+        <button
+          className={styles.linkBtn}
+          onClick={() => {
+            selectArticle(article.id);
+            setHubTab('newsroom');
+          }}
+        >
+          Open in newsroom
+        </button>
+      </div>
 
-      <Label>Size on the page</Label>
+      <div className={styles.label}>Size on the page</div>
       <div className={styles.segmented}>
         {(['lead', 'secondary', 'brief'] as Tier[]).map((t, i) => (
-          <button key={t} className={block.tier === t ? styles.segOn : ''} onClick={() => edit((d) => setTier(d, block.id, t, story))} title={`Key ${i + 1}`}>
+          <button key={t} className={block.tier === t ? styles.segOn : ''} onClick={() => edit((d) => setTier(d, block.id, t, sized))} title={`Key ${i + 1}`}>
             {TIER_LABEL[t]}
           </button>
         ))}
       </div>
       <div className={styles.fitLine}>
         <span>
-          {block.cols}×{block.rows} · {Math.round(inches)} in of text for a {story.base_column_inches} in story
+          {block.cols}×{block.rows} · {Math.round(textInches(block))} in of space for a {article.inches} in article
         </span>
         <span className={styles['fitWord_' + fit.status]}>{FIT_LABEL[fit.status]}</span>
       </div>
@@ -100,51 +111,29 @@ function StoryNotes({ block, page }: { block: StoryBlock; page: PageId }) {
         ) : null}
       </div>
 
-      <Label>Reporter</Label>
-      <div className={styles.reporters}>
-        {staff.map((r) => {
-          const load = reporterLoad(game.draft, r.id) - (a.reporterId === r.id ? inches : 0);
-          const cap = filingCapacity(r);
-          const over = load + inches > cap;
-          return (
-            <button key={r.id} className={`${styles.reporter} ${a.reporterId === r.id ? styles.reporterOn : ''}`} onClick={() => assign(story.id, r.id)}>
-              <span className={styles.repName}>
-                {r.name}
-                {!isOnDesk(r, story, world) ? <em> · off desk</em> : null}
-              </span>
-              <Meter value={load + inches} max={cap} warn={over} />
-              <span className={over ? styles.warnText : styles.repCap}>
-                {Math.round(load + inches)}/{cap} in
-              </span>
-            </button>
-          );
-        })}
-        <button className={`${styles.reporter} ${a.reporterId === null ? styles.reporterOn : ''}`} onClick={() => assign(story.id, null)}>
-          <span className={styles.repName}>Wire copy</span>
-          <span className={styles.repCap}>no byline · straight only</span>
-        </button>
-      </div>
-      {reporter ? <Attributes reporter={reporter} /> : null}
-
-      <Label>Angle</Label>
+      <div className={styles.label}>Angle</div>
       <div className={styles.segmented}>
-        {ANGLES.map((ang) => {
-          const disabled = (ang === 'puff' && story.sensitivity === 'high') || (a.reporterId === null && ang !== 'straight');
-          return (
-            <button key={ang} disabled={disabled} className={a.angle === ang ? styles.segOn : ''} onClick={() => setAngle(story.id, ang)}>
-              {ANGLE_LABEL[ang]}
-            </button>
-          );
-        })}
+        {ANGLES.map((ang) => (
+          <button
+            key={ang}
+            disabled={(ang === 'puff' && story.sensitivity === 'high') || (article.reporterId === null && ang !== 'straight')}
+            className={article.angle === ang ? styles.segOn : ''}
+            onClick={() => setAngle(article.id, ang)}
+          >
+            {ANGLE_LABEL[ang]}
+          </button>
+        ))}
       </div>
-      {story.sensitivity === 'high' ? <p className={styles.note}>Sensitive story: no Puff, and the copy stays plain and respectful whatever the angle.</p> : null}
 
-      <Label>Copy · {article.origin === 'template' ? 'wire facts (template)' : article.origin}</Label>
+      <div className={styles.label}>Scouting report · placement multiplies it ×{prominenceOf(page, block).toFixed(2)}</div>
+      <ScoutingReport card={sc.card} />
+
+      <div className={styles.label}>Copy · {copy.origin === 'template' ? 'wire facts (template)' : copy.origin}</div>
       <div className={styles.copy}>
-        <div className={styles.copyHead}>{article.headline}</div>
-        {article.deck ? <div className={styles.copyDeck}>{article.deck}</div> : null}
-        <div className={styles.copyByline}>{bylineFor(game.draft, story.id)}</div>
-        <p>{article.body}</p>
+        <div className={styles.copyHead}>{copy.headline}</div>
+        {copy.deck ? <div className={styles.copyDeck}>{copy.deck}</div> : null}
+        <div className={styles.copyByline}>{bylineOf(article)}</div>
+        <p>{copy.body}</p>
       </div>
 
       <button className={styles.linkBtn} onClick={() => edit((d) => removeBlock(d, block.id), { select: null })}>
@@ -176,18 +165,29 @@ function AdNotes({ adId, blockId, page }: { adId: string; blockId: string; page:
 function IssueNotes() {
   const game = useStore((s) => s.game)!;
   const { world } = loadGameData();
-  const staff = game.staff.map((id) => reporterById(world, id)).filter((r): r is Reporter => !!r);
   const pages = activePages(game.draft);
+  const pile = selectedForPrint(game);
+  const placed = pile.filter((a) => findStoryBlock(game.draft, a.storyId)).length;
+  const ads = adRevenue(game.draft, world.entities);
+  const pay = payroll(world, game.staff);
   return (
     <>
       <div className={styles.kicker}>Notes for this issue</div>
       <h2 className={styles.noteHead}>Make up the paper</h2>
       <p className={styles.note}>
-        Drag stories off the wire onto the page. Space is the budget: what you can't fit goes inside or doesn't run. A story with its headline above the fold
-        counts most (×{PROMINENCE.frontAboveFold}), below the fold ×{PROMINENCE.frontBelowFold}, inside ×{PROMINENCE.inside}, a brief ×{PROMINENCE.brief}.
+        Drag your picked articles onto the page. Space is the budget: what doesn't fit waits in the backlog and goes stale. A story with its headline above the
+        fold counts most (×{PROMINENCE.frontAboveFold}), below the fold ×{PROMINENCE.frontBelowFold}, inside ×{PROMINENCE.inside}, a brief ×{PROMINENCE.brief}.
       </p>
 
-      <Label>Space</Label>
+      <div className={styles.label}>Articles</div>
+      <div className={styles.smallRow}>
+        <span>Placed</span>
+        <b>
+          {placed} of {pile.length} picked
+        </b>
+      </div>
+
+      <div className={styles.label}>Space</div>
       {pages.map((p) => {
         const u = pageUsage(game.draft, p);
         return (
@@ -198,9 +198,15 @@ function IssueNotes() {
           </div>
         );
       })}
+
+      <div className={styles.label}>Money this issue</div>
       <div className={styles.smallRow}>
-        <span>Ad money this issue</span>
-        <b className={styles.money}>+${adRevenue(game.draft, world.entities)}</b>
+        <span>Ads</span>
+        <b className={styles.money}>+${ads}</b>
+      </div>
+      <div className={styles.smallRow}>
+        <span>Payroll</span>
+        <b className={styles.warnText}>−${pay}</b>
       </div>
       {game.draft.extraPages.length ? (
         <div className={styles.smallRow}>
@@ -208,53 +214,14 @@ function IssueNotes() {
           <span className={styles.warnText}>+${(EXTRA_PAGE_COST_PER_COPY * game.draft.extraPages.length).toFixed(2)} print cost per copy</span>
         </div>
       ) : null}
+      <p className={styles.keys}>Copy sales arrive with the simulation milestone.</p>
 
-      <Label>Reporters' filing</Label>
-      {staff.map((r) => {
-        const load = reporterLoad(game.draft, r.id);
-        const cap = filingCapacity(r);
-        return (
-          <div key={r.id} className={styles.spaceRow}>
-            <span>{r.name}</span>
-            <Meter value={load} max={cap} warn={load > cap} />
-            <span className={load > cap ? styles.warnText : ''}>{Math.round(load)}/{cap} in</span>
-          </div>
-        );
-      })}
-
-      <Label>Keys</Label>
+      <div className={styles.label}>Keys</div>
       <p className={styles.keys}>
         Click to select · drag to move · drag the orange corner to resize · arrows nudge · shift+arrows resize · 1/2/3 lead/secondary/brief · Del removes ·
-        Ctrl+Z undo · Ctrl+Shift+Z redo
+        Ctrl+Z undo · Ctrl+Shift+Z redo · F1/F2/F3 switch tabs
       </p>
     </>
-  );
-}
-
-function Attributes({ reporter }: { reporter: Reporter }) {
-  return (
-    <div className={styles.attrs}>
-      <div className={styles.attrVoice}>"{reporter.voice}"</div>
-      {ATTRIBUTE_KEYS.map((k) => (
-        <div key={k} className={styles.attr}>
-          <span>{ATTR_LABEL[k]}</span>
-          <b className={reporter.attributes[k] >= 15 ? styles.attrHigh : reporter.attributes[k] <= 7 ? styles.attrLow : ''}>{reporter.attributes[k]}</b>
-        </div>
-      ))}
-    </div>
-  );
-}
-
-function Label({ children }: { children: React.ReactNode }) {
-  return <div className={styles.label}>{children}</div>;
-}
-
-function Meter({ value, max, warn }: { value: number; max: number; warn?: boolean }) {
-  const pct = Math.min(100, (value / Math.max(1, max)) * 100);
-  return (
-    <span className={styles.meter}>
-      <span className={warn ? styles.meterWarn : styles.meterFill} style={{ width: `${pct}%` }} />
-    </span>
   );
 }
 

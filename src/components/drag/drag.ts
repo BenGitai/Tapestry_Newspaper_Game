@@ -15,9 +15,8 @@ import {
   removeBlock,
   resizeBlock,
   storyBlockId,
-  textInches,
 } from '../../sim/layout.ts';
-import { reporterById, suggestReporter } from '../../sim/staff.ts';
+import { articleForStory } from '../../sim/newsroom.ts';
 import type { PageId, Tier } from '../../sim/types.ts';
 import { useStore } from '../../state/store.ts';
 import { clientToStage } from '../desk/Stage.tsx';
@@ -154,7 +153,8 @@ export function beginDrag(
       ev.stopImmediatePropagation();
       const story = loadGameData().stories.storyById(a.payload.storyId);
       if (!story) return;
-      const shape = defaultShape(tier, story);
+      const article = useStore.getState().game && articleForStory(useStore.getState().game!, story.id);
+      const shape = defaultShape(tier, { base_column_inches: article?.inches ?? story.base_column_inches });
       useDrag.setState({ active: { ...a, payload: { ...a.payload, tier }, shape, grab: { dc: Math.min(a.grab.dc, shape.cols / 2), dr: 0.5 } } });
     }
   };
@@ -186,7 +186,7 @@ export function beginDrag(
 
 function commit(a: ActiveDrag): void {
   const store = useStore.getState();
-  const { stories, world } = loadGameData();
+  const { stories } = loadGameData();
   const p = a.payload;
 
   if (a.overWire) {
@@ -213,19 +213,14 @@ function commit(a: ActiveDrag): void {
   }
 
   const story = stories.storyById(p.storyId);
-  if (!story) return;
+  const article = store.game && articleForStory(store.game, p.storyId);
+  if (!story || !article) return;
   const id = storyBlockId(story.id);
   store.edit(
     (d) => {
       const existing = findBlock(d, id)?.block;
       const block = existing && existing.kind === 'story' ? { ...existing, col: t.col, row: t.row } : { ...newStoryBlock(story, p.tier, t), ...a.shape };
-      const placed = putBlock(d, t.page, block);
-      if (!placed.ok || d.assignments[story.id]) return placed;
-      // First time on the page: give it a reporter from the right desk if one has room.
-      const game = store.game;
-      const staff = (game?.staff ?? []).map((sid) => reporterById(world, sid)).filter((r) => r !== undefined);
-      const reporterId = suggestReporter(placed.draft, story, staff, world, textInches(block));
-      return { ok: true, draft: { ...placed.draft, assignments: { ...placed.draft.assignments, [story.id]: { reporterId, angle: 'straight' } } } };
+      return putBlock(d, t.page, block);
     },
     { select: id },
   );

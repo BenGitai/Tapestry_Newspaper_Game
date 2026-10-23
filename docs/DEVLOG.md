@@ -1,5 +1,42 @@
 # Devlog
 
+## 2026-10-23 · Desktop app and the newsroom loop
+
+**What changed**
+- **Desktop app.** Electron 44 wraps the game. `npm run dev` opens the game window, with hot reload from Vite. `npm run start` runs the production build. `npm run package` builds an unpacked app in `release/`. `npm run smoke` plays through the built app with Playwright and screenshots each step into `.tmp/smoke/`.
+  - The window is sandboxed: no Node in the page, no navigation, links open in the system browser. F11 toggles fullscreen.
+  - `npm run dev:web` still opens it in a browser tab if you need one.
+- **New flow:** title → Form 1-A → hiring day → hub with Newsroom / Layout / Staff tabs. F1/F2/F3 switch tabs. Details are in `docs/DESIGN_CHANGES.md`.
+- **Setup:** paper kind, seven coverage sliders (including Science & Tech and World & National), frequency, stance, live proof, and an APPROVED stamp.
+- **Hiring:** pick 2–4 reporters within an origin-based payroll budget, and set each one's beat, patch, style, workload and training.
+- **Newsroom:**
+  - Reporters file automatically from their assignments, most important stories first.
+  - You can commission uncovered stories or run wire copy.
+  - Star, pick for print, change the angle or spike any article.
+  - The backlog carries over and goes stale; storylines supersede old pieces.
+- **Scorecard:** shown readership, heat, trust and sensational flag; correction risk and award chance stay hidden until printed.
+- **Staff tab:**
+  - Full assignment editor, morale and record for each reporter.
+  - Release with severance.
+  - A market where candidates show attribute ranges until you check references ($50). Hiring has a signing fee, and hires start the next issue.
+- **Layout** now uses only articles picked for print. Fit compares the block with the article's length.
+- **Between issues:** placed articles are published, payroll is paid, ad money comes in, training and morale apply, queued assignments take effect, and reporters file again.
+- **Data:**
+  - 6 fictional Science & Tech stories, a `science_tech` desk, and two reporters (Amara Osei, Felix Moreau).
+  - Reader groups got a `science` interest.
+  - Left and right story leans are still balanced; there's a test for it.
+- **Tests:** 71 passing. New: filing and commissions, backlog and staleness, staff (scouting, hiring, assignment queue, training, morale), scorecard (including a left/right mirror test), and data balance.
+
+**Small decisions**
+- Every reporter can always file their first piece of an issue, however long. Capacity only limits extra pieces. Without this, Rosa Okafor couldn't file the day's biggest City Hall story.
+- Assignment changes wait until the next issue. Commissions are the way to react in the same issue.
+- Only one active article per story. Two reporters never file the same story.
+- Released reporters' unpublished work is spiked.
+- Readers and trust in the header are still the origin's starting values until the simulation milestone.
+- Letters to the editor (milestone 6) may be AI-written but are flagged for review (`docs/AI_CONTENT_REVIEW.md`).
+
+**What's next:** the summarizer milestone (prompt, cache, `npm run summarize`, cost report, fact check, Summarizer lab). Then the simulation: sales, trust, lean, rival, plus results revealing the hidden scorecard lines and save/load.
+
 ## 2026-10-23 · Milestones 1 + 2: skeleton and paste-up layout
 
 **What changed**

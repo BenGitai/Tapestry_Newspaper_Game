@@ -1,85 +1,5 @@
 /* Layout on the 1440x900 stage: header strip, wire (left), board (middle), notes (right). */
 
-/* ---------- header strip ---------- */
-.header {
-  position: absolute;
-  left: 14px;
-  right: 14px;
-  top: 10px;
-  height: 54px;
-  background: var(--c-aged-paper);
-  border-bottom: 3px double var(--c-ink);
-  display: flex;
-  align-items: center;
-  gap: 22px;
-  padding: 0 18px;
-}
-
-.paperName {
-  font-family: var(--f-display);
-  font-weight: 700;
-  font-size: 27px;
-  white-space: nowrap;
-}
-
-.edition {
-  font-family: var(--f-mono);
-  font-size: 10.5px;
-  text-transform: uppercase;
-  letter-spacing: 0.12em;
-  color: var(--c-ink-muted);
-  white-space: nowrap;
-}
-
-.stats {
-  display: flex;
-  gap: 22px;
-  margin-left: auto;
-}
-
-.stat {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-
-.statLabel {
-  font-family: var(--f-mono);
-  font-size: 9.5px;
-  text-transform: uppercase;
-  letter-spacing: 0.12em;
-  color: var(--c-ink-muted);
-}
-
-.statValue,
-.statGood {
-  font-family: var(--f-mono);
-  font-size: 15px;
-}
-
-.statGood {
-  color: var(--c-green);
-}
-
-.headerButtons {
-  display: flex;
-  gap: 6px;
-}
-
-.headerButtons button {
-  font-family: var(--f-mono);
-  font-size: 10.5px;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  background: transparent;
-  border: 1.5px solid var(--c-ink);
-  padding: 6px 10px;
-}
-
-.headerButtons button:disabled {
-  opacity: 0.35;
-}
-
 /* ---------- wire ---------- */
 .wire {
   position: absolute;
@@ -264,14 +184,38 @@
   align-items: center;
 }
 
+.boardBar {
+  align-self: stretch;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  height: 18px;
+}
+
+.boardButtons {
+  display: flex;
+  gap: 4px;
+}
+
+.boardButtons button {
+  font-family: var(--f-mono);
+  font-size: 9.5px;
+  text-transform: uppercase;
+  background: transparent;
+  border: 1px solid var(--c-ink-muted);
+  padding: 1px 7px;
+}
+
+.boardButtons button:disabled {
+  opacity: 0.35;
+}
+
 .boardLabel {
-  align-self: flex-start;
   font-family: var(--f-mono);
   font-size: 9.5px;
   text-transform: uppercase;
   letter-spacing: 0.14em;
   color: var(--c-ink-muted);
-  height: 14px;
 }
 
 .pageTabs {
@@ -641,20 +585,12 @@
   opacity: 0.45;
 }
 
-/* ---------- notice slip ---------- */
-.notice {
-  position: absolute;
-  left: 50%;
-  bottom: 26px;
-  transform: translateX(-50%) rotate(-0.8deg);
-  background: var(--c-newsprint-light);
-  border: 1.5px solid var(--c-stamp-red);
-  color: var(--c-stamp-red);
-  font-family: var(--f-mono);
-  font-size: 11px;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  padding: 8px 14px;
-  z-index: 50;
-  cursor: pointer;
+
+.inlineLink {
+  background: none;
+  border: none;
+  padding: 0;
+  font: inherit;
+  color: var(--c-tiger);
+  text-decoration: underline;
 }

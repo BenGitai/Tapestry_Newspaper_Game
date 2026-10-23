@@ -106,11 +106,80 @@ export const FRONT_PAGE_AD_MULTIPLIER = 1.25;
 // Reporters
 // ---------------------------------------------------------------------------
 
-/** Column inches a reporter can file per issue = base + speed x perSpeed (speed is 1-20). */
+/** Column inches a reporter can file per issue = (base + speed x perSpeed) x workload x style pace. Speed is 1-20. */
 export const FILING_CAPACITY = { base: 4, perSpeed: 0.8 } as const;
 
-/** Number of reporters you start with (spec 6.8), chosen from starting candidates by coverage split. */
-export const STARTING_STAFF = 3;
+export const WORKLOAD = {
+  light: { capacity: 0.8, moralePerIssue: 3, correctionRisk: 0.8 },
+  normal: { capacity: 1.0, moralePerIssue: 0, correctionRisk: 1.0 },
+  crunch: { capacity: 1.3, moralePerIssue: -6, correctionRisk: 1.5 },
+} as const;
+
+/** Writing style: default angle, how long the pieces run and how fast they get written. */
+export const STYLE = {
+  news: { angle: 'straight', length: 1.0, pace: 1.0 },
+  feature: { angle: 'puff', length: 0.9, pace: 1.0 },
+  investigative: { angle: 'hard', length: 1.3, pace: 0.8 },
+} as const;
+
+/** Starting staff: how many you may hire at the start, and the payroll you can afford per issue. */
+export const STARTING_STAFF = { min: 2, max: 4 } as const;
+export const STARTING_PAYROLL_CAP: Record<'founded' | 'inherited' | 'bought', number> = {
+  founded: 360,
+  inherited: 440,
+  bought: 400,
+};
+/** Most reporters you can employ at once in the demo. */
+export const MAX_STAFF = 6;
+
+/** Hiring mid-game costs a signing fee; releasing someone costs severance. Both are multiples of salary per issue. */
+export const SIGNING_FEE_MULTIPLIER = 2;
+export const SEVERANCE_MULTIPLIER = 2;
+/** Cost of checking a candidate's references (reveals their exact attributes). */
+export const REFERENCE_CHECK_COST = 50;
+/** Unscouted candidates show each attribute as a range this many points either side. */
+export const SCOUT_RANGE = 3;
+
+/** Training adds this much to the chosen attribute per issue (displayed rounded down; max 20). */
+export const TRAINING_PER_ISSUE = 0.35;
+
+/** Morale gained per article of theirs that runs, and its limits. */
+export const MORALE = { perPublished: 2, min: 0, max: 100 } as const;
+
+// ---------------------------------------------------------------------------
+// Newsroom: filing and the backlog
+// ---------------------------------------------------------------------------
+
+/** Unpublished articles lose this much value per issue they sit in the backlog. */
+export const STALENESS_PER_ISSUE = 0.25;
+/** Value never drops below this. */
+export const STALENESS_FLOOR = 0.2;
+/** An article whose storyline has moved on (a newer step is on the wire) keeps this share of its value. */
+export const SUPERSEDED_VALUE = 0.3;
+
+// ---------------------------------------------------------------------------
+// Article scorecard (half shown, half hidden; values are 0..1)
+// ---------------------------------------------------------------------------
+
+export const SCORECARD = {
+  /** Readership appeal weights. */
+  readership: { importance: 0.5, flair: 0.25, onPatch: 0.1, styleMatch: 0.1, offBeat: -0.1 },
+  /** Political heat: |story lean| x angle factor x (base + charge / 20). */
+  heatAngle: { puff: 0.5, straight: 0, hard: 1 },
+  heatChargeBase: 0.5,
+  /** Extra heat per targeted institution on a Hard-hitting piece. */
+  heatPerTarget: 0.15,
+  /** Correction risk = (20 - accuracy) / 20 x this x workload risk. */
+  correctionBase: 0.35,
+  /** Award chance = impact/20 x importance/5 x this x style bonus. */
+  awardBase: 0.2,
+  awardInvestigative: 1.6,
+  /** A piece is sensational when it runs Hard-hitting by a reporter with charge >= this, or tact <= that. */
+  sensationalCharge: 14,
+  sensationalTact: 6,
+  /** Sensational pieces swing harder both ways (awards and lost readers). */
+  sensationalSwing: 1.5,
+} as const;
 
 // ---------------------------------------------------------------------------
 // Calendar

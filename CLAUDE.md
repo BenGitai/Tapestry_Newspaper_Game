@@ -1,6 +1,6 @@
 # Above the Fold — project rules for Claude Code
 
-A newspaper-manager game by Tapestry Games (student indie studio). This repo is a playable demo. Read `docs/GAME_DESIGN.md` before making design decisions and `docs/PLATFORM_NOTES.md` for the tech stack.
+A newspaper-manager game by Tapestry Games (student indie studio). This repo is a playable demo, shipped as a desktop app (Electron). Read `docs/GAME_DESIGN.md` and then `docs/DESIGN_CHANGES.md` (which overrides it where they differ) before making design decisions, and `docs/PLATFORM_DECISION.md` for the tech stack.
 
 ## Ground rules
 - **Print only.** There are no digital articles in this game. Page layout is the core mechanic.
@@ -25,7 +25,9 @@ A newspaper-manager game by Tapestry Games (student indie studio). This repo is 
 - Keep a short `docs/DEVLOG.md`: what changed and what's next, a few lines per session.
 
 ## Commands
-- `npm run dev`: start the game (http://localhost:5173). In dev, the backtick key (`` ` ``) opens a jump menu.
+- `npm run dev`: open the game in its desktop window (Electron + Vite hot reload). `npm run dev:web` runs it in a browser tab instead. In dev, the backtick key (`` ` ``) opens a jump menu.
+- `npm run start`: build and run the desktop app; `npm run package`: build an unpacked app into `release/`
+- `npm run smoke`: build, then play through the desktop app with Playwright (screenshots in `.tmp/smoke/`)
 - `npm test`: run tests (Vitest)
 - `npm run typecheck`, `npm run lint`, `npm run build`
 - `npm run summarize`: pre-generate article text for all stories and print the cost report (added in milestone 3)

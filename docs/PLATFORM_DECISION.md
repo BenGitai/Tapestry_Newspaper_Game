@@ -4,7 +4,7 @@ Status: **approved 2026-10-23**, with the answers below. The original proposal f
 
 ## Approved decisions (2026-10-23)
 
-- **Stack:** web stack approved. Desktop wrapper (leaning Electron) decided at packaging time.
+- **Stack:** TypeScript/React approved, shipped as a **desktop app from now on** (update, same day: "not a web game"). **Electron 44** wraps it today; electron-builder packages it. Steam integration comes later from the Electron main process.
 - **Added to scope:** local save/load, end-of-demo screen, symmetry mirror test, headless runner (`npm run simulate`).
 - **Letters to the editor:** may be AI-generated for now, but **flagged internally for later review**. Every AI-written letter and the code that produces it carries the marker `AI-CONTENT-REVIEW`, and `docs/AI_CONTENT_REVIEW.md` lists them.
 - **Q1 layout:** **B, snap-grid paste-up.** Space is a management resource.

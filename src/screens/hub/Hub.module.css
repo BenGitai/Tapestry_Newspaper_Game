@@ -1,0 +1,296 @@
+/* Header strip shared by all hub tabs, plus panel styles for the newsroom and staff tabs. */
+.header {
+  position: absolute;
+  left: 14px;
+  right: 14px;
+  top: 10px;
+  height: 54px;
+  background: var(--c-aged-paper);
+  border-bottom: 3px double var(--c-ink);
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  padding: 0 16px;
+}
+
+.paperName {
+  font-family: var(--f-display);
+  font-weight: 700;
+  font-size: 24px;
+  white-space: nowrap;
+  max-width: 300px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.edition {
+  font-family: var(--f-mono);
+  font-size: 9.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--c-ink-muted);
+  white-space: nowrap;
+}
+
+.tabs {
+  display: flex;
+  align-self: stretch;
+  align-items: flex-end;
+  gap: 3px;
+  margin-left: 8px;
+}
+
+.tabs button {
+  font-family: var(--f-display);
+  font-weight: 700;
+  font-size: 16px;
+  background: var(--c-paste-up-dark);
+  border: 1px solid var(--c-ink-muted);
+  border-bottom: none;
+  padding: 7px 16px 6px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.tabs .tabOn {
+  background: var(--c-newsprint);
+  border-color: var(--c-ink);
+  padding-bottom: 9px;
+}
+
+.badge {
+  font-family: var(--f-mono);
+  font-weight: 500;
+  font-size: 10px;
+  background: var(--c-tiger);
+  padding: 0 5px;
+}
+
+.stats {
+  display: flex;
+  gap: 16px;
+  margin-left: auto;
+}
+
+.stat {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.statLabel {
+  font-family: var(--f-mono);
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--c-ink-muted);
+}
+
+.statValue,
+.statGood {
+  font-family: var(--f-mono);
+  font-size: 14px;
+}
+
+.statGood {
+  color: var(--c-green);
+}
+
+.lab {
+  font-family: var(--f-mono);
+  font-size: 10px;
+  text-transform: uppercase;
+  background: transparent;
+  border: 1.5px solid var(--c-ink);
+  padding: 5px 8px;
+}
+
+.notice {
+  position: absolute;
+  left: 50%;
+  bottom: 26px;
+  transform: translateX(-50%) rotate(-0.8deg);
+  background: var(--c-newsprint-light);
+  border: 1.5px solid var(--c-stamp-red);
+  color: var(--c-stamp-red);
+  font-family: var(--f-mono);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  padding: 8px 14px;
+  z-index: 50;
+  cursor: pointer;
+  max-width: 700px;
+}
+
+/* ---------- shared panel look for the newsroom and staff tabs ---------- */
+.col {
+  position: absolute;
+  top: 78px;
+  bottom: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.paper {
+  background: var(--c-aged-paper);
+  padding: 12px 14px;
+}
+
+.colHead {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  border-bottom: 1.5px solid var(--c-ink);
+  padding-bottom: 4px;
+}
+
+.colTitle {
+  font-family: var(--f-display);
+  font-weight: 700;
+  font-size: 19px;
+}
+
+.colSub {
+  font-family: var(--f-mono);
+  font-size: 9.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--c-ink-muted);
+}
+
+.scroll {
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 2px 2px 10px;
+  scrollbar-width: thin;
+  scrollbar-color: var(--c-ink-muted) transparent;
+}
+
+.kicker {
+  font-family: var(--f-mono);
+  font-size: 9.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--c-rust);
+}
+
+.label {
+  font-family: var(--f-mono);
+  font-size: 9.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--c-ink-muted);
+  margin: 10px 0 5px;
+  padding-bottom: 3px;
+  border-bottom: 1px solid var(--c-ink);
+}
+
+.note {
+  font-size: 12px;
+  line-height: 1.45;
+  margin: 4px 0;
+}
+
+.subTabs {
+  display: flex;
+  gap: 3px;
+  flex-wrap: wrap;
+}
+
+.subTabs button {
+  font-family: var(--f-mono);
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  background: transparent;
+  border: 1px solid var(--c-ink);
+  padding: 4px 8px;
+}
+
+.subTabs .subOn {
+  background: var(--c-ink);
+  color: var(--c-newsprint);
+}
+
+.btn {
+  font-family: var(--f-mono);
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  background: transparent;
+  border: 1.5px solid var(--c-ink);
+  padding: 5px 9px;
+}
+
+.btn:hover:not(:disabled) {
+  background: var(--c-ink);
+  color: var(--c-newsprint);
+}
+
+.btn:disabled {
+  opacity: 0.4;
+}
+
+.btnPrimary {
+  background: var(--c-tiger);
+  border-color: var(--c-tiger);
+}
+
+.linkBtn {
+  background: none;
+  border: none;
+  padding: 0;
+  font-family: var(--f-mono);
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  text-decoration: underline;
+  color: var(--c-rust);
+}
+
+.meter {
+  display: block;
+  position: relative;
+  height: 6px;
+  background: var(--c-paste-up);
+  flex: 1;
+}
+
+.meterFill,
+.meterWarn {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  background: var(--c-ink);
+}
+
+.meterWarn {
+  background: var(--c-stamp-red);
+}
+
+.big {
+  height: 48px;
+  flex: none;
+  background: var(--c-tiger);
+  border: none;
+  font-family: var(--f-display);
+  font-weight: 700;
+  font-size: 19px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.big:hover:not(:disabled) {
+  background: var(--c-stamp-red);
+}
+
+.big:disabled {
+  opacity: 0.45;
+}

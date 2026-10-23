@@ -6,6 +6,8 @@ import react from '@vitejs/plugin-react';
 // Never expose ANTHROPIC_API_KEY: Vite only exposes VITE_-prefixed env vars to client code.
 export default defineConfig({
   plugins: [react()],
+  // Relative asset paths so the built game loads from file:// inside the desktop app.
+  base: './',
   server: { port: 5173 },
   test: {
     environment: 'node',

@@ -1,0 +1,341 @@
+.rosterPaper,
+.sidePaper {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.sidePaper {
+  transform: rotate(0.3deg);
+}
+
+.rosterAll {
+  font-family: var(--f-mono);
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  background: transparent;
+  border: 1px dashed var(--c-ink-muted);
+  padding: 6px;
+  text-align: left;
+}
+
+.roster {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  text-align: left;
+  background: var(--c-newsprint);
+  border: 1px solid var(--c-proof-grey);
+  padding: 8px 10px;
+}
+
+.roster:hover {
+  border-color: var(--c-tiger);
+}
+
+.rosterOn,
+.rosterOn:hover {
+  border: 2px solid var(--c-ink);
+  background: var(--c-newsprint-light);
+}
+
+.rosterName {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+}
+
+.rosterName b {
+  font-family: var(--f-display);
+  font-size: 16px;
+}
+
+.rosterName span {
+  font-family: var(--f-mono);
+  font-size: 9px;
+  text-transform: uppercase;
+  color: var(--c-ink-muted);
+}
+
+.rosterAssign {
+  font-size: 11px;
+  color: var(--c-ink-soft);
+}
+
+.pending {
+  font-family: var(--f-mono);
+  font-size: 9px;
+  text-transform: uppercase;
+  color: var(--c-rust);
+}
+
+.meterRow {
+  display: grid;
+  grid-template-columns: 48px 1fr 54px;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--f-mono);
+  font-size: 9px;
+  text-transform: uppercase;
+}
+
+.meterRow > span:last-child {
+  text-align: right;
+}
+
+/* ---- article pile ---- */
+.pileHead {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  background: var(--c-aged-paper);
+  padding: 8px 10px;
+}
+
+.pileHead button {
+  background: var(--c-aged-paper);
+}
+
+.filterChip {
+  font-family: var(--f-mono);
+  font-size: 9.5px;
+  text-transform: uppercase;
+  border: 1px solid var(--c-rust);
+  color: var(--c-rust);
+  padding: 3px 6px;
+  white-space: nowrap;
+}
+
+.slip {
+  background: var(--c-newsprint-light);
+  border: 1px dashed var(--c-ink-muted);
+  padding: 9px 12px 8px;
+  cursor: pointer;
+  transition: transform 120ms ease-out;
+}
+
+.slip:hover {
+  border: 1px solid var(--c-tiger);
+}
+
+.slipOn,
+.slipOn:hover {
+  border: 2px solid var(--c-tiger);
+}
+
+.slipPrint {
+  border-left: 6px solid var(--c-ink);
+}
+
+.slipMeta {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  font-family: var(--f-mono);
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--c-ink-muted);
+}
+
+.slipMeta em {
+  font-style: normal;
+}
+
+.commissioned {
+  color: var(--c-ink);
+}
+
+.stale {
+  color: var(--c-rust);
+}
+
+.slipHead {
+  font-family: var(--f-display);
+  font-weight: 700;
+  font-size: 17px;
+  line-height: 1.15;
+  margin: 5px 0 6px;
+}
+
+.slipFoot {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+}
+
+.slipActions {
+  display: flex;
+  gap: 6px;
+  flex: none;
+}
+
+.star {
+  font-size: 16px;
+  line-height: 1;
+  background: none;
+  border: none;
+  color: var(--c-ink-muted);
+  padding: 0 4px;
+}
+
+.starOn {
+  color: var(--c-tiger);
+}
+
+.printBtn {
+  font-family: var(--f-mono);
+  font-size: 10px;
+  text-transform: uppercase;
+  border: 1.5px solid var(--c-ink);
+  background: transparent;
+  padding: 4px 8px;
+  white-space: nowrap;
+}
+
+.printOn {
+  background: var(--c-ink);
+  color: var(--c-newsprint);
+}
+
+.empty {
+  font-style: italic;
+  font-size: 13px;
+  color: var(--c-newsprint);
+  opacity: 0.75;
+  padding: 10px;
+}
+
+/* ---- detail ---- */
+.detailHead {
+  font-family: var(--f-display);
+  font-weight: 700;
+  font-size: 21px;
+  line-height: 1.12;
+  margin: 4px 0;
+}
+
+.detailMeta {
+  font-family: var(--f-mono);
+  font-size: 9.5px;
+  text-transform: uppercase;
+  color: var(--c-ink-muted);
+}
+
+.seg {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: 1fr;
+  border: 1.5px solid var(--c-ink);
+}
+
+.seg button {
+  font-family: var(--f-mono);
+  font-size: 10px;
+  text-transform: uppercase;
+  background: transparent;
+  border: none;
+  border-right: 1px solid var(--c-ink);
+  padding: 6px 2px;
+}
+
+.seg button:last-child {
+  border-right: none;
+}
+
+.seg button:disabled {
+  color: var(--c-ink-faint);
+  text-decoration: line-through;
+}
+
+.segOn,
+.seg .segOn {
+  background: var(--c-ink);
+  color: var(--c-newsprint);
+}
+
+.copy {
+  background: var(--c-newsprint-light);
+  padding: 8px 10px;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.copy p {
+  margin: 4px 0 0;
+}
+
+.detailActions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin-top: 10px;
+}
+
+/* ---- wire desk ---- */
+.wireSlip {
+  background: var(--c-newsprint-light);
+  border: 1px dashed var(--c-ink-muted);
+  padding: 8px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.wireHead {
+  font-family: var(--f-display);
+  font-weight: 700;
+  font-size: 15px;
+  line-height: 1.15;
+}
+
+.sensitive {
+  align-self: flex-start;
+  font-family: var(--f-mono);
+  font-size: 9px;
+  text-transform: uppercase;
+  color: var(--c-stamp-red);
+  border: 1px solid currentColor;
+  padding: 0 3px;
+}
+
+.commissionRow {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+
+.commissionRow select {
+  flex: 1;
+  min-width: 0;
+  font-family: var(--f-body);
+  font-size: 12px;
+  background: var(--c-newsprint);
+  border: 1px solid var(--c-ink);
+  border-radius: 0;
+  padding: 3px;
+  color: var(--c-ink);
+}
+
+.coveredRow {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 11.5px;
+  padding: 2px 0;
+  border-bottom: 1px dotted var(--c-ink-faint);
+}
+
+.coveredRow em {
+  font-family: var(--f-mono);
+  font-size: 9px;
+  font-style: normal;
+  text-transform: uppercase;
+  white-space: nowrap;
+  color: var(--c-ink-muted);
+}

@@ -1,0 +1,230 @@
+// Staff: manage your reporters (assignment, workload, training) and recruit new ones.
+import { useState } from 'react';
+import type { Reporter } from '../../data/schemas.ts';
+import { loadGameData } from '../../data/worldData.ts';
+import { MAX_STAFF, REFERENCE_CHECK_COST } from '../../sim/balance.ts';
+import {
+  currentAttributes,
+  DESK_LABEL,
+  filingCapacity,
+  isScouted,
+  payroll,
+  reporterById,
+  severance,
+  shownAssignment,
+  signingFee,
+} from '../../sim/staff.ts';
+import type { GameState, StaffMember } from '../../sim/types.ts';
+import { useStore } from '../../state/store.ts';
+import { assignmentSummary, AssignmentEditor, AttributeTable, ReporterHeader, StrengthsLine } from '../../components/staff/StaffParts.tsx';
+import styles from './Hub.module.css';
+import s from './Staff.module.css';
+
+export function StaffTab() {
+  const game = useStore((st) => st.game)!;
+  const { world } = loadGameData();
+  const [selected, setSelected] = useState<string>(game.staff[0]?.reporterId ?? '');
+  const [candidate, setCandidate] = useState<string | null>(null);
+  const member = game.staff.find((m) => m.reporterId === selected);
+  const market = world.staff_pool.filter((r) => !game.staff.some((m) => m.reporterId === r.id));
+
+  return (
+    <>
+      {/* ---------- your staff ---------- */}
+      <section className={styles.col} style={{ left: 14, width: 300 }}>
+        <div className={`${styles.paper} ${s.listPaper}`}>
+          <div className={styles.colHead}>
+            <span className={styles.colTitle}>Newsroom</span>
+            <span className={styles.colSub}>
+              {game.staff.length}/{MAX_STAFF} · ${payroll(world, game.staff)}/issue
+            </span>
+          </div>
+          <div className={styles.scroll}>
+            {game.staff.map((m) => {
+              const r = reporterById(world, m.reporterId);
+              if (!r) return null;
+              return (
+                <button key={m.reporterId} className={`${s.staffRow} ${selected === m.reporterId && !candidate ? s.on : ''}`} onClick={() => { setSelected(m.reporterId); setCandidate(null); }}>
+                  <b>{r.name}</b>
+                  <span>{assignmentSummary(shownAssignment(m))}</span>
+                  <span className={s.rowMeta}>
+                    {filingCapacity(r, m)} in/issue · morale {Math.round(m.morale)}
+                    {m.pendingAssignment ? ' · changes next issue' : ''}
+                    {m.hiredIssue > game.issueNumber ? ' · starts next issue' : ''}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      </section>
+
+      {/* ---------- manage selected ---------- */}
+      <section className={styles.col} style={{ left: 324, width: 560 }}>
+        <div className={`${styles.paper} ${s.managePaper}`}>
+          {candidate ? (
+            <CandidateFile game={game} reporter={reporterById(world, candidate)!} onHired={(id) => { setSelected(id); setCandidate(null); }} />
+          ) : member ? (
+            <ManageReporter game={game} member={member} />
+          ) : (
+            <p className={styles.note}>Pick a reporter.</p>
+          )}
+        </div>
+      </section>
+
+      {/* ---------- recruitment market ---------- */}
+      <section className={styles.col} style={{ left: 894, right: 14 }}>
+        <div className={`${styles.paper} ${s.marketPaper}`}>
+          <div className={styles.colHead}>
+            <span className={styles.colTitle}>Help wanted</span>
+            <span className={styles.colSub}>{market.length} available</span>
+          </div>
+          <p className={styles.note}>
+            Reporters on the market. Until you check references (${REFERENCE_CHECK_COST}), you only have a rough idea of their abilities.
+          </p>
+          <div className={styles.scroll}>
+            {market.map((r) => {
+              const scouted = isScouted(game, r.id);
+              return (
+                <button key={r.id} className={`${s.candidate} ${candidate === r.id ? s.on : ''}`} onClick={() => setCandidate(r.id)}>
+                  <div className={s.candHead}>
+                    <b>{r.name}</b>
+                    <span>
+                      {DESK_LABEL[r.desk]} · ${r.salary_per_issue}/issue
+                    </span>
+                  </div>
+                  <AttributeTable reporter={r} attrs={r.attributes} scouted={scouted} />
+                  {!scouted ? <span className={s.rough}>Rough estimate</span> : null}
+                </button>
+              );
+            })}
+            {market.length === 0 ? <p className={styles.note}>Nobody else is looking for work.</p> : null}
+          </div>
+        </div>
+      </section>
+    </>
+  );
+}
+
+function ManageReporter({ game, member }: { game: GameState; member: StaffMember }) {
+  const setAssignment = useStore((st) => st.setAssignment);
+  const release = useStore((st) => st.release);
+  const [confirm, setConfirm] = useState(false);
+  const { world } = loadGameData();
+  const r = reporterById(world, member.reporterId) as Reporter;
+  const attrs = currentAttributes(r, member);
+  const published = game.articles.filter((a) => a.reporterId === r.id && a.status === 'published').length;
+  const unpublished = game.articles.filter((a) => a.reporterId === r.id && a.status === 'backlog').length;
+  const startsLater = member.hiredIssue > game.issueNumber;
+
+  return (
+    <div className={s.manage}>
+      <ReporterHeader reporter={r} sub={startsLater ? 'starts next issue' : `with you since issue ${member.hiredIssue}`} />
+
+      <div className={s.twoCol}>
+        <div>
+          <div className={styles.label}>Attributes</div>
+          <AttributeTable reporter={r} attrs={attrs} scouted training={shownAssignment(member).training} />
+          <div style={{ marginTop: 6 }}>
+            <StrengthsLine attrs={attrs} />
+          </div>
+        </div>
+        <div>
+          <div className={styles.label}>Condition</div>
+          <div className={s.stat}>
+            <span>Morale</span>
+            <b className={member.morale < 35 ? s.bad : member.morale > 70 ? s.good : ''}>{Math.round(member.morale)}/100</b>
+          </div>
+          <div className={s.stat}>
+            <span>Published</span>
+            <b>{published}</b>
+          </div>
+          <div className={s.stat}>
+            <span>Unpublished</span>
+            <b>{unpublished}</b>
+          </div>
+          <div className={s.stat}>
+            <span>Salary</span>
+            <b>${r.salary_per_issue}/issue</b>
+          </div>
+        </div>
+      </div>
+
+      <div className={styles.label}>Assignment {startsLater ? '' : '· changes apply from next issue'}</div>
+      <AssignmentEditor reporter={r} member={member} value={shownAssignment(member)} onChange={(a) => setAssignment(r.id, a)} />
+      {member.pendingAssignment ? (
+        <p className={s.pending}>
+          Now: {assignmentSummary(member.assignment)}. Next issue: {assignmentSummary(member.pendingAssignment)}.
+          <button className={styles.linkBtn} onClick={() => setAssignment(r.id, member.assignment)}>
+            Undo change
+          </button>
+        </p>
+      ) : null}
+
+      <div className={styles.label}>Contract</div>
+      {confirm ? (
+        <div className={s.confirm}>
+          Release {r.name}? Severance is ${severance(r)}, and their unpublished work goes with them.
+          <button className={styles.btn} onClick={() => release(r.id)}>
+            Yes, release
+          </button>
+          <button className={styles.linkBtn} onClick={() => setConfirm(false)}>
+            Keep
+          </button>
+        </div>
+      ) : (
+        <button className={styles.linkBtn} onClick={() => setConfirm(true)}>
+          Release from contract (${severance(r)} severance)
+        </button>
+      )}
+    </div>
+  );
+}
+
+function CandidateFile({ game, reporter, onHired }: { game: GameState; reporter: Reporter; onHired: (id: string) => void }) {
+  const hire = useStore((st) => st.hire);
+  const checkReferences = useStore((st) => st.checkReferences);
+  const scouted = isScouted(game, reporter.id);
+  const full = game.staff.length >= MAX_STAFF;
+  return (
+    <div className={s.manage}>
+      <div className={styles.kicker}>Candidate file</div>
+      <ReporterHeader reporter={reporter} />
+      <div className={styles.label}>{scouted ? 'Attributes (references checked)' : 'Attributes (rough estimate)'}</div>
+      <AttributeTable reporter={reporter} attrs={reporter.attributes} scouted={scouted} />
+      {scouted ? (
+        <div style={{ marginTop: 6 }}>
+          <StrengthsLine attrs={reporter.attributes} />
+        </div>
+      ) : (
+        <p className={styles.note}>
+          Their clips suggest the ranges above. A reference check (${REFERENCE_CHECK_COST}) tells you exactly what you'd be getting.
+        </p>
+      )}
+      <div className={styles.label}>Terms</div>
+      <p className={styles.note}>
+        Salary ${reporter.salary_per_issue} per issue. Signing fee ${signingFee(reporter)}. Starts next issue on their home desk; you can set the assignment
+        before then.
+      </p>
+      <div className={s.actions}>
+        {!scouted ? (
+          <button className={styles.btn} onClick={() => checkReferences(reporter.id)}>
+            Check references (${REFERENCE_CHECK_COST})
+          </button>
+        ) : null}
+        <button
+          className={`${styles.btn} ${styles.btnPrimary}`}
+          disabled={full}
+          onClick={() => {
+            const before = useStore.getState().game?.staff.length ?? 0;
+            hire(reporter.id);
+            if ((useStore.getState().game?.staff.length ?? 0) > before) onHired(reporter.id);
+          }}
+          title={full ? `The newsroom holds ${MAX_STAFF}` : undefined}
+        >
+          Hire (${signingFee(reporter)})
+        </button>
+      </div>
+    </div>
+  );
+}

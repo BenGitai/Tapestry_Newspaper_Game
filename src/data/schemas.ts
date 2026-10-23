@@ -2,14 +2,14 @@
 // in the JSON fails loudly at startup instead of silently breaking the simulation.
 import { z } from 'zod';
 
-export const CATEGORIES = ['politics', 'economy', 'social', 'sports', 'culture', 'world'] as const;
+export const CATEGORIES = ['politics', 'economy', 'social', 'sports', 'culture', 'science', 'world'] as const;
 export const categorySchema = z.enum(CATEGORIES);
 export type Category = z.infer<typeof categorySchema>;
 
 export const ANGLES = ['puff', 'straight', 'hard'] as const;
 export type Angle = (typeof ANGLES)[number];
 
-export const DESKS = ['city_hall', 'business', 'neighborhoods', 'sports', 'culture'] as const;
+export const DESKS = ['city_hall', 'business', 'neighborhoods', 'sports', 'culture', 'science_tech'] as const;
 export const deskSchema = z.enum(DESKS);
 export type Desk = z.infer<typeof deskSchema>;
 

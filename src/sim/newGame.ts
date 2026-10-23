@@ -1,18 +1,13 @@
 // Creating a new game from the setup form, and the issue calendar.
-import type { CityWorld, Desk, Reporter } from '../data/schemas.ts';
-import { DEMO_START_DATE, STARTING_STAFF } from './balance.ts';
-import { emptyDraft } from './layout.ts';
-import type { CoverageCategory, Frequency, GameState, PaperSetup } from './types.ts';
+import type { CityWorld, Reporter } from '../data/schemas.ts';
+import type { StorySource } from '../data/StorySource.ts';
+import { STARTING_STAFF } from './balance.ts';
+import { adRevenue, emptyDraft } from './layout.ts';
+import { fileBeatArticles, settleAfterPrint } from './newsroom.ts';
+import { advanceStaff, deskForCategory, newStaffMember, payroll, reporterById, startingPayrollCap } from './staff.ts';
+import type { CoverageCategory, GameState, PaperSetup, StaffAssignment } from './types.ts';
 
-export const COVERAGE_CATEGORIES: CoverageCategory[] = ['politics', 'economy', 'social', 'sports', 'culture'];
-
-export const DESK_FOR_CATEGORY: Record<CoverageCategory, Desk> = {
-  politics: 'city_hall',
-  economy: 'business',
-  social: 'neighborhoods',
-  sports: 'sports',
-  culture: 'culture',
-};
+export const COVERAGE_CATEGORIES: CoverageCategory[] = ['politics', 'economy', 'social', 'sports', 'culture', 'science', 'world'];
 
 export function defaultSetup(): PaperSetup {
   return {
@@ -20,67 +15,81 @@ export function defaultSetup(): PaperSetup {
     cityId: 'philadelphia',
     origin: 'founded',
     frequency: 'daily',
-    coverage: { politics: 5, economy: 3, social: 3, sports: 4, culture: 2 },
+    style: 'neighborhood',
+    coverage: { politics: 5, economy: 3, social: 3, sports: 4, culture: 2, science: 2, world: 1 },
     stance: 'neutral',
   };
 }
 
 /**
- * Starting reporters: rank the starting candidates by how much weight the
- * coverage split puts on their desk, keep the top STARTING_STAFF. Ties go to
- * data-file order so the result is deterministic.
+ * A suggested starting staff for the hiring screen: starting candidates ranked by
+ * how much the coverage split weights their desk, added while payroll fits.
+ * Ties go to data-file order so the result is deterministic.
  */
-export function pickStartingStaff(world: CityWorld, coverage: PaperSetup['coverage']): Reporter[] {
-  const weightOf = (desk: Desk): number => {
-    const cat = COVERAGE_CATEGORIES.find((c) => DESK_FOR_CATEGORY[c] === desk);
-    return cat ? coverage[cat] : 0;
+export function suggestStartingStaff(world: CityWorld, setup: PaperSetup): Reporter[] {
+  const weightOf = (r: Reporter): number => {
+    const cat = COVERAGE_CATEGORIES.find((c) => deskForCategory(world, c) === r.desk);
+    return cat ? setup.coverage[cat] : 0;
   };
-  return world.staff_pool
+  const cap = startingPayrollCap(setup.origin);
+  const picked: Reporter[] = [];
+  const ranked = world.staff_pool
     .map((r, i) => ({ r, i }))
     .filter(({ r }) => r.starting_candidate)
-    .sort((a, b) => weightOf(b.r.desk) - weightOf(a.r.desk) || a.i - b.i)
-    .slice(0, STARTING_STAFF)
-    .map(({ r }) => r);
+    .sort((a, b) => weightOf(b.r) - weightOf(a.r) || a.i - b.i);
+  for (const { r } of ranked) {
+    if (picked.length >= STARTING_STAFF.max - 1) break;
+    if (payroll(world, [...picked, r].map((x) => ({ reporterId: x.id }))) <= cap) picked.push(r);
+  }
+  return picked;
 }
 
-export function createGame(setup: PaperSetup, world: CityWorld): GameState {
+export interface Hire {
+  reporterId: string;
+  assignment: StaffAssignment;
+}
+
+/** New game: staff hired on the hiring screen start on issue 1, and file their first stories. */
+export function createGame(setup: PaperSetup, world: CityWorld, stories: StorySource, hires: Hire[]): GameState {
   const origin = world.origins[setup.origin];
-  return {
+  const staff = hires
+    .map((h) => {
+      const r = reporterById(world, h.reporterId);
+      return r ? newStaffMember(world, r, 1, origin.morale, h.assignment) : undefined;
+    })
+    .filter((m) => m !== undefined);
+  const game: GameState = {
     setup,
     issueNumber: 1,
     cash: origin.cash,
     debt: origin.debt,
-    staff: pickStartingStaff(world, setup.coverage).map((r) => r.id),
+    staff,
+    articles: [],
+    scouted: [],
     draft: emptyDraft(),
     archive: [],
     finished: false,
   };
+  return fileBeatArticles(game, world, stories);
 }
 
-// ---------------------------------------------------------------------------
-// Calendar
-// ---------------------------------------------------------------------------
-
-/** How many issues the demo runs for a frequency, given the days of wire available. */
-export function issueCount(frequency: Frequency, dayCount: number): number {
-  return frequency === 'daily' ? dayCount : 1;
+/**
+ * Close out the printed issue and open the next one: articles on the page are
+ * published, the rest stay in the backlog; payroll is paid and ad money comes in
+ * (sales arrive with the simulation); staff train and queued assignments apply;
+ * then reporters file for the new issue.
+ */
+export function advanceIssue(game: GameState, world: CityWorld, stories: StorySource): GameState {
+  const { game: settled, publishedBy } = settleAfterPrint(game);
+  const cash = settled.cash + adRevenue(settled.draft, world.entities) - payroll(world, settled.staff);
+  const next: GameState = {
+    ...settled,
+    cash,
+    issueNumber: settled.issueNumber + 1,
+    staff: advanceStaff(settled.staff, publishedBy),
+    draft: emptyDraft(),
+  };
+  return fileBeatArticles(next, world, stories);
 }
 
-/** Wire days that feed an issue. Weekly pulls every day into one issue (more stories to choose from). */
-export function issueDays(frequency: Frequency, issueNumber: number, dayCount: number): number[] {
-  if (frequency === 'daily') return [issueNumber];
-  return Array.from({ length: dayCount }, (_, i) => i + 1);
-}
-
-/** The date printed on an issue: the last wire day it covers. */
-export function issueDate(frequency: Frequency, issueNumber: number, dayCount: number): Date {
-  const days = issueDays(frequency, issueNumber, dayCount);
-  const last = days[days.length - 1] ?? 1;
-  const d = new Date(`${DEMO_START_DATE}T12:00:00`);
-  d.setDate(d.getDate() + last - 1);
-  return d;
-}
-
-export function formatIssueDate(d: Date): string {
-  return d.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
-}
+export { formatIssueDate, issueCount, issueDate, issueDays } from './calendar.ts';

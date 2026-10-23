@@ -1,10 +1,9 @@
 // Paste-up rules: the page grid, placement, fit and prominence.
 // Pure functions over IssueDraft; every edit returns a new draft.
-import type { Entity, Reporter, Story } from '../data/schemas.ts';
+import type { Entity, Story } from '../data/schemas.ts';
 import {
   AD_SIZES,
   DEFAULT_AD_SIZE,
-  FILING_CAPACITY,
   FIT,
   FRONT_PAGE_AD_MULTIPLIER,
   LEAD_PHOTO_ROWS,
@@ -17,7 +16,7 @@ import type { AdBlock, Block, IssueDraft, PageId, Rect, StoryBlock, Tier } from 
 export const ALL_PAGES: PageId[] = ['front', 'a2', 'a3'];
 
 export function emptyDraft(): IssueDraft {
-  return { pages: { front: [], a2: [], a3: [] }, extraPages: [], assignments: {} };
+  return { pages: { front: [], a2: [], a3: [] }, extraPages: [] };
 }
 
 /** Pages that will actually print in this draft, in order. */
@@ -267,23 +266,8 @@ export function setExtraPage(draft: IssueDraft, page: PageId, on: boolean): Issu
 }
 
 // ---------------------------------------------------------------------------
-// Reporters and page accounting
+// Page accounting
 // ---------------------------------------------------------------------------
-
-export function filingCapacity(reporter: Pick<Reporter, 'attributes'>): number {
-  return Math.round(FILING_CAPACITY.base + reporter.attributes.speed * FILING_CAPACITY.perSpeed);
-}
-
-/** Column inches a reporter is filing in this draft (only stories that are placed count). */
-export function reporterLoad(draft: IssueDraft, reporterId: string): number {
-  let inches = 0;
-  for (const [storyId, a] of Object.entries(draft.assignments)) {
-    if (a.reporterId !== reporterId) continue;
-    const found = findStoryBlock(draft, storyId);
-    if (found) inches += textInches(found.block);
-  }
-  return Math.round(inches * 10) / 10;
-}
 
 export interface PageUsage {
   totalInches: number;

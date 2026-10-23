@@ -1,162 +1,243 @@
 // Zustand store: holds state and wires UI events to the pure rules in src/sim.
 import { create } from 'zustand';
-import type { Angle, Story } from '../data/schemas.ts';
+import type { Angle } from '../data/schemas.ts';
 import { loadGameData } from '../data/worldData.ts';
-import { emptyDraft, findStoryBlock, type EditResult } from '../sim/layout.ts';
-import { createGame, formatIssueDate, issueCount, issueDate, issueDays } from '../sim/newGame.ts';
-import type { GameState, IssueDraft, PageId, PaperSetup } from '../sim/types.ts';
+import { activePages, findStoryBlock, removeBlock, storyBlockId, type EditResult } from '../sim/layout.ts';
+import { advanceIssue, createGame, formatIssueDate, issueCount, issueDate, type Hire } from '../sim/newGame.ts';
+import { articleForStory, commission as commissionStory, updateArticle, type NewsroomEdit } from '../sim/newsroom.ts';
+import { checkReferences, hire as hireReporter, release as releaseReporter, setAssignment as queueAssignment, type StaffEdit } from '../sim/staff.ts';
+import type { Article, GameState, IssueDraft, PageId, PaperSetup, StaffAssignment } from '../sim/types.ts';
 
-export type Screen = 'title' | 'setup' | 'editor' | 'press' | 'lab' | 'end';
-export type WireFilter = 'all' | 'local' | 'world' | 'politics' | 'economy' | 'social' | 'sports' | 'culture';
+export type Screen = 'title' | 'setup' | 'hiring' | 'hub' | 'press' | 'end' | 'lab';
+export type HubTab = 'newsroom' | 'layout' | 'staff';
 
 const HISTORY_LIMIT = 100;
 
 interface Store {
   screen: Screen;
+  hubTab: HubTab;
+  /** Setup form result, waiting for the hiring screen. */
+  pendingSetup: PaperSetup | null;
   game: GameState | null;
   past: IssueDraft[];
   future: IssueDraft[];
   selectedBlockId: string | null;
+  selectedArticleId: string | null;
+  focusReporterId: string | null;
   currentPage: PageId;
-  wireFilter: WireFilter;
-  wireTab: 'wire' | 'ads';
+  layoutTab: 'print' | 'ads';
   notice: { text: string; at: number } | null;
 
   goto(screen: Screen): void;
-  startGame(setup: PaperSetup): void;
-  /** Apply a layout edit. Failed edits show their reason and change nothing. */
+  setHubTab(tab: HubTab): void;
+  submitSetup(setup: PaperSetup): void;
+  startGame(setup: PaperSetup, hires: Hire[]): void;
+  notify(text: string): void;
+
+  // layout
   edit(fn: (d: IssueDraft) => EditResult | IssueDraft, opts?: { select?: string | null }): boolean;
   undo(): void;
   redo(): void;
-  select(blockId: string | null): void;
+  selectBlock(blockId: string | null): void;
   setPage(page: PageId): void;
-  setWireFilter(f: WireFilter): void;
-  setWireTab(t: 'wire' | 'ads'): void;
-  notify(text: string): void;
-  assignReporter(storyId: string, reporterId: string | null): void;
-  setAngle(storyId: string, angle: Angle): void;
+  setLayoutTab(t: 'print' | 'ads'): void;
+
+  // newsroom
+  selectArticle(id: string | null): void;
+  focusReporter(id: string | null): void;
+  toggleFavorite(id: string): void;
+  toggleForPrint(id: string): void;
+  setArticleAngle(id: string, angle: Angle): void;
+  spike(id: string): void;
+  commission(storyId: string, reporterId: string | null, angle?: Angle): boolean;
+
+  // staff
+  setAssignment(reporterId: string, asg: StaffAssignment): void;
+  hire(reporterId: string): void;
+  release(reporterId: string): void;
+  checkReferences(reporterId: string): void;
+
+  // turn
   sendToPress(): void;
   nextIssue(): void;
 }
 
-function setDraft(game: GameState, draft: IssueDraft): GameState {
-  return { ...game, draft };
-}
-
-export const useStore = create<Store>((set, get) => ({
-  screen: 'title',
-  game: null,
-  past: [],
-  future: [],
-  selectedBlockId: null,
-  currentPage: 'front',
-  wireFilter: 'all',
-  wireTab: 'wire',
-  notice: null,
-
-  goto: (screen) => set({ screen }),
-
-  startGame: (setup) => {
-    const { world } = loadGameData();
-    set({ game: createGame(setup, world), screen: 'editor', past: [], future: [], selectedBlockId: null, currentPage: 'front' });
-  },
-
-  edit: (fn, opts) => {
+export const useStore = create<Store>((set, get) => {
+  /** Apply a whole-game change from the sim; show the reason if it was refused. */
+  const apply = (fn: (g: GameState) => StaffEdit | NewsroomEdit | GameState): boolean => {
     const game = get().game;
     if (!game) return false;
-    const result = fn(game.draft);
-    const next = 'ok' in result ? result : ({ ok: true, draft: result } as const);
-    if (!next.ok) {
-      get().notify(next.reason);
-      return false;
+    const r = fn(game);
+    if ('ok' in r) {
+      if (!r.ok) {
+        get().notify(r.reason);
+        return false;
+      }
+      set({ game: r.game });
+      return true;
     }
-    if (next.draft === game.draft) return true;
-    set((s) => ({
-      game: setDraft(game, next.draft),
-      past: [...s.past.slice(-HISTORY_LIMIT + 1), game.draft],
-      future: [],
-      ...(opts && 'select' in opts ? { selectedBlockId: opts.select ?? null } : {}),
-    }));
+    set({ game: r });
     return true;
-  },
+  };
 
-  undo: () => {
-    const { game, past, future } = get();
-    const prev = past[past.length - 1];
-    if (!game || !prev) return;
-    set({ game: setDraft(game, prev), past: past.slice(0, -1), future: [game.draft, ...future] });
-  },
+  /** Take a story off the page if it's there (used when an article leaves the print pile). */
+  const unplace = (game: GameState, storyId: string): GameState => {
+    const found = findStoryBlock(game.draft, storyId);
+    return found ? { ...game, draft: removeBlock(game.draft, storyBlockId(storyId)) } : game;
+  };
 
-  redo: () => {
-    const { game, past, future } = get();
-    const next = future[0];
-    if (!game || !next) return;
-    set({ game: setDraft(game, next), past: [...past, game.draft], future: future.slice(1) });
-  },
+  return {
+    screen: 'title',
+    hubTab: 'newsroom',
+    pendingSetup: null,
+    game: null,
+    past: [],
+    future: [],
+    selectedBlockId: null,
+    selectedArticleId: null,
+    focusReporterId: null,
+    currentPage: 'front',
+    layoutTab: 'print',
+    notice: null,
 
-  select: (blockId) => set({ selectedBlockId: blockId }),
-  setPage: (page) => set({ currentPage: page }),
-  setWireFilter: (wireFilter) => set({ wireFilter }),
-  setWireTab: (wireTab) => set({ wireTab }),
-  notify: (text) => set({ notice: { text, at: Date.now() } }),
+    goto: (screen) => set({ screen }),
+    setHubTab: (hubTab) => set({ hubTab }),
+    submitSetup: (pendingSetup) => set({ pendingSetup, screen: 'hiring' }),
+    startGame: (setup, hires) => {
+      const { world, stories } = loadGameData();
+      set({
+        game: createGame(setup, world, stories, hires),
+        screen: 'hub',
+        hubTab: 'newsroom',
+        past: [],
+        future: [],
+        selectedBlockId: null,
+        selectedArticleId: null,
+        focusReporterId: null,
+        currentPage: 'front',
+      });
+    },
+    notify: (text) => set({ notice: { text, at: Date.now() } }),
 
-  assignReporter: (storyId, reporterId) =>
-    get().edit((d) => {
-      const prev = d.assignments[storyId];
-      // Wire copy runs straight: there's no reporter to give it an angle.
-      const angle = reporterId === null ? 'straight' : (prev?.angle ?? 'straight');
-      return { ...d, assignments: { ...d.assignments, [storyId]: { reporterId, angle } } };
-    }),
+    edit: (fn, opts) => {
+      const game = get().game;
+      if (!game) return false;
+      const result = fn(game.draft);
+      const next = 'ok' in result ? result : ({ ok: true, draft: result } as const);
+      if (!next.ok) {
+        get().notify(next.reason);
+        return false;
+      }
+      if (next.draft === game.draft) return true;
+      set((s) => ({
+        game: { ...game, draft: next.draft },
+        past: [...s.past.slice(-HISTORY_LIMIT + 1), game.draft],
+        future: [],
+        ...(opts && 'select' in opts ? { selectedBlockId: opts.select ?? null } : {}),
+      }));
+      return true;
+    },
+    undo: () => {
+      const { game, past, future } = get();
+      const prev = past[past.length - 1];
+      if (!game || !prev) return;
+      set({ game: { ...game, draft: prev }, past: past.slice(0, -1), future: [game.draft, ...future] });
+    },
+    redo: () => {
+      const { game, past, future } = get();
+      const next = future[0];
+      if (!game || !next) return;
+      set({ game: { ...game, draft: next }, past: [...past, game.draft], future: future.slice(1) });
+    },
+    selectBlock: (selectedBlockId) => set({ selectedBlockId }),
+    setPage: (currentPage) => set({ currentPage }),
+    setLayoutTab: (layoutTab) => set({ layoutTab }),
 
-  setAngle: (storyId, angle) =>
-    get().edit((d) => {
-      const prev = d.assignments[storyId] ?? { reporterId: null, angle: 'straight' as Angle };
-      if (prev.reporterId === null && angle !== 'straight') return { ok: false, reason: 'Wire copy runs straight. Assign a reporter to choose an angle.' };
-      const story = loadGameData().stories.storyById(storyId);
-      if (story?.sensitivity === 'high' && angle === 'puff') return { ok: false, reason: 'Sensitive stories cannot take the Puff angle.' };
-      return { ...d, assignments: { ...d.assignments, [storyId]: { ...prev, angle } } };
-    }),
+    selectArticle: (selectedArticleId) => set({ selectedArticleId }),
+    focusReporter: (focusReporterId) => set({ focusReporterId }),
+    toggleFavorite: (id) => apply((g) => updateArticle(g, id, { favorite: !g.articles.find((a) => a.id === id)?.favorite })),
+    toggleForPrint: (id) =>
+      apply((g) => {
+        const a = g.articles.find((x) => x.id === id);
+        if (!a) return g;
+        const next = updateArticle(g, id, { selected: !a.selected });
+        return a.selected ? unplace(next, a.storyId) : next;
+      }),
+    setArticleAngle: (id, angle) =>
+      apply((g) => {
+        const a = g.articles.find((x) => x.id === id);
+        const story = a && loadGameData().stories.storyById(a.storyId);
+        if (!a || !story) return g;
+        if (a.reporterId === null && angle !== 'straight') return { ok: false, reason: 'Wire copy runs straight.' };
+        if (story.sensitivity === 'high' && angle === 'puff') return { ok: false, reason: 'Sensitive stories cannot take the Puff angle.' };
+        return updateArticle(g, id, { angle });
+      }),
+    spike: (id) =>
+      apply((g) => {
+        const a = g.articles.find((x) => x.id === id);
+        if (!a) return g;
+        return unplace(updateArticle(g, id, { status: 'spiked', selected: false, favorite: false }), a.storyId);
+      }),
+    commission: (storyId, reporterId, angle) => {
+      const { world, stories } = loadGameData();
+      return apply((g) => commissionStory(g, world, stories, storyId, reporterId, angle));
+    },
 
-  sendToPress: () => {
-    const game = get().game;
-    if (!game) return;
-    const { stories } = loadGameData();
-    const dayCount = stories.dayCount();
-    const dateLabel = formatIssueDate(issueDate(game.setup.frequency, game.issueNumber, dayCount));
-    const archive = [...game.archive, { issueNumber: game.issueNumber, dateLabel, draft: game.draft }];
-    set({ game: { ...game, archive }, screen: 'press', selectedBlockId: null });
-  },
+    setAssignment: (reporterId, asg) => apply((g) => queueAssignment(g, reporterId, asg)),
+    hire: (reporterId) => {
+      const { world } = loadGameData();
+      const morale = get().game ? world.origins[get().game!.setup.origin].morale : 50;
+      apply((g) => hireReporter(g, world, reporterId, morale));
+    },
+    release: (reporterId) =>
+      apply((g) => {
+        const r = releaseReporter(g, loadGameData().world, reporterId);
+        if (!r.ok) return r;
+        // Their unpublished work leaves with them.
+        let next = r.game;
+        for (const a of next.articles.filter((x) => x.reporterId === reporterId && x.status === 'backlog')) {
+          next = unplace(updateArticle(next, a.id, { status: 'spiked', selected: false }), a.storyId);
+        }
+        return next;
+      }),
+    checkReferences: (reporterId) => apply((g) => checkReferences(g, reporterId)),
 
-  nextIssue: () => {
-    const game = get().game;
-    if (!game) return;
-    const dayCount = loadGameData().stories.dayCount();
-    if (game.issueNumber >= issueCount(game.setup.frequency, dayCount)) {
-      set({ game: { ...game, finished: true }, screen: 'end' });
-      return;
-    }
-    set({
-      game: { ...game, issueNumber: game.issueNumber + 1, draft: emptyDraft() },
-      screen: 'editor',
-      past: [],
-      future: [],
-      selectedBlockId: null,
-      currentPage: 'front',
-      wireTab: 'wire',
-    });
-  },
-}));
+    sendToPress: () => {
+      const game = get().game;
+      if (!game) return;
+      const { stories } = loadGameData();
+      const dateLabel = formatIssueDate(issueDate(game.setup.frequency, game.issueNumber, stories.dayCount()));
+      const articles: Record<string, Article> = {};
+      for (const page of activePages(game.draft)) {
+        for (const b of game.draft.pages[page]) {
+          if (b.kind !== 'story') continue;
+          const a = articleForStory(game, b.storyId);
+          if (a) articles[b.storyId] = a;
+        }
+      }
+      const archive = [...game.archive, { issueNumber: game.issueNumber, dateLabel, draft: game.draft, articles }];
+      set({ game: { ...game, archive }, screen: 'press', selectedBlockId: null });
+    },
 
-// ---------------------------------------------------------------------------
-// Selectors
-// ---------------------------------------------------------------------------
-
-export function wireStories(game: GameState): Story[] {
-  const { stories } = loadGameData();
-  const days = issueDays(game.setup.frequency, game.issueNumber, stories.dayCount());
-  return days.flatMap((d) => stories.storiesForDay(d));
-}
-
-export function isPlaced(game: GameState, storyId: string): boolean {
-  return findStoryBlock(game.draft, storyId) !== undefined;
-}
+    nextIssue: () => {
+      const game = get().game;
+      if (!game) return;
+      const { world, stories } = loadGameData();
+      if (game.issueNumber >= issueCount(game.setup.frequency, stories.dayCount())) {
+        set({ game: { ...game, finished: true }, screen: 'end' });
+        return;
+      }
+      set({
+        game: advanceIssue(game, world, stories),
+        screen: 'hub',
+        hubTab: 'newsroom',
+        past: [],
+        future: [],
+        selectedBlockId: null,
+        selectedArticleId: null,
+        currentPage: 'front',
+        layoutTab: 'print',
+      });
+    },
+  };
+});

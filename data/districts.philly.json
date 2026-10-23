@@ -16,42 +16,42 @@
     {
       "id": "students",
       "name": "Students",
-      "interests": { "politics": 0.5, "economy": 0.3, "social": 0.7, "sports": 0.5, "culture": 0.8, "world": 0.6 },
+      "interests": { "politics": 0.5, "economy": 0.3, "social": 0.7, "sports": 0.5, "culture": 0.8, "world": 0.6, "science": 0.7 },
       "hard_news_pref": 0.6,
       "price_sensitivity": 0.9
     },
     {
       "id": "young_professionals",
       "name": "Young professionals",
-      "interests": { "politics": 0.6, "economy": 0.7, "social": 0.5, "sports": 0.6, "culture": 0.7, "world": 0.5 },
+      "interests": { "politics": 0.6, "economy": 0.7, "social": 0.5, "sports": 0.6, "culture": 0.7, "world": 0.5, "science": 0.7 },
       "hard_news_pref": 0.5,
       "price_sensitivity": 0.4
     },
     {
       "id": "working_families",
       "name": "Working families",
-      "interests": { "politics": 0.6, "economy": 0.8, "social": 0.8, "sports": 0.7, "culture": 0.3, "world": 0.2 },
+      "interests": { "politics": 0.6, "economy": 0.8, "social": 0.8, "sports": 0.7, "culture": 0.3, "world": 0.2, "science": 0.4 },
       "hard_news_pref": 0.6,
       "price_sensitivity": 0.8
     },
     {
       "id": "retirees",
       "name": "Retirees",
-      "interests": { "politics": 0.8, "economy": 0.6, "social": 0.6, "sports": 0.6, "culture": 0.5, "world": 0.5 },
+      "interests": { "politics": 0.8, "economy": 0.6, "social": 0.6, "sports": 0.6, "culture": 0.5, "world": 0.5, "science": 0.5 },
       "hard_news_pref": 0.5,
       "price_sensitivity": 0.5
     },
     {
       "id": "small_business",
       "name": "Small business owners",
-      "interests": { "politics": 0.7, "economy": 0.9, "social": 0.5, "sports": 0.5, "culture": 0.4, "world": 0.3 },
+      "interests": { "politics": 0.7, "economy": 0.9, "social": 0.5, "sports": 0.5, "culture": 0.4, "world": 0.3, "science": 0.5 },
       "hard_news_pref": 0.6,
       "price_sensitivity": 0.4
     },
     {
       "id": "sports_diehards",
       "name": "Sports diehards",
-      "interests": { "politics": 0.3, "economy": 0.3, "social": 0.3, "sports": 1.0, "culture": 0.3, "world": 0.1 },
+      "interests": { "politics": 0.3, "economy": 0.3, "social": 0.3, "sports": 1.0, "culture": 0.3, "world": 0.1, "science": 0.2 },
       "hard_news_pref": 0.3,
       "price_sensitivity": 0.6
     }
@@ -166,7 +166,9 @@
     { "id": "hale", "name": "Desmond Hale", "desk": "business", "skill": 4, "salary_per_issue": 130, "attributes": { "speed": 10, "accuracy": 16, "impact": 13, "charge": 7, "flair": 9, "tact": 14 }, "voice": "Measured. Explains what the numbers mean for ordinary people.", "starting_candidate": true },
     { "id": "raman", "name": "Priya Raman", "desk": "culture", "skill": 3, "salary_per_issue": 95, "attributes": { "speed": 14, "accuracy": 12, "impact": 9, "charge": 4, "flair": 18, "tact": 11 }, "voice": "Playful, with vivid descriptions of food, art and music.", "starting_candidate": false },
     { "id": "brenner", "name": "Walt Brenner", "desk": "city_hall", "skill": 2, "salary_per_issue": 60, "attributes": { "speed": 18, "accuracy": 6, "impact": 15, "charge": 16, "flair": 13, "tact": 4 }, "voice": "Breathless. Loves a dramatic lede. Prone to overstatement.", "starting_candidate": false },
-    { "id": "ferraro", "name": "Lucia Ferraro", "desk": "neighborhoods", "skill": 5, "salary_per_issue": 190, "attributes": { "speed": 7, "accuracy": 19, "impact": 18, "charge": 9, "flair": 12, "tact": 18 }, "voice": "Patient and thorough. Quietly devastating understatement.", "starting_candidate": false }
+    { "id": "ferraro", "name": "Lucia Ferraro", "desk": "neighborhoods", "skill": 5, "salary_per_issue": 190, "attributes": { "speed": 7, "accuracy": 19, "impact": 18, "charge": 9, "flair": 12, "tact": 18 }, "voice": "Patient and thorough. Quietly devastating understatement.", "starting_candidate": false },
+    { "id": "osei", "name": "Amara Osei", "desk": "science_tech", "skill": 3, "salary_per_issue": 105, "attributes": { "speed": 12, "accuracy": 16, "impact": 11, "charge": 5, "flair": 13, "tact": 14 }, "voice": "Curious and clear. Explains how things work without talking down.", "starting_candidate": true },
+    { "id": "moreau", "name": "Felix Moreau", "desk": "science_tech", "skill": 4, "salary_per_issue": 150, "attributes": { "speed": 9, "accuracy": 18, "impact": 15, "charge": 7, "flair": 10, "tact": 12 }, "voice": "Skeptical. Asks who checked the numbers. Dry humor.", "starting_candidate": false }
   ],
 
   "desk_categories": {
@@ -175,6 +177,7 @@
     "neighborhoods": ["social"],
     "sports": ["sports"],
     "culture": ["culture"],
+    "science_tech": ["science"],
     "_note": "World/national stories have no desk; any reporter can rewrite them from the wire at a small quality penalty."
   },
 

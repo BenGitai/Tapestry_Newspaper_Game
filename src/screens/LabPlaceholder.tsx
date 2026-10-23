@@ -26,7 +26,7 @@ export function LabPlaceholder() {
             </option>
           ))}
         </select>
-        <button onClick={() => goto(hasGame ? 'editor' : 'title')}>Back</button>
+        <button onClick={() => goto(hasGame ? 'hub' : 'title')}>Back</button>
       </div>
       {story ? (
         <div className={styles.labCols}>

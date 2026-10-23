@@ -23,6 +23,7 @@ export function PressRun() {
       <div className={styles.sheet}>
         <PageSheet
           draft={printed.draft}
+          articles={printed.articles}
           page={page}
           mode="print"
           paperName={game.setup.paperName}

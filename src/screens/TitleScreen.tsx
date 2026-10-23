@@ -2,14 +2,13 @@
 // First pass for milestone 1; the full title screen and setup form come in milestone 5.
 import logo from '../assets/tapestry-logo.png';
 import { loadGameData } from '../data/worldData.ts';
-import { defaultSetup } from '../sim/newGame.ts';
 import { useStore } from '../state/store.ts';
 import { DeskSurface } from '../components/desk/DeskSurface.tsx';
 import { PhotoBox } from '../components/paper/Halftone.tsx';
 import styles from './TitleScreen.module.css';
 
 export function TitleScreen() {
-  const startGame = useStore((s) => s.startGame);
+  const goto = useStore((s) => s.goto);
   const { stories } = loadGameData();
   const headlines = stories.storiesForDay(1).slice(0, 3);
 
@@ -29,7 +28,7 @@ export function TitleScreen() {
           <span>All the news you choose to print</span>
         </div>
 
-        <button className={styles.lead} onClick={() => startGame(defaultSetup())}>
+        <button className={styles.lead} onClick={() => goto('setup')}>
           <span className={styles.kicker}>▸ New game</span>
           <span className={styles.leadHead}>Upstart launches paper on a shoestring</span>
           <span className={styles.deck}>New owner promises "the news people actually need." Rival Herald declines to comment.</span>

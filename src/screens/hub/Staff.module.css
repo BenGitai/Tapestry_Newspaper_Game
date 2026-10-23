@@ -1,0 +1,139 @@
+.listPaper,
+.managePaper,
+.marketPaper {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.managePaper {
+  background: var(--c-newsprint);
+  transform: rotate(-0.2deg);
+  overflow-y: auto;
+  scrollbar-width: thin;
+}
+
+.marketPaper {
+  transform: rotate(0.35deg);
+}
+
+.staffRow,
+.candidate {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  text-align: left;
+  background: var(--c-newsprint);
+  border: 1px solid var(--c-proof-grey);
+  padding: 8px 10px;
+}
+
+.staffRow:hover,
+.candidate:hover {
+  border-color: var(--c-tiger);
+}
+
+.on,
+.on:hover {
+  border: 2px solid var(--c-ink);
+  background: var(--c-newsprint-light);
+}
+
+.staffRow b,
+.candHead b {
+  font-family: var(--f-display);
+  font-size: 16px;
+}
+
+.staffRow span {
+  font-size: 11px;
+  color: var(--c-ink-soft);
+}
+
+.staffRow .rowMeta {
+  font-family: var(--f-mono);
+  font-size: 9px;
+  text-transform: uppercase;
+  color: var(--c-ink-muted);
+}
+
+.candHead {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 4px;
+}
+
+.candHead span {
+  font-family: var(--f-mono);
+  font-size: 9px;
+  text-transform: uppercase;
+  color: var(--c-ink-muted);
+}
+
+.rough {
+  font-family: var(--f-mono);
+  font-size: 8.5px;
+  text-transform: uppercase;
+  color: var(--c-ink-faint);
+  font-style: italic;
+}
+
+.manage {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.twoCol {
+  display: grid;
+  grid-template-columns: 1fr 150px;
+  gap: 16px;
+}
+
+.stat {
+  display: flex;
+  justify-content: space-between;
+  font-family: var(--f-mono);
+  font-size: 10.5px;
+  text-transform: uppercase;
+  padding: 2px 0;
+}
+
+.stat b {
+  font-weight: 500;
+}
+
+.good {
+  color: var(--c-green);
+}
+
+.bad {
+  color: var(--c-stamp-red);
+}
+
+.pending {
+  font-size: 11.5px;
+  font-style: italic;
+  margin: 4px 0;
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  align-items: baseline;
+}
+
+.confirm {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  flex-wrap: wrap;
+  font-size: 12px;
+}
+
+.actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 6px;
+}

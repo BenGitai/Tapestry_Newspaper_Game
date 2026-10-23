@@ -5,7 +5,7 @@ import { displayName, loadGameData } from '../../data/worldData.ts';
 import { PAGE } from '../../sim/balance.ts';
 import { adPay, FIT_LABEL, fitOf, pageLabel, textInches, usableRows } from '../../sim/layout.ts';
 import { initials, reporterById } from '../../sim/staff.ts';
-import type { AdBlock, IssueDraft, PageId, StoryBlock } from '../../sim/types.ts';
+import type { AdBlock, Article, IssueDraft, PageId, StoryBlock } from '../../sim/types.ts';
 import { beginDrag, registerGrid, useDrag, type ActiveDrag } from '../drag/drag.ts';
 import { ArticleView } from './ArticleView.tsx';
 import { CELL_H, CELL_W, GRID_H, GRID_W, PAGE_H, PAGE_PAD_X, PAGE_PAD_Y, PAGE_W, rectPx } from './geometry.ts';
@@ -13,6 +13,8 @@ import styles from './PageSheet.module.css';
 
 interface Props {
   draft: IssueDraft;
+  /** The article running for each story id (bylines, angle, length). */
+  articles: Record<string, Article>;
   page: PageId;
   mode: 'edit' | 'print';
   paperName: string;
@@ -23,9 +25,9 @@ interface Props {
   onSelect?: (id: string | null) => void;
 }
 
-export function bylineFor(draft: IssueDraft, storyId: string): string {
+export function bylineFor(articles: Record<string, Article>, storyId: string): string {
   const { world, stories } = loadGameData();
-  const a = draft.assignments[storyId];
+  const a = articles[storyId];
   const reporter = a?.reporterId ? reporterById(world, a.reporterId) : undefined;
   if (reporter) return `By ${initials(reporter.name)}`;
   const story = stories.storyById(storyId);
@@ -33,7 +35,7 @@ export function bylineFor(draft: IssueDraft, storyId: string): string {
   return src ? src.name : 'Wire report';
 }
 
-export function PageSheet({ draft, page, mode, paperName, dateLabel, issueNumber, coverPrice, selectedId, onSelect }: Props) {
+export function PageSheet({ draft, articles, page, mode, paperName, dateLabel, issueNumber, coverPrice, selectedId, onSelect }: Props) {
   const { stories, world } = loadGameData();
   const edit = mode === 'edit';
   const active = useDrag((s) => (edit ? s.active : null));
@@ -53,9 +55,10 @@ export function PageSheet({ draft, page, mode, paperName, dateLabel, issueNumber
   const renderStory = (b: StoryBlock) => {
     const story = stories.storyById(b.storyId);
     if (!story) return null;
-    const a = draft.assignments[b.storyId];
+    const a = articles[b.storyId];
+    const sized = { base_column_inches: a?.inches ?? story.base_column_inches };
     const article = articleSource().get({ storyId: story.id, journalistId: a?.reporterId ?? null, angle: a?.angle ?? 'straight', tier: b.tier }, story);
-    const fit = fitOf(story, b);
+    const fit = fitOf(sized, b);
     const shown = resizing === b.id && target ? { ...b, cols: target.cols, rows: target.rows } : b;
     const px = rectPx(shown);
     const selected = edit && selectedId === b.id;
@@ -67,10 +70,10 @@ export function PageSheet({ draft, page, mode, paperName, dateLabel, issueNumber
         onPointerDown={edit ? (e) => beginDrag(e, { kind: 'story', storyId: b.storyId, tier: b.tier, fromBlock: true }, { cols: b.cols, rows: b.rows }, grabFrom(e, b), () => onSelect?.(b.id)) : undefined}
         aria-label={`${story.wire_headline}, ${b.tier}`}
       >
-        <ArticleView story={story} block={shown} article={article} byline={bylineFor(draft, story.id)} />
+        <ArticleView story={story} block={shown} article={article} byline={bylineFor(articles, story.id)} />
         {edit ? (
           <div className={`${styles.fitTag} ${styles['fit_' + fit.status]}`}>
-            {Math.round(textInches(shown))} in · {FIT_LABEL[fitOf(story, shown).status]}
+            {Math.round(textInches(shown))} in · {FIT_LABEL[fitOf(sized, shown).status]}
           </div>
         ) : null}
         {selected ? (

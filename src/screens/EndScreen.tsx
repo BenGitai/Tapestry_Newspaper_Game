@@ -19,7 +19,7 @@ export function EndScreen() {
         {game.archive.map((iss, i) => (
           <div key={iss.issueNumber} className={styles.thumb} style={{ transform: `rotate(${(i % 2 ? 1 : -1) * (0.8 + i * 0.3)}deg)`, width: 620 * scale, height: 756 * scale }}>
             <div style={{ transform: `scale(${scale})`, transformOrigin: 'top left' }}>
-              <PageSheet draft={iss.draft} page="front" mode="print" paperName={game.setup.paperName} dateLabel={iss.dateLabel} issueNumber={iss.issueNumber} coverPrice={world.pricing.cover_price} />
+              <PageSheet draft={iss.draft} articles={iss.articles} page="front" mode="print" paperName={game.setup.paperName} dateLabel={iss.dateLabel} issueNumber={iss.issueNumber} coverPrice={world.pricing.cover_price} />
             </div>
           </div>
         ))}

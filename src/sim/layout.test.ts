@@ -6,7 +6,6 @@ import {
   checkPlacement,
   defaultShape,
   emptyDraft,
-  filingCapacity,
   findFreeSpot,
   findStoryBlock,
   fitOf,
@@ -16,7 +15,6 @@ import {
   prominenceOf,
   putBlock,
   removeBlock,
-  reporterLoad,
   resizeBlock,
   setExtraPage,
   setTier,
@@ -186,16 +184,4 @@ describe('money and filing', () => {
     expect(u.freeInches).toBe(u.totalInches - 8);
   });
 
-  it('reporters file the text inches of placed stories only', () => {
-    let d = ok(putBlock(emptyDraft(), 'front', newStoryBlock(library, 'secondary', { col: 0, row: 3 })));
-    d = { ...d, assignments: { 'd1-library': { reporterId: 'okafor', angle: 'hard' }, 'd1-pickles': { reporterId: 'okafor', angle: 'puff' } } };
-    expect(reporterLoad(d, 'okafor')).toBe(textInches(d.pages.front[0] as StoryBlock));
-    expect(reporterLoad(d, 'tran')).toBe(0);
-  });
-
-  it('faster reporters can file more', () => {
-    const brenner = world.staff_pool.find((r) => r.id === 'brenner')!;
-    const ferraro = world.staff_pool.find((r) => r.id === 'ferraro')!;
-    expect(filingCapacity(brenner)).toBeGreaterThan(filingCapacity(ferraro));
-  });
 });
