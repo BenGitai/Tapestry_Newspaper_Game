@@ -130,7 +130,7 @@ export const STARTING_PAYROLL_CAP: Record<'founded' | 'inherited' | 'bought', nu
   bought: 400,
 };
 /** Most reporters you can employ at once in the demo. */
-export const MAX_STAFF = 6;
+export const MAX_STAFF = 8;
 
 /** Hiring mid-game costs a signing fee; releasing someone costs severance. Both are multiples of salary per issue. */
 export const SIGNING_FEE_MULTIPLIER = 2;
@@ -187,3 +187,126 @@ export const SCORECARD = {
 
 /** Day 1 of the demo. The wire text says day 1 is a Wednesday. */
 export const DEMO_START_DATE = '2026-10-21';
+
+// ---------------------------------------------------------------------------
+// Simulation: readers, trust, lean, money, rival (milestone 4)
+// ---------------------------------------------------------------------------
+
+/** Reader satisfaction with an issue. */
+export const READERS = {
+  /** Interest score that counts as "met expectations" (satisfaction 1.0). */
+  satisfactionBaseline: 3.0,
+  /** Satisfaction is clamped to this range. */
+  satisfactionMax: 2,
+  /** Stories set in a reader's own district count this much more. */
+  localBoost: 1.5,
+  /** ...and more again if you have a bureau there. */
+  bureauLocalBoost: 1.25,
+  /** How much each group likes an angle, from its hard_news_pref (0..1). */
+  hardTaste: { base: 0.6, perPref: 0.8 },
+  puffTaste: { base: 1.4, perPref: -0.8 },
+  /** Readership grade (0..1) scales appeal between these. */
+  readershipFactor: { min: 0.75, max: 1.25 },
+  /** A sensational piece either sells big or drives readers off (50/50). */
+  sensationalUp: 1.3,
+  sensationalDown: 0.75,
+  /** Old stories: online outlets had them first. */
+  staleSalesFactor: 0.85,
+} as const;
+
+/** Circulation: how many readers you can reach in a district, and how fast they come and go. */
+export const CIRCULATION = {
+  /** Share of a district's print readers you reach with no newsstands. */
+  baseReach: 0.02,
+  /** Extra reach when your coverage split matches what the district reads (alignment 0..1). */
+  coverageReach: 0.05,
+  perNewsstand: 0.015,
+  maxNewsstands: 4,
+  bureauReach: 0.02,
+  maxReach: 0.5,
+  /** Readers move this share of the way toward their target each issue. */
+  adjustRate: 0.1,
+  /** High trust softens losses: at trust 100 you lose this much less. */
+  trustCushion: 0.5,
+  /** Rival share x this is taken off your target. */
+  rivalCompetition: 0.6,
+  /** Scooping the rival on a front-page story adds this to targets in its districts. */
+  scoopBonus: 0.04,
+  /** The print reader pool shrinks this much every issue (the internet). */
+  printPoolDecline: 0.005,
+} as const;
+
+export const TRUST = {
+  /** Trust change per issue = scorecard trust x prominence x fit x this. */
+  perArticle: 6,
+  /** Districts outside a story's own districts feel this share of its trust effect. */
+  elsewhere: 0.4,
+  correction: -4,
+  awardEverywhere: 3,
+  /** Lean fit below this costs a little trust each issue in that district. */
+  leanFitFloor: 0.55,
+  leanMisfitPenalty: 2,
+} as const;
+
+/** Perceived political lean, -1 (left) .. +1 (right). Symmetric: only magnitudes are tuned. */
+export const LEAN = {
+  /** Lean signal of a printed story = prominence x story lean x angle factor x (base + charge/20). */
+  angle: { hard: 1, straight: 0, puff: -0.5 },
+  chargeBase: 0.5,
+  /** Leaving out an importance >= 4 story the rival ran moves lean the other way by this share. */
+  omission: 0.3,
+  /** Each issue's signal is scaled by this before being added. */
+  rate: 0.15,
+  /** Stated stance -> starting perceived lean. */
+  stance: { left: -0.6, center_left: -0.3, neutral: 0, center_right: 0.3, right: 0.6 },
+} as const;
+
+export const MONEY = {
+  /** Interest on debt, per issue. */
+  debtInterest: 0.005,
+  /** Share of the debt you must repay each issue. */
+  debtRepayment: 0.03,
+  /** Rent, editors, utilities: per issue, times the origin's cost multiplier. */
+  overheadPerIssue: 2000,
+  /** Delivery and newsstand cut, per copy sold. */
+  deliveryPerCopy: 0.5,
+  /** The wire service charges for each wire-copy story you print. */
+  wireCopyFee: 60,
+  /** Distribution is only paid in districts with at least this many readers or a newsstand. */
+  distributionMinReaders: 100,
+  awardPrize: 500,
+  /** Cash below this after an issue ends the game: the presses stop. */
+  bankruptAt: -1500,
+} as const;
+
+export const ADVERTISERS = {
+  /** Relationship 0..100. A Hard-hitting story about them costs this x prominence. */
+  hitPenalty: 35,
+  /** Below this they pull their ads. */
+  pullBelow: 45,
+  pullIssues: 2,
+  /** Relationships recover this much each issue. */
+  recovery: 6,
+  start: 75,
+} as const;
+
+export const RIVAL_SIM = {
+  /** Starting rival share in a district = starting_share x (0.5 + rival_strength). */
+  startStrengthBase: 0.5,
+  /** Rival gains this share where you missed a big story it led with, and loses it where you scooped it. */
+  shift: 0.01,
+  minShare: 0.05,
+  maxShare: 0.8,
+} as const;
+
+/** Paper style tweaks reader reactions. */
+export const PAPER_STYLE = {
+  record: { puffPenalty: 1.3, sensationalSales: 0.9, trustGain: 1.15 },
+  neighborhood: { puffPenalty: 1.0, sensationalSales: 1.0, trustGain: 1.0, localBonus: 1.2 },
+  tabloid: { puffPenalty: 0.8, sensationalSales: 1.3, trustGain: 0.8 },
+} as const;
+
+export const AWARDS = { moraleBonus: 10 } as const;
+
+/** Morale effects of the simulation. */
+export const MORALE_EVENTS = { correction: -8 } as const;

@@ -33,7 +33,7 @@ describe('new game', () => {
     expect(g.articles.every((a) => a.issueFiled === 1 && a.status === 'backlog')).toBe(true);
   });
 
-  it('advancing publishes what ran, keeps the rest, pays staff and collects ad money', () => {
+  it('advancing publishes what ran and keeps the rest (money is settled when the issue is resolved)', () => {
     let g = createGame(defaultSetup(), world, stories, hires(['okafor', 'kowalczyk', 'tran']));
     const [first, second] = g.articles;
     const story = stories.storyById(first!.storyId)!;
@@ -47,7 +47,7 @@ describe('new game', () => {
     expect(next.issueNumber).toBe(2);
     expect(next.articles.find((a) => a.id === first!.id)?.status).toBe('published');
     expect(next.articles.find((a) => a.id === second!.id)?.status).toBe('backlog');
-    expect(next.cash).toBe(cash + 350 - payroll(world, g.staff));
+    expect(next.cash).toBe(cash);
     expect(next.articles.some((a) => a.issueFiled === 2)).toBe(true);
     expect(next.draft.pages.front).toHaveLength(0);
   });

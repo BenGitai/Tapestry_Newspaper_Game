@@ -594,3 +594,9 @@
   color: var(--c-tiger);
   text-decoration: underline;
 }
+
+.slipPulled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  text-decoration: line-through;
+}

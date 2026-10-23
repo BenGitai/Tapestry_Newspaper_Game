@@ -1,8 +1,9 @@
 // Creating a new game from the setup form, and the issue calendar.
 import type { CityWorld, Reporter } from '../data/schemas.ts';
 import type { StorySource } from '../data/StorySource.ts';
-import { STARTING_STAFF } from './balance.ts';
-import { adRevenue, emptyDraft } from './layout.ts';
+import { ADVERTISERS, STARTING_STAFF } from './balance.ts';
+import { emptyDraft } from './layout.ts';
+import { initialDistricts, stanceLean } from './readers.ts';
 import { fileBeatArticles, settleAfterPrint } from './newsroom.ts';
 import { advanceStaff, deskForCategory, newStaffMember, payroll, reporterById, startingPayrollCap } from './staff.ts';
 import type { CoverageCategory, GameState, PaperSetup, StaffAssignment } from './types.ts';
@@ -37,9 +38,14 @@ export function suggestStartingStaff(world: CityWorld, setup: PaperSetup): Repor
     .map((r, i) => ({ r, i }))
     .filter(({ r }) => r.starting_candidate)
     .sort((a, b) => weightOf(b.r) - weightOf(a.r) || a.i - b.i);
-  for (const { r } of ranked) {
-    if (picked.length >= STARTING_STAFF.max - 1) break;
-    if (payroll(world, [...picked, r].map((x) => ({ reporterId: x.id }))) <= cap) picked.push(r);
+  // One reporter per desk first, then fill if budget allows.
+  for (const pass of ['distinct', 'any'] as const) {
+    for (const { r } of ranked) {
+      if (picked.length >= STARTING_STAFF.max - 1) break;
+      if (picked.includes(r)) continue;
+      if (pass === 'distinct' && picked.some((p) => p.desk === r.desk)) continue;
+      if (payroll(world, [...picked, r].map((x) => ({ reporterId: x.id }))) <= cap) picked.push(r);
+    }
   }
   return picked;
 }
@@ -50,7 +56,7 @@ export interface Hire {
 }
 
 /** New game: staff hired on the hiring screen start on issue 1, and file their first stories. */
-export function createGame(setup: PaperSetup, world: CityWorld, stories: StorySource, hires: Hire[]): GameState {
+export function createGame(setup: PaperSetup, world: CityWorld, stories: StorySource, hires: Hire[], seed = Date.now() % 2147483647): GameState {
   const origin = world.origins[setup.origin];
   const staff = hires
     .map((h) => {
@@ -58,8 +64,19 @@ export function createGame(setup: PaperSetup, world: CityWorld, stories: StorySo
       return r ? newStaffMember(world, r, 1, origin.morale, h.assignment) : undefined;
     })
     .filter((m) => m !== undefined);
+  const advertisers: GameState['advertisers'] = {};
+  for (const e of world.entities) advertisers[e.id] = { relationship: ADVERTISERS.start, pulledThrough: 0 };
   const game: GameState = {
     setup,
+    seed,
+    districts: initialDistricts(world, setup, origin.starting_readers, origin.trust),
+    perceivedLean: stanceLean(setup.stance),
+    advertisers,
+    printPool: world.city.print_reader_pool,
+    publishedInches: { politics: 0, economy: 0, social: 0, sports: 0, culture: 0, science: 0, world: 0 },
+    results: [],
+    awards: 0,
+    corrections: 0,
     issueNumber: 1,
     cash: origin.cash,
     debt: origin.debt,
@@ -74,17 +91,15 @@ export function createGame(setup: PaperSetup, world: CityWorld, stories: StorySo
 }
 
 /**
- * Close out the printed issue and open the next one: articles on the page are
- * published, the rest stay in the backlog; payroll is paid and ad money comes in
- * (sales arrive with the simulation); staff train and queued assignments apply;
- * then reporters file for the new issue.
+ * Open the next issue after the printed one has been resolved (money, readers
+ * and trust are settled in simulate.ts): articles on the page are published, the
+ * rest stay in the backlog; staff train and queued assignments apply; then
+ * reporters file for the new issue.
  */
 export function advanceIssue(game: GameState, world: CityWorld, stories: StorySource): GameState {
   const { game: settled, publishedBy } = settleAfterPrint(game);
-  const cash = settled.cash + adRevenue(settled.draft, world.entities) - payroll(world, settled.staff);
   const next: GameState = {
     ...settled,
-    cash,
     issueNumber: settled.issueNumber + 1,
     staff: advanceStaff(settled.staff, publishedBy),
     draft: emptyDraft(),

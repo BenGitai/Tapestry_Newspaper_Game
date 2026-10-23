@@ -6,4 +6,4 @@ Every item below is also marked in code or data with `AI-CONTENT-REVIEW` (search
 
 | Item | Where | Status |
 |---|---|---|
-| Letters to the editor (planned, milestone 6) | not built yet | Approved as AI-generated for the demo only. Review before release. |
+| Letters to the editor: sentence templates and reader names | `src/sim/letters.ts` | Written by an AI model as placeholders, filled from game events. Approved for the demo only. Review or rewrite before release. |

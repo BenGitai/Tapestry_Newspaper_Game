@@ -4,19 +4,22 @@ import { useEffect, useState } from 'react';
 import { loadGameData } from '../../data/worldData.ts';
 import { adRevenue } from '../../sim/layout.ts';
 import { selectedForPrint } from '../../sim/newsroom.ts';
-import { formatIssueDate, issueCount, issueDate } from '../../sim/newGame.ts';
-import { payroll } from '../../sim/staff.ts';
+import { issueCount, issueDate } from '../../sim/newGame.ts';
 import { useStore, type HubTab } from '../../state/store.ts';
 import { DeskSurface } from '../../components/desk/DeskSurface.tsx';
 import { Editor } from '../editor/Editor.tsx';
 import { NewsroomTab } from './NewsroomTab.tsx';
 import { StaffTab } from './StaffTab.tsx';
+import { MapTab } from './MapTab.tsx';
+import { leanLabel } from '../../sim/paperStats.ts';
+import { averageTrust, totalReaders } from '../../sim/readers.ts';
 import styles from './Hub.module.css';
 
 const TABS: { id: HubTab; label: string; key: string }[] = [
   { id: 'newsroom', label: 'Newsroom', key: 'F1' },
   { id: 'layout', label: 'Layout', key: 'F2' },
   { id: 'staff', label: 'Staff', key: 'F3' },
+  { id: 'map', label: 'City map', key: 'F4' },
 ];
 
 export function Hub() {
@@ -24,6 +27,7 @@ export function Hub() {
   const tab = useStore((s) => s.hubTab);
   const setTab = useStore((s) => s.setHubTab);
   const goto = useStore((s) => s.goto);
+  const saveGame = useStore((s) => s.saveGame);
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -40,8 +44,7 @@ export function Hub() {
   if (!game) return null;
   const { world, stories } = loadGameData();
   const dayCount = stories.dayCount();
-  const dateLabel = formatIssueDate(issueDate(game.setup.frequency, game.issueNumber, dayCount));
-  const origin = world.origins[game.setup.origin];
+  const dateLabel = issueDate(game.setup.frequency, game.issueNumber, dayCount).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
   const forPrint = selectedForPrint(game).length;
 
   return (
@@ -49,7 +52,7 @@ export function Hub() {
       <header className={styles.header}>
         <div className={styles.paperName}>{game.setup.paperName}</div>
         <div className={styles.edition}>
-          Issue {game.issueNumber} of {issueCount(game.setup.frequency, dayCount)} · {dateLabel}
+          Issue {game.issueNumber}/{issueCount(game.setup.frequency, dayCount)} · {dateLabel}
         </div>
         <nav className={styles.tabs}>
           {TABS.map((t) => (
@@ -61,19 +64,23 @@ export function Hub() {
         </nav>
         <div className={styles.stats}>
           <Stat label="Treasury" value={`$${game.cash.toLocaleString()}`} />
-          <Stat label="Payroll" value={`$${payroll(world, game.staff)}`} />
           <Stat label="Ads" value={`+$${adRevenue(game.draft, world.entities)}`} good />
-          <Stat label="Readers" value={origin.starting_readers.toLocaleString()} />
-          <Stat label="Trust" value={`${origin.trust}`} />
+          <Stat label="Readers" value={totalReaders(game.districts).toLocaleString()} />
+          <Stat label="Trust" value={`${Math.round(averageTrust(game.districts))}`} />
+          <Stat label="Seen as" value={leanLabel(game.perceivedLean)} />
         </div>
-        <button className={styles.lab} onClick={() => goto('lab')} title="Dev tool">
-          Lab
+        <button className={styles.lab} onClick={() => saveGame('slot1')} title="Save to slot 1 (the game also autosaves every issue)">
+          Save
+        </button>
+        <button className={styles.lab} onClick={() => goto('title')} title="Back to the title page (autosaved)">
+          Menu
         </button>
       </header>
 
       {tab === 'newsroom' ? <NewsroomTab /> : null}
       {tab === 'layout' ? <Editor /> : null}
       {tab === 'staff' ? <StaffTab /> : null}
+      {tab === 'map' ? <MapTab /> : null}
       <Notice />
     </DeskSurface>
   );

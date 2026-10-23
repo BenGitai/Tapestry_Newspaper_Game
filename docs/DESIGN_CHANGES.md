@@ -51,5 +51,18 @@ Changes how far the paper spreads, and with it the money and coverage. It alread
 ## Frequency
 Changes how many stories come through per issue. Daily gets one wire day per issue. Weekly gets the whole week in one issue.
 
+## Full loop, map and stated-vs-actual (2026-10-23, second update)
+- **Simulation.** Every printed issue is resolved and the results feed the next issue.
+  - Readers in each district, from what they like, the angle, local stories, staleness, sensational swings, trust, political fit, reach and the rival's share.
+  - Trust and perceived lean. Lean is symmetric, and leaving out a big story the rival led with counts too.
+  - Money: sales, ads, printing, delivery, distribution, payroll, overhead, wire fees and debt.
+  - Hidden scorecard rolls: corrections and awards.
+  - Advertisers who pull their ads, the rival's front page, scoops, and letters to the editor.
+  - Cash below −$1,500 ends the paper.
+- **Results sheet** after every issue, and a **final memo** at the end comparing start and finish.
+- **City map tab.** Philadelphia's districts with five layers: your readership, trust, political fit, income and rival share. It shows story pins, a district panel (stats, what they read, today's stories, newsstands and bureaus), and a **"Your paper: stated vs actual"** report: coverage promised against printed, stance against how readers see you, the kind of paper against its actual mix, and a verdict.
+- **Save and load.** Autosave every issue, a manual save slot, and Continue/Load on the title page.
+- **18 reporters** in the pool. Up to 8 on staff.
+
 ## Future (not in the demo)
 - **Generated local news.** The full game should generate local sports and local politics rather than take them from real news. Real news remains the source for everything else.

@@ -123,8 +123,92 @@ export interface PrintedIssue {
   articles: Record<string, Article>;
 }
 
+// ---------------------------------------------------------------------------
+// Simulation state
+// ---------------------------------------------------------------------------
+
+export interface DistrictState {
+  readers: number;
+  /** 0-100 */
+  trust: number;
+  newsstands: number;
+  bureau: boolean;
+  /** Share of the district's print readers who take the rival paper (0..1). */
+  rivalShare: number;
+}
+
+export interface AdvertiserState {
+  /** 0-100 */
+  relationship: number;
+  /** Ads are pulled through this issue number (0 = running). */
+  pulledThrough: number;
+}
+
+export interface Letter {
+  name: string;
+  place: string;
+  text: string;
+  tone: 'praise' | 'complaint';
+}
+
+export interface RevealedOutcome {
+  articleId: string;
+  storyId: string;
+  reporterId: string | null;
+  correction: boolean;
+  award: boolean;
+  sensationalSwing?: 'up' | 'down';
+}
+
+export interface DistrictResult {
+  readers: number;
+  readersChange: number;
+  trust: number;
+  trustChange: number;
+  satisfaction: number;
+}
+
+export interface IssueResult {
+  issueNumber: number;
+  dateLabel: string;
+  copies: number;
+  copiesChange: number;
+  districts: Record<string, DistrictResult>;
+  revenue: { sales: number; ads: number; prizes: number };
+  costs: { printing: number; distribution: number; payroll: number; overhead: number; wire: number; debt: number };
+  profit: number;
+  cashAfter: number;
+  leanBefore: number;
+  leanAfter: number;
+  trustBefore: number;
+  trustAfter: number;
+  revealed: RevealedOutcome[];
+  /** Consequences, in plain language. */
+  events: string[];
+  letters: Letter[];
+  /** The rival's front page: story ids, lead first. */
+  rivalFront: string[];
+  scoops: string[];
+  missed: string[];
+}
+
 export interface GameState {
   setup: PaperSetup;
+  /** Seed for every random roll, so a game can be replayed. */
+  seed: number;
+  districts: Record<string, DistrictState>;
+  /** -1 (left) .. +1 (right). Starts at the stated stance. */
+  perceivedLean: number;
+  advertisers: Record<string, AdvertiserState>;
+  /** Print readers in the whole city; shrinks a little each issue. */
+  printPool: number;
+  /** Column inches published per category, all issues (for stated vs actual). */
+  publishedInches: Record<Category, number>;
+  results: IssueResult[];
+  awards: number;
+  corrections: number;
+  /** Set when the game ended early (bankrupt). */
+  endReason?: 'bankrupt';
   /** 1-based issue number. */
   issueNumber: number;
   cash: number;

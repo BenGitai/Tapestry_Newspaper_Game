@@ -72,7 +72,7 @@ describe('hiring and releasing', () => {
   it('the newsroom has a size limit', () => {
     let g = start(['okafor', 'tran']);
     g = { ...g, cash: 100000 };
-    for (const id of ['hale', 'raman', 'brenner', 'ferraro']) {
+    for (const id of ['hale', 'raman', 'brenner', 'ferraro', 'deluca', 'sato', 'nguyen']) {
       const h = hire(g, world, id, 50);
       if (h.ok) g = h.game;
     }

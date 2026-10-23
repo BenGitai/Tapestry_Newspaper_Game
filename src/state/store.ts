@@ -7,9 +7,12 @@ import { advanceIssue, createGame, formatIssueDate, issueCount, issueDate, type 
 import { articleForStory, commission as commissionStory, updateArticle, type NewsroomEdit } from '../sim/newsroom.ts';
 import { checkReferences, hire as hireReporter, release as releaseReporter, setAssignment as queueAssignment, type StaffEdit } from '../sim/staff.ts';
 import type { Article, GameState, IssueDraft, PageId, PaperSetup, StaffAssignment } from '../sim/types.ts';
+import { addNewsstand as buyNewsstand, openBureau as buyBureau, type DistrictEdit } from '../sim/paperStats.ts';
+import { resolveIssue } from '../sim/simulate.ts';
+import { saves, type SlotId } from './save.ts';
 
 export type Screen = 'title' | 'setup' | 'hiring' | 'hub' | 'press' | 'end' | 'lab';
-export type HubTab = 'newsroom' | 'layout' | 'staff';
+export type HubTab = 'newsroom' | 'layout' | 'staff' | 'map';
 
 const HISTORY_LIMIT = 100;
 
@@ -57,14 +60,22 @@ interface Store {
   release(reporterId: string): void;
   checkReferences(reporterId: string): void;
 
+  // city
+  addNewsstand(districtId: string): void;
+  openBureau(districtId: string): void;
+
   // turn
   sendToPress(): void;
   nextIssue(): void;
+
+  // saves
+  saveGame(slot: SlotId): void;
+  loadGame(slot: SlotId): boolean;
 }
 
 export const useStore = create<Store>((set, get) => {
   /** Apply a whole-game change from the sim; show the reason if it was refused. */
-  const apply = (fn: (g: GameState) => StaffEdit | NewsroomEdit | GameState): boolean => {
+  const apply = (fn: (g: GameState) => StaffEdit | NewsroomEdit | DistrictEdit | GameState): boolean => {
     const game = get().game;
     if (!game) return false;
     const r = fn(game);
@@ -105,8 +116,10 @@ export const useStore = create<Store>((set, get) => {
     submitSetup: (pendingSetup) => set({ pendingSetup, screen: 'hiring' }),
     startGame: (setup, hires) => {
       const { world, stories } = loadGameData();
+      const game = createGame(setup, world, stories, hires);
+      saves.save('autosave', game);
       set({
-        game: createGame(setup, world, stories, hires),
+        game,
         screen: 'hub',
         hubTab: 'newsroom',
         past: [],
@@ -202,6 +215,26 @@ export const useStore = create<Store>((set, get) => {
       }),
     checkReferences: (reporterId) => apply((g) => checkReferences(g, reporterId)),
 
+    addNewsstand: (districtId) => apply((g) => buyNewsstand(g, loadGameData().world, districtId)),
+    openBureau: (districtId) => apply((g) => buyBureau(g, loadGameData().world, districtId)),
+
+    saveGame: (slot) => {
+      const game = get().game;
+      if (!game) return;
+      get().notify(saves.save(slot, game) ? 'Saved.' : 'Could not save.');
+    },
+    loadGame: (slot) => {
+      const game = saves.load(slot);
+      if (!game) {
+        get().notify('That save could not be loaded.');
+        return false;
+      }
+      const lastPrinted = game.archive[game.archive.length - 1];
+      const screen: Screen = game.finished ? 'end' : lastPrinted && lastPrinted.issueNumber === game.issueNumber ? 'press' : 'hub';
+      set({ game, screen, hubTab: 'newsroom', past: [], future: [], selectedBlockId: null, selectedArticleId: null, focusReporterId: null, currentPage: 'front' });
+      return true;
+    },
+
     sendToPress: () => {
       const game = get().game;
       if (!game) return;
@@ -216,19 +249,25 @@ export const useStore = create<Store>((set, get) => {
         }
       }
       const archive = [...game.archive, { issueNumber: game.issueNumber, dateLabel, draft: game.draft, articles }];
-      set({ game: { ...game, archive }, screen: 'press', selectedBlockId: null });
+      const { game: resolved } = resolveIssue({ ...game, archive }, loadGameData().world, stories);
+      saves.save('autosave', resolved);
+      set({ game: resolved, screen: 'press', selectedBlockId: null });
     },
 
     nextIssue: () => {
       const game = get().game;
       if (!game) return;
       const { world, stories } = loadGameData();
-      if (game.issueNumber >= issueCount(game.setup.frequency, stories.dayCount())) {
-        set({ game: { ...game, finished: true }, screen: 'end' });
+      if (game.endReason || game.issueNumber >= issueCount(game.setup.frequency, stories.dayCount())) {
+        const done = { ...game, finished: true };
+        saves.save('autosave', done);
+        set({ game: done, screen: 'end' });
         return;
       }
+      const next = advanceIssue(game, world, stories);
+      saves.save('autosave', next);
       set({
-        game: advanceIssue(game, world, stories),
+        game: next,
         screen: 'hub',
         hubTab: 'newsroom',
         past: [],

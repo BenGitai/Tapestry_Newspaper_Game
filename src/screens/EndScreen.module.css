@@ -53,3 +53,47 @@
   text-transform: uppercase;
   letter-spacing: 0.08em;
 }
+
+.numbers {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+  margin: 10px 0;
+}
+
+.numbers div {
+  border: 1px solid var(--c-ink);
+  background: var(--c-newsprint);
+  padding: 5px 8px;
+  display: flex;
+  flex-direction: column;
+}
+
+.numbers span {
+  font-family: var(--f-mono);
+  font-size: 9px;
+  text-transform: uppercase;
+  color: var(--c-ink-muted);
+}
+
+.numbers b {
+  font-family: var(--f-mono);
+  font-weight: 500;
+  font-size: 13px;
+}
+
+.small {
+  font-size: 12.5px;
+}
+
+.backQuiet {
+  margin-top: 6px;
+  width: 100%;
+  background: none;
+  border: none;
+  font-family: var(--f-mono);
+  font-size: 11px;
+  text-transform: uppercase;
+  text-decoration: underline;
+  color: var(--c-ink-muted);
+}

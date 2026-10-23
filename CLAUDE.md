@@ -31,7 +31,7 @@ A newspaper-manager game by Tapestry Games (student indie studio). This repo is 
 - `npm test`: run tests (Vitest)
 - `npm run typecheck`, `npm run lint`, `npm run build`
 - `npm run summarize`: pre-generate article text for all stories and print the cost report (added in milestone 3)
-- `npm run simulate`: headless strategy runs for balance (added in milestone 4)
+- `npm run simulate`: play the demo headlessly with fixed strategies (per origin) and print readers, cash, trust and lean, for balance work
 
 ## AI-written content
 - Letters to the editor may be AI-generated for now. Mark any code or data that produces them with `AI-CONTENT-REVIEW` and list it in `docs/AI_CONTENT_REVIEW.md` so the team can review or replace it later.

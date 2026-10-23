@@ -4,6 +4,7 @@ import { articleSource } from '../../data/ArticleSource.ts';
 import { displayName, loadGameData } from '../../data/worldData.ts';
 import { adPay, adSize, defaultShape, findAdBlock, findStoryBlock, pageLabel, placementLabel } from '../../sim/layout.ts';
 import { selectedForPrint } from '../../sim/newsroom.ts';
+import { adsAvailable } from '../../sim/simulate.ts';
 import { useStore } from '../../state/store.ts';
 import { beginDrag, registerWirePanel } from '../../components/drag/drag.ts';
 import { ANGLE_LABEL, articleScorecard, bylineOf, ScoreChips } from '../../components/newsroom/ArticleParts.tsx';
@@ -30,7 +31,7 @@ export function WirePanel() {
           For print <span className="mono">{pile.length - placedCount} to place</span>
         </button>
         <button className={tab === 'ads' ? styles.tabOn : ''} onClick={() => setTab('ads')}>
-          Ad desk <span className="mono">{ads.filter((a) => !findAdBlock(game.draft, a.id)).length} open</span>
+          Ad desk <span className="mono">{ads.filter((a) => !findAdBlock(game.draft, a.id) && adsAvailable(game, a.id)).length} open</span>
         </button>
       </div>
 
@@ -84,13 +85,14 @@ export function WirePanel() {
           {ads.map((a, i) => {
             const placed = findAdBlock(game.draft, a.id);
             const size = adSize(a.id);
+            const pulled = !adsAvailable(game, a.id);
             return (
               <div
                 key={a.id}
-                className={`${styles.slip} ${styles.adSlip} ${placed ? styles.slipPlaced : ''}`}
+                className={`${styles.slip} ${styles.adSlip} ${placed ? styles.slipPlaced : ''} ${pulled ? styles.slipPulled : ''}`}
                 style={{ transform: `rotate(${i % 2 ? 0.3 : -0.25}deg)` }}
                 onPointerDown={(e) =>
-                  beginDrag(e, { kind: 'ad', adId: a.id, fromBlock: !!placed }, size, { dc: size.cols / 2, dr: 0.5 }, placed ? () => { setPage(placed.page); select(placed.block.id); } : undefined)
+                  pulled ? undefined : beginDrag(e, { kind: 'ad', adId: a.id, fromBlock: !!placed }, size, { dc: size.cols / 2, dr: 0.5 }, placed ? () => { setPage(placed.page); select(placed.block.id); } : undefined)
                 }
               >
                 <div className={styles.slipMeta}>
@@ -99,7 +101,13 @@ export function WirePanel() {
                 </div>
                 <div className={styles.slipHead}>{displayName(a.name)}</div>
                 <div className={styles.slipStatus}>
-                  {placed ? <span className={styles.onPage}>Running on {pageLabel(placed.page)}</span> : <span>Drag to the page</span>}
+                  {pulled ? (
+                    <span className={styles.onPage}>Ads pulled through issue {game.advertisers[a.id]?.pulledThrough}</span>
+                  ) : placed ? (
+                    <span className={styles.onPage}>Running on {pageLabel(placed.page)}</span>
+                  ) : (
+                    <span>Drag to the page</span>
+                  )}
                   <span className={styles.pay}>${adPay(a, 'a2')} · front ${adPay(a, 'front')}</span>
                 </div>
               </div>

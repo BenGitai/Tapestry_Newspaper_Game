@@ -40,9 +40,14 @@ await page.mouse.move(from.x + from.width / 2 + 30, from.y + 40, { steps: 4 });
 await page.mouse.move(to.x + to.width * 0.3, to.y + to.height * 0.22, { steps: 12 });
 await page.mouse.up();
 await step('07-placed', async () => {});
-await step('08-press', () => page.getByRole('button', { name: 'Send to press' }).click());
-await step('09-next', () => page.getByRole('button', { name: 'Next issue' }).click());
+await step('08-results', () => page.getByRole('button', { name: 'Send to press' }).click());
+await step('09-next', () => page.getByRole('button', { name: /Next issue/ }).click());
 await step('10-staff', () => page.getByRole('button', { name: 'Staff', exact: true }).click());
+await step('11-map', () => page.getByRole('button', { name: 'City map', exact: true }).click());
+await step('12-district', () => page.locator('polygon').nth(4).click({ force: true }));
+await step('13-saved', () => page.getByRole('button', { name: 'Save', exact: true }).click());
+await step('14-title', () => page.getByRole('button', { name: 'Menu', exact: true }).click());
+await step('15-continue', () => page.getByText(/reaches issue 2/).click());
 
 await app.close();
 if (errors.length) {

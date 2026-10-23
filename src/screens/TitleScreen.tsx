@@ -5,11 +5,16 @@ import { loadGameData } from '../data/worldData.ts';
 import { useStore } from '../state/store.ts';
 import { DeskSurface } from '../components/desk/DeskSurface.tsx';
 import { PhotoBox } from '../components/paper/Halftone.tsx';
+import { saves } from '../state/save.ts';
 import styles from './TitleScreen.module.css';
 
 export function TitleScreen() {
   const goto = useStore((s) => s.goto);
+  const loadGame = useStore((s) => s.loadGame);
   const { stories } = loadGameData();
+  const metas = saves.list();
+  const auto = metas.find((m) => m.slot === 'autosave');
+  const slot1 = metas.find((m) => m.slot === 'slot1');
   const headlines = stories.storiesForDay(1).slice(0, 3);
 
   return (
@@ -46,13 +51,13 @@ export function TitleScreen() {
             </ul>
           </div>
           <div className={styles.right}>
-            <button className={styles.side} disabled title="Saving arrives with the simulation milestone">
+            <button className={styles.side} disabled={!auto} onClick={() => loadGame('autosave')}>
               <span className={styles.kicker}>▸ Continue</span>
-              <span className={styles.sideHead}>Ledger reaches day 214, circulation climbing</span>
+              <span className={styles.sideHead}>{auto ? `${auto.paperName} reaches issue ${auto.issueNumber}` : 'No paper on the press yet'}</span>
             </button>
-            <button className={styles.side} disabled title="Saving arrives with the simulation milestone">
+            <button className={styles.side} disabled={!slot1} onClick={() => loadGame('slot1')}>
               <span className={styles.kicker}>▸ Load game</span>
-              <span className={styles.sideHead}>Old editions found in basement archive</span>
+              <span className={styles.sideHead}>{slot1 ? `Saved edition found: ${slot1.paperName}, issue ${slot1.issueNumber}` : 'Old editions found in basement archive'}</span>
             </button>
             <div className={styles.classifieds}>
               <div className={styles.classTitle}>Classifieds</div>

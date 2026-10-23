@@ -1,5 +1,37 @@
 # Devlog
 
+## 2026-10-23 · Full gameplay loop, city map, more reporters
+
+**What changed**
+- **Simulation (`src/sim/simulate.ts`).** `resolveIssue` runs when you send to press and covers readers and trust per district, perceived lean, money, hidden scorecard rolls, advertisers, the rival, letters and bankruptcy. Every number lives in `balance.ts` (READERS, CIRCULATION, TRUST, LEAN, MONEY, ADVERTISERS, RIVAL_SIM, PAPER_STYLE). Rolls use a seeded RNG, so a game replays exactly.
+- **Rival (`rival.ts`)** follows the rule in the data file. Scoops and missed big stories move rival share and your lean.
+- **Results sheet** after every issue covers the books, sales by district, the revealed hidden half, events, the rival's front page and letters. The end memo compares start and finish, and there's a bankruptcy ending.
+- **City map tab (F4)** has five layers, story pins, a district panel with newsstands and bureaus, and a stated-vs-actual report for the paper.
+- **Saves:** autosave every issue, a manual slot from the hub's Save button, and Continue/Load on the title page. Storage sits behind a `SaveStore` interface.
+- **Pulled ads** show on the ad desk and can't be placed.
+- **Reporters:** 9 more fictional ones (18 total). The newsroom holds 8. Suggested starting staff now covers different desks.
+- **`npm run simulate`** plays 10 strategies for each origin.
+- **Tests:** 84 passing. New: a full mirror test (flip every lean, the stance and every district's mix, and results mirror exactly), deterministic replay, the books balancing, advertiser pull-outs, the rival rule, district actions, letters and bankruptcy.
+
+**Bugs found and fixed**
+- `findFreeSpot` ignored candidate positions when handed a whole block. The balance runner caught it.
+- The first balance pass was far too generous: a new paper went from 1,500 to 26,000 readers and earned $80k in four issues. Added delivery cost per copy, overhead, debt repayment and wire fees, and slowed reader growth.
+
+**Balance after this session** (`npm run simulate`, 4 daily issues)
+- Founded: about 1,500 → 5,000 readers. Cash is tight ($6k → about $3–4k, more with ads). Printing nothing goes bankrupt.
+- Inherited grows modestly. Bought shrinks but stays solvent.
+- All-puff loses about 7 trust points against straight or hard-hitting.
+- Stances: right-leaning stances do slightly worse than left in Philadelphia because the district data leans left. That comes from the data, not the rules; the mirror test proves the rules are symmetric. The team may want to revisit the district mixes.
+- These numbers need real playtesting.
+
+**Small decisions**
+- Readers are copies sold. Cover price is fixed.
+- A missed big story is the rival's front-page story with importance ≥ 4 that you didn't run.
+- Corrections and awards apply in the same results sheet. They aren't held over to the next day.
+- Letters are template-filled from issue events and flagged `AI-CONTENT-REVIEW`.
+
+**What's next:** the summarizer (prompt, cache, `npm run summarize`, cost report, fact check, Summarizer lab). Then polish: sound-free juice on the stamp and press, a settings screen, and a playtest checklist.
+
 ## 2026-10-23 · Desktop app and the newsroom loop
 
 **What changed**

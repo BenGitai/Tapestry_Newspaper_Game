@@ -34,7 +34,7 @@ describe('demo data', () => {
   });
 
   it('every reporter has a full set of 1-20 attributes', () => {
-    expect(world.staff_pool).toHaveLength(9);
+    expect(world.staff_pool).toHaveLength(18);
     for (const r of world.staff_pool) {
       for (const v of Object.values(r.attributes)) {
         expect(v).toBeGreaterThanOrEqual(1);

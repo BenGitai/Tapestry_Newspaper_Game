@@ -16,9 +16,9 @@
 .paperName {
   font-family: var(--f-display);
   font-weight: 700;
-  font-size: 24px;
+  font-size: 22px;
   white-space: nowrap;
-  max-width: 300px;
+  max-width: 230px;
   overflow: hidden;
   text-overflow: ellipsis;
 }
@@ -43,11 +43,11 @@
 .tabs button {
   font-family: var(--f-display);
   font-weight: 700;
-  font-size: 16px;
+  font-size: 15px;
   background: var(--c-paste-up-dark);
   border: 1px solid var(--c-ink-muted);
   border-bottom: none;
-  padding: 7px 16px 6px;
+  padding: 7px 12px 6px;
   display: flex;
   align-items: center;
   gap: 6px;
@@ -69,7 +69,7 @@
 
 .stats {
   display: flex;
-  gap: 16px;
+  gap: 14px;
   margin-left: auto;
 }
 

@@ -146,6 +146,11 @@ describe('shapes and fit', () => {
     expect(r.ok).toBe(false);
   });
 
+  it('findFreeSpot works when handed a whole block (its own position is ignored)', () => {
+    const block = newStoryBlock(library, 'lead', { col: 0, row: 0 });
+    expect(findFreeSpot(emptyDraft(), 'front', block)).toEqual({ col: 0, row: PAGE.frontMastheadRows });
+  });
+
   it('findFreeSpot returns the closest free position', () => {
     const d = ok(putBlock(emptyDraft(), 'front', newStoryBlock(library, 'secondary', { col: 0, row: 3 })));
     expect(findFreeSpot(d, 'front', { cols: 2, rows: 3 })).toEqual({ col: 2, row: 3 });

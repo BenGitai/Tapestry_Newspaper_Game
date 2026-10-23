@@ -224,7 +224,7 @@ export function findFreeSpot(
   let best: { col: number; row: number; d: number } | undefined;
   for (let row = top; row + shape.rows <= bottom; row++) {
     for (let col = 0; col + shape.cols <= PAGE.cols; col++) {
-      if (!checkPlacement(draft, page, { col, row, ...shape }, ignoreId).ok) continue;
+      if (!checkPlacement(draft, page, { col, row, cols: shape.cols, rows: shape.rows }, ignoreId).ok) continue;
       const d = near ? Math.abs(col - near.col) + Math.abs(row - near.row) : row * PAGE.cols + col;
       if (!best || d < best.d) best = { col, row, d };
     }
