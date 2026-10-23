@@ -600,3 +600,17 @@
   cursor: not-allowed;
   text-decoration: line-through;
 }
+
+.pageTabLocked {
+  font-family: var(--f-mono);
+  font-size: 9.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--c-ink-faint);
+  border: 1px dashed var(--c-ink-faint);
+  border-bottom: none;
+  padding: 0 10px;
+  display: flex;
+  align-items: center;
+  cursor: help;
+}

@@ -26,7 +26,17 @@ export const PAGE = {
 /** Pages that ship with every issue, in order. */
 export const BASE_PAGES = ['front', 'a2'] as const;
 /** Optional extra pages. Each one adds print cost per copy. */
-export const EXTRA_PAGES = ['a3'] as const;
+export const EXTRA_PAGES = ['a3', 'a4', 'a5', 'a6'] as const;
+/**
+ * Extra pages unlock permanently once the paper is big enough to fill and
+ * distribute them: total readers and total newsstands across the city.
+ */
+export const PAGE_UNLOCKS: { page: 'a3' | 'a4' | 'a5' | 'a6'; readers: number; newsstands: number }[] = [
+  { page: 'a3', readers: 0, newsstands: 0 },
+  { page: 'a4', readers: 6000, newsstands: 4 },
+  { page: 'a5', readers: 12000, newsstands: 8 },
+  { page: 'a6', readers: 20000, newsstands: 12 },
+];
 /** Added to the print cost of every copy for each extra page run. */
 export const EXTRA_PAGE_COST_PER_COPY = 0.06;
 

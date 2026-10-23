@@ -2,7 +2,15 @@
 import { useEffect } from 'react';
 import { loadGameData } from '../../data/worldData.ts';
 import { EXTRA_PAGE_COST_PER_COPY } from '../../sim/balance.ts';
-import { activePages, ALL_PAGES, findBlock, pageLabel, putBlock, removeBlock, resizeBlock, setExtraPage, setTier } from '../../sim/layout.ts';
+import { activePages, ALL_PAGES, findBlock, pageLabel, putBlock, removeBlock, resizeBlock, setTier } from '../../sim/layout.ts';
+import { PAGE_UNLOCKS } from '../../sim/balance.ts';
+import { isUnlocked } from '../../sim/pages.ts';
+import type { PageId } from '../../sim/types.ts';
+
+function lockedHint(p: PageId): string {
+  const u = PAGE_UNLOCKS.find((x) => x.page === p);
+  return u ? `Unlocks at ${u.readers.toLocaleString()} readers and ${u.newsstands} newsstands` : '';
+}
 import { formatIssueDate, issueDate } from '../../sim/newGame.ts';
 import { articleForStory, backlog } from '../../sim/newsroom.ts';
 import type { Article, Tier } from '../../sim/types.ts';
@@ -19,7 +27,7 @@ export function Editor() {
   const selectedId = useStore((s) => s.selectedBlockId);
   const select = useStore((s) => s.selectBlock);
   const setPage = useStore((s) => s.setPage);
-  const edit = useStore((s) => s.edit);
+  const setPageRunning = useStore((s) => s.setPageRunning);
   const undo = useStore((s) => s.undo);
   const redo = useStore((s) => s.redo);
   const canUndo = useStore((s) => s.past.length > 0);
@@ -63,7 +71,7 @@ export function Editor() {
                     title="Stop running this page"
                     onClick={(e) => {
                       e.stopPropagation();
-                      edit((d) => setExtraPage(d, p, false));
+                      setPageRunning(p, false);
                       setPage('a2');
                     }}
                   >
@@ -71,13 +79,16 @@ export function Editor() {
                   </span>
                 ) : null}
               </button>
+            ) : !isUnlocked(game, p) ? (
+              <span key={p} className={styles.pageTabLocked} title={lockedHint(p)}>
+                {pageLabel(p)} · locked
+              </span>
             ) : (
               <button
                 key={p}
                 className={styles.pageTabAdd}
                 onClick={() => {
-                  edit((d) => setExtraPage(d, p, true));
-                  setPage(p);
+                  if (setPageRunning(p, true)) setPage(p);
                 }}
                 title={`Adds $${EXTRA_PAGE_COST_PER_COPY.toFixed(2)} to the print cost of every copy`}
               >

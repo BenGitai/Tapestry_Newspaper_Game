@@ -1,5 +1,12 @@
 # Devlog
 
+## 2026-10-23 · Page unlocks
+
+- Pages A4–A6 unlock permanently with readers plus newsstands (`src/sim/pages.ts`, `PAGE_UNLOCKS` in balance). A3 is open from the start. Extra pages carry over between issues. Locked tabs show their requirements, and progress shows in the Layout notes and the map's paper panel.
+- Saves bumped to v3.
+- Runner: "Grow + desk heads" now buys newsstands and runs unlocked pages. It reaches 18–25k readers and 5–6 pages by issue 10, against 12–16k for a 4-reporter paper. It ends with less cash (invested) and more corrections (cheap hires). A big newsroom now pays off through more pages.
+- Tests: 117 passing.
+
 ## 2026-10-23 · Bigger starting budgets, room for a big newsroom
 
 - Starting payroll budgets are now $500 (founded), $580 (inherited) and $540 (bought). That buys 4–5 average reporters (about $100 each) or 3–4 good ones (about $135). You can hire up to 5 on hiring day. Tests check both targets.

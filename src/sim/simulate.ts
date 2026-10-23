@@ -27,6 +27,7 @@ import { rivalFrontPage } from './rival.ts';
 import { rng, seedFor } from './rng.ts';
 import { scorecard, type Scorecard } from './scorecard.ts';
 import { editorEffect } from './desks.ts';
+import { unlockPages } from './pages.ts';
 import { currentAttributes, payroll, reporterById } from './staff.ts';
 import type { Article, DistrictResult, GameState, IssueResult, PageId, RevealedOutcome, StoryBlock } from './types.ts';
 
@@ -316,7 +317,9 @@ export function resolveIssue(game: GameState, world: CityWorld, stories: StorySo
     endReason: cash < MONEY.bankruptAt ? 'bankrupt' : game.endReason,
   };
   if (next.endReason === 'bankrupt') events.push('The bank has stopped extending credit. The presses stop after this issue.');
-  return { game: next, result };
+  const grown = unlockPages(next);
+  for (const p of grown.unlocked) events.push(`The paper has grown: you can now run page ${p.toUpperCase()}.`);
+  return { game: grown.game, result };
 }
 
 /** Are this advertiser's ads available for the current issue? */

@@ -87,5 +87,10 @@ Changes how many stories come through per issue. Daily gets one wire day per iss
   - Reporters under an active head train faster and gain morale.
   - A head goes inactive if the desk drops below 3, and must step down before they can be released.
 
+## Growing the paper: page unlocks (2026-10-23, fifth update)
+- **Extra inside pages unlock permanently** as the paper grows. A3 is open from the start. A4 needs 6,000 readers and 4 newsstands, A5 12,000 and 8, A6 20,000 and 12 (`PAGE_UNLOCKS`). Unlocks are announced on the results sheet.
+- Each extra page still costs print money per copy. Pages you ran stay on for the next issue.
+- Locked pages show their requirements on the layout tabs. The Layout notes and the map's "Your paper" panel show progress toward the next page.
+
 ## Future (not in the demo)
 - **Generated local news.** The full game should generate local sports and local politics rather than take them from real news. Real news remains the source for everything else.

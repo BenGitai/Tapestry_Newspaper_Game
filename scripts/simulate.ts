@@ -1,7 +1,8 @@
 // npm run simulate: play the demo headlessly with fixed strategies and print how
 // each one ends up. Use it to check that the balance numbers create trade-offs.
 import { loadGameData } from '../src/data/worldData.ts';
-import { findFreeSpot, newAdBlock, newStoryBlock, putBlock } from '../src/sim/layout.ts';
+import { findFreeSpot, newAdBlock, newStoryBlock, putBlock, setExtraPage } from '../src/sim/layout.ts';
+import { addNewsstand } from '../src/sim/paperStats.ts';
 import { createGame, defaultSetup, issueCount, suggestStartingStaff } from '../src/sim/newGame.ts';
 import { backlog, commission, updateArticle, wireForIssue } from '../src/sim/newsroom.ts';
 import { leanLabel } from '../src/sim/paperStats.ts';
@@ -10,7 +11,7 @@ import { adsAvailable, resolveIssue } from '../src/sim/simulate.ts';
 import { advanceIssue } from '../src/sim/newGame.ts';
 import { defaultAssignment, hire, payroll } from '../src/sim/staff.ts';
 import { promote, setDuties } from '../src/sim/desks.ts';
-import type { Angle, GameState, PaperSetup, Tier } from '../src/sim/types.ts';
+import type { Angle, GameState, PageId, PaperSetup, Tier } from '../src/sim/types.ts';
 
 const { world, stories } = loadGameData();
 
@@ -58,7 +59,10 @@ function makeUpPaper(game: GameState, s: Strategy): GameState {
     g = updateArticle(g, a.id, { selected: true, angle });
     const tier: Tier = i === 0 ? 'lead' : i < 6 ? 'secondary' : 'brief';
     const sized = { ...story, base_column_inches: a.inches };
-    for (const page of ['front', 'a2'] as const) {
+    // Growing papers also fill every inside page they've unlocked.
+    const pages = s.grow ? (['front', 'a2', ...g.unlockedPages] as PageId[]) : (['front', 'a2'] as const);
+    for (const page of pages) {
+      if (page !== 'front' && page !== 'a2' && !g.draft.extraPages.includes(page)) g = { ...g, draft: setExtraPage(g.draft, page, true) };
       const block = newStoryBlock(sized, tier, { col: 0, row: 0 });
       const spot = findFreeSpot(g.draft, page, block);
       if (!spot) continue;
@@ -111,6 +115,12 @@ function growNewsroom(game: GameState): GameState {
     if (!h.ok) break;
     g = h.game;
   }
+  // Newsstands where the paper sells best, keeping a cushion.
+  for (const d of [...world.districts].sort((a, b) => (g.districts[b.id]?.readers ?? 0) - (g.districts[a.id]?.readers ?? 0))) {
+    if (g.cash < cushion + world.pricing.newsstand_cost * 2) break;
+    const n = addNewsstand(g, world, d.id);
+    if (n.ok) g = n.game;
+  }
   for (const m of g.staff) {
     const p = promote(g, world, m.reporterId);
     if (p.ok) g = setDuties(p.game, m.reporterId, { filter: false, fix: true, upgrade: true, runDesk: true });
@@ -121,11 +131,11 @@ function growNewsroom(game: GameState): GameState {
 const pad = (v: string | number, n: number) => String(v).padStart(n);
 for (const origin of ['founded', 'inherited', 'bought'] as const) {
   console.log(`\n=== Origin: ${world.origins[origin].name} (start ${world.origins[origin].starting_readers} readers, $${world.origins[origin].cash}) ===`);
-  console.log(`${'strategy'.padEnd(22)} ${pad('readers', 8)} ${pad('cash', 8)} ${pad('trust', 6)} ${pad('awards', 7)} ${pad('corr', 5)} ${pad('staff', 6)}  seen as`);
+  console.log(`${'strategy'.padEnd(22)} ${pad('readers', 8)} ${pad('cash', 8)} ${pad('trust', 6)} ${pad('awards', 7)} ${pad('corr', 5)} ${pad('staff', 6)} ${pad('pages', 6)}  seen as`);
   for (const s of STRATEGIES) {
     const g = play(s, origin);
     console.log(
-      `${s.name.padEnd(22)} ${pad(totalReaders(g.districts), 8)} ${pad(g.cash, 8)} ${pad(Math.round(averageTrust(g.districts)), 6)} ${pad(g.awards, 7)} ${pad(g.corrections, 5)} ${pad(g.staff.length, 6)}  ${leanLabel(g.perceivedLean)}${g.endReason ? ' (bankrupt)' : ''}`,
+      `${s.name.padEnd(22)} ${pad(totalReaders(g.districts), 8)} ${pad(g.cash, 8)} ${pad(Math.round(averageTrust(g.districts)), 6)} ${pad(g.awards, 7)} ${pad(g.corrections, 5)} ${pad(g.staff.length, 6)} ${pad(2 + g.unlockedPages.length, 6)}  ${leanLabel(g.perceivedLean)}${g.endReason ? ' (bankrupt)' : ''}`,
     );
   }
 }

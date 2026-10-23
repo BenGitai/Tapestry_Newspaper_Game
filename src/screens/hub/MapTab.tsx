@@ -9,6 +9,7 @@ import { CIRCULATION } from '../../sim/balance.ts';
 import { findStoryBlock, placementLabel } from '../../sim/layout.ts';
 import { wireForIssue } from '../../sim/newsroom.ts';
 import { leanLabel, paperReport } from '../../sim/paperStats.ts';
+import { nextUnlock, totalNewsstands } from '../../sim/pages.ts';
 import { averageTrust, districtInterests, leanFit, reach, totalReaders } from '../../sim/readers.ts';
 import { CATEGORY_LABEL, initials, reporterById } from '../../sim/staff.ts';
 import type { GameState } from '../../sim/types.ts';
@@ -360,6 +361,15 @@ function PaperPanel({ game }: { game: GameState }) {
         <Stat label="Trust" value={`${Math.round(averageTrust(game.districts))} / 100`} />
         <Stat label="Cash" value={`$${game.cash.toLocaleString()}`} sub={game.debt ? `debt $${game.debt.toLocaleString()}` : undefined} />
         <Stat label="Awards · corrections" value={`${game.awards} · ${game.corrections}`} />
+        <Stat
+          label="Pages"
+          value={`${2 + game.unlockedPages.length} unlocked`}
+          sub={(() => {
+            const n = nextUnlock(game);
+            return n ? `${n.page.toUpperCase()} at ${n.readers.toLocaleString()} readers + ${n.newsstands} stands` : 'all pages open';
+          })()}
+        />
+        <Stat label="Newsstands" value={`${totalNewsstands(game)}`} sub="across the city" />
       </div>
       {copies.length > 1 ? <Spark values={copies} label="Copies sold, by issue" /> : null}
 

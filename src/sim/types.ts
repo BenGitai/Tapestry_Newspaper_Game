@@ -3,7 +3,7 @@ import type { Angle, Attributes, Category, OriginId } from '../data/schemas.ts';
 
 export type { Angle, Attributes, Category, OriginId };
 
-export type PageId = 'front' | 'a2' | 'a3';
+export type PageId = 'front' | 'a2' | 'a3' | 'a4' | 'a5' | 'a6';
 export type Tier = 'lead' | 'secondary' | 'brief';
 export type Frequency = 'daily' | 'weekly' | 'monthly';
 export type Stance = 'left' | 'center_left' | 'neutral' | 'center_right' | 'right';
@@ -225,6 +225,8 @@ export interface GameState {
   /** Column inches published per category, all issues (for stated vs actual). */
   publishedInches: Record<Category, number>;
   results: IssueResult[];
+  /** Extra pages the paper has grown into (see PAGE_UNLOCKS). */
+  unlockedPages: PageId[];
   awards: number;
   corrections: number;
   /** Set when the game ended early (bankrupt). */

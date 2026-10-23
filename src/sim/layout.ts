@@ -13,10 +13,10 @@ import {
 } from './balance.ts';
 import type { AdBlock, Block, IssueDraft, PageId, Rect, StoryBlock, Tier } from './types.ts';
 
-export const ALL_PAGES: PageId[] = ['front', 'a2', 'a3'];
+export const ALL_PAGES: PageId[] = ['front', 'a2', 'a3', 'a4', 'a5', 'a6'];
 
 export function emptyDraft(): IssueDraft {
-  return { pages: { front: [], a2: [], a3: [] }, extraPages: [] };
+  return { pages: { front: [], a2: [], a3: [], a4: [], a5: [], a6: [] }, extraPages: [] };
 }
 
 /** Pages that will actually print in this draft, in order. */

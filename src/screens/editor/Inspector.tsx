@@ -22,6 +22,8 @@ import {
 } from '../../sim/layout.ts';
 import { articleForStory, selectedForPrint } from '../../sim/newsroom.ts';
 import { payroll } from '../../sim/staff.ts';
+import { nextUnlock, totalNewsstands } from '../../sim/pages.ts';
+import { totalReaders } from '../../sim/readers.ts';
 import type { PageId, StoryBlock, Tier } from '../../sim/types.ts';
 import { useStore } from '../../state/store.ts';
 import { ANGLE_LABEL, articleScorecard, bylineOf, ScoutingReport, STYLE_SHORT } from '../../components/newsroom/ArticleParts.tsx';
@@ -199,6 +201,8 @@ function IssueNotes() {
         );
       })}
 
+      <NextPage />
+
       <div className={styles.label}>Money this issue</div>
       <div className={styles.smallRow}>
         <span>Ads</span>
@@ -231,5 +235,20 @@ function SpaceBar({ news, ads, total }: { news: number; ads: number; total: numb
       <span className={styles.meterFill} style={{ width: `${(news / total) * 100}%` }} />
       <span className={styles.meterAd} style={{ width: `${(ads / total) * 100}%` }} />
     </span>
+  );
+}
+
+/** What it takes to unlock the next inside page. */
+function NextPage() {
+  const game = useStore((s) => s.game)!;
+  const next = nextUnlock(game);
+  if (!next) return <p className={styles.keys}>All {game.unlockedPages.length + 2} pages unlocked.</p>;
+  const readers = totalReaders(game.districts);
+  const stands = totalNewsstands(game);
+  return (
+    <p className={styles.keys}>
+      Next page, {next.page.toUpperCase()}: {readers.toLocaleString()}/{next.readers.toLocaleString()} readers · {stands}/{next.newsstands} newsstands (add
+      them on the City map).
+    </p>
   );
 }

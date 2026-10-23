@@ -2,7 +2,8 @@
 import { create } from 'zustand';
 import type { Angle } from '../data/schemas.ts';
 import { loadGameData } from '../data/worldData.ts';
-import { activePages, findStoryBlock, removeBlock, storyBlockId, type EditResult } from '../sim/layout.ts';
+import { activePages, findStoryBlock, removeBlock, setExtraPage, storyBlockId, type EditResult } from '../sim/layout.ts';
+import { isUnlocked } from '../sim/pages.ts';
 import { advanceIssue, createGame, formatIssueDate, issueCount, issueDate, type Hire } from '../sim/newGame.ts';
 import { articleForStory, commission as commissionStory, updateArticle, type NewsroomEdit } from '../sim/newsroom.ts';
 import { checkReferences, hire as hireReporter, release as releaseReporter, setAssignment as queueAssignment, type StaffEdit } from '../sim/staff.ts';
@@ -40,6 +41,8 @@ interface Store {
 
   // layout
   edit(fn: (d: IssueDraft) => EditResult | IssueDraft, opts?: { select?: string | null }): boolean;
+  /** Turn an extra page on or off (only pages the paper has unlocked). */
+  setPageRunning(page: PageId, on: boolean): boolean;
   undo(): void;
   redo(): void;
   selectBlock(blockId: string | null): void;
@@ -153,6 +156,15 @@ export const useStore = create<Store>((set, get) => {
         ...(opts && 'select' in opts ? { selectedBlockId: opts.select ?? null } : {}),
       }));
       return true;
+    },
+    setPageRunning: (page, on) => {
+      const game = get().game;
+      if (!game) return false;
+      if (on && !isUnlocked(game, page)) {
+        get().notify(`Page ${page.toUpperCase()} isn't unlocked yet.`);
+        return false;
+      }
+      return get().edit((d) => setExtraPage(d, page, on));
     },
     undo: () => {
       const { game, past, future } = get();

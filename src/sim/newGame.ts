@@ -77,6 +77,7 @@ export function createGame(setup: PaperSetup, world: CityWorld, stories: StorySo
     printPool: world.city.print_reader_pool,
     publishedInches: { politics: 0, economy: 0, social: 0, sports: 0, culture: 0, science: 0, world: 0 },
     results: [],
+    unlockedPages: ['a3'],
     awards: 0,
     corrections: 0,
     issueNumber: 1,
@@ -116,7 +117,8 @@ export function advanceIssue(game: GameState, world: CityWorld, stories: StorySo
     ...settled,
     issueNumber: settled.issueNumber + 1,
     staff: advanceStaff(settled.staff, publishedBy, world, mentoring(settled, world)),
-    draft: emptyDraft(),
+    // Pages you ran last issue stay on.
+    draft: { ...emptyDraft(), extraPages: settled.draft.extraPages.filter((p) => settled.unlockedPages.includes(p)) },
   };
   return startIssue(next, world, stories);
 }
