@@ -1,0 +1,54 @@
+.layer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 100;
+}
+
+/* A sheet of paper lifted off the board: tilted, slightly larger, no blur shadow. */
+.ghost {
+  position: absolute;
+  background: var(--c-newsprint-light);
+  border: 1.5px solid var(--c-ink);
+  outline: 4px solid color-mix(in srgb, var(--c-ink) 18%, transparent);
+  padding: 6px 8px;
+  transform: rotate(-1.6deg) scale(1.03);
+  transform-origin: top left;
+  opacity: 0.94;
+  overflow: hidden;
+  transition: transform 90ms ease-out;
+}
+
+.ad {
+  text-align: center;
+}
+
+.toWire {
+  transform: rotate(2deg) scale(0.9);
+  opacity: 0.75;
+}
+
+.kicker {
+  font-family: var(--f-mono);
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--c-rust);
+  margin-bottom: 4px;
+}
+
+.title {
+  font-family: var(--f-display);
+  font-weight: 700;
+  font-size: 15px;
+  line-height: 1.1;
+}
+
+.hint {
+  margin-top: 6px;
+  font-family: var(--f-mono);
+  font-size: 8.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--c-ink-muted);
+}

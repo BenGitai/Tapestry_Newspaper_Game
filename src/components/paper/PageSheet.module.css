@@ -1,0 +1,369 @@
+.sheet {
+  position: relative;
+  background: var(--c-newsprint);
+  color: var(--c-ink);
+  user-select: none;
+}
+
+.grid {
+  position: absolute;
+}
+
+.gridLines {
+  position: absolute;
+  inset: 0;
+  stroke: var(--c-ink-faint);
+  stroke-width: 0.5;
+  stroke-dasharray: 2 3;
+  opacity: 0.35;
+  pointer-events: none;
+}
+
+/* ---- masthead ---- */
+.masthead {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  border-bottom: 3px double var(--c-ink);
+  padding-bottom: 5px;
+}
+
+.mastName {
+  font-family: var(--f-display);
+  font-weight: 700;
+  text-align: center;
+  line-height: 1;
+  letter-spacing: -0.01em;
+  margin-bottom: 10px;
+}
+
+.mastMeta {
+  display: flex;
+  justify-content: space-between;
+  font-family: var(--f-mono);
+  font-size: 9.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  border-top: 1px solid var(--c-ink);
+  padding-top: 4px;
+}
+
+.insideHeader {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-family: var(--f-mono);
+  font-size: 9.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  border-bottom: 3px double var(--c-ink);
+}
+
+.insideName {
+  font-family: var(--f-display);
+  font-weight: 700;
+  font-size: 16px;
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+/* ---- fold ---- */
+.fold {
+  position: absolute;
+  left: -12px;
+  right: -12px;
+  border-top: 1.5px dashed var(--c-rust);
+  pointer-events: none;
+  z-index: 3;
+}
+
+.fold span {
+  position: absolute;
+  right: 12px;
+  top: -8px;
+  background: var(--c-newsprint);
+  padding: 0 6px;
+  font-family: var(--f-mono);
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: var(--c-rust);
+}
+
+.foldPrint {
+  border-top: 1px solid var(--c-paste-up);
+  opacity: 0.6;
+}
+
+/* ---- blocks ---- */
+.block {
+  position: absolute;
+  overflow: hidden;
+}
+
+.editable {
+  cursor: grab;
+}
+
+.editable:hover {
+  outline: 1px dashed var(--c-ink-muted);
+  outline-offset: 2px;
+}
+
+.selected,
+.selected:hover {
+  outline: 2px solid var(--c-tiger);
+  outline-offset: 2px;
+  overflow: visible;
+}
+
+.selected .article {
+  overflow: hidden;
+  height: 100%;
+}
+
+.selected .bodyRow {
+  overflow: hidden;
+}
+
+.lifted {
+  opacity: 0.25;
+}
+
+.article {
+  height: 100%;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.headline {
+  font-family: var(--f-display);
+  font-weight: 700;
+  line-height: 1.02;
+  margin: 0 0 4px;
+  text-wrap: balance;
+}
+
+.lead .headline {
+  text-transform: uppercase;
+  letter-spacing: -0.01em;
+}
+
+.brief .headline {
+  font-size: 12px;
+  margin-bottom: 2px;
+}
+
+.deck {
+  font-family: var(--f-body);
+  font-style: italic;
+  font-size: 11.5px;
+  line-height: 1.3;
+  margin: 0 0 5px;
+}
+
+.byline {
+  font-family: var(--f-mono);
+  font-size: 8.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin-bottom: 4px;
+}
+
+.briefByline {
+  font-family: var(--f-mono);
+  font-size: 8px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.bodyRow {
+  display: flex;
+  gap: 0;
+  flex: 1;
+  min-height: 0;
+}
+
+.body {
+  font-family: var(--f-body);
+  font-size: 9.5px;
+  line-height: 1.32;
+  text-align: justify;
+  hyphens: auto;
+  column-gap: 10px;
+  column-rule: 0.5px solid var(--c-ink-faint);
+  column-fill: auto;
+  height: 100%;
+  overflow: hidden;
+}
+
+.photoCol {
+  flex: none;
+  height: 100%;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.photoCol .body {
+  flex: 1;
+  min-height: 0;
+}
+
+.cutline {
+  font-family: var(--f-mono);
+  font-size: 7.5px;
+  line-height: 1.3;
+  color: var(--c-ink-muted);
+  margin: 3px 0 4px;
+  padding-right: 8px;
+}
+
+/* ---- ads ---- */
+.ad {
+  border: 1.5px solid var(--c-ink);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 6px;
+  gap: 4px;
+}
+
+.adLabel {
+  font-family: var(--f-mono);
+  font-size: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+}
+
+.adName {
+  font-family: var(--f-display);
+  font-weight: 700;
+  line-height: 1.05;
+}
+
+.adSector {
+  font-family: var(--f-body);
+  font-style: italic;
+  font-size: 10px;
+  text-transform: capitalize;
+}
+
+.adPay {
+  font-family: var(--f-mono);
+  font-size: 9px;
+  color: var(--c-green);
+}
+
+/* ---- edit-mode overlays ---- */
+.fitTag {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  background: var(--c-newsprint);
+  font-family: var(--f-mono);
+  font-size: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  padding: 1px 4px;
+  border: 1px solid currentColor;
+  pointer-events: none;
+}
+
+.fit_fits,
+.fit_brief {
+  color: var(--c-green);
+}
+
+.fit_trimmed,
+.fit_padded {
+  color: var(--c-rust);
+}
+
+.fit_cutHard {
+  color: var(--c-stamp-red);
+}
+
+.resizeHandle {
+  position: absolute;
+  right: -7px;
+  bottom: -7px;
+  width: 12px;
+  height: 12px;
+  background: var(--c-tiger);
+  border: 1.5px solid var(--c-ink);
+  cursor: nwse-resize;
+  z-index: 4;
+}
+
+.preview {
+  position: absolute;
+  pointer-events: none;
+  z-index: 5;
+  display: flex;
+  align-items: flex-end;
+  justify-content: flex-start;
+}
+
+.previewBody {
+  position: absolute;
+  inset: 0;
+  padding: 6px 8px;
+  overflow: hidden;
+}
+
+.previewKicker {
+  font-family: var(--f-mono);
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--c-rust);
+}
+
+.previewTitle {
+  font-family: var(--f-display);
+  font-weight: 700;
+  font-size: 14px;
+  line-height: 1.1;
+  margin-top: 3px;
+}
+
+.preview span {
+  position: relative;
+}
+
+.previewOk {
+  border: 2px solid var(--c-tiger);
+  background: var(--c-newsprint-light);
+}
+
+.previewBad {
+  border: 2px dashed var(--c-stamp-red);
+  background: color-mix(in srgb, var(--c-newsprint-light) 85%, transparent);
+}
+
+.previewBad span {
+  background: var(--c-stamp-red);
+  color: var(--c-newsprint);
+  font-family: var(--f-mono);
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  padding: 2px 5px;
+}
+
+.print .block {
+  cursor: default;
+}

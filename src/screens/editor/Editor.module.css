@@ -1,0 +1,660 @@
+/* Layout on the 1440x900 stage: header strip, wire (left), board (middle), notes (right). */
+
+/* ---------- header strip ---------- */
+.header {
+  position: absolute;
+  left: 14px;
+  right: 14px;
+  top: 10px;
+  height: 54px;
+  background: var(--c-aged-paper);
+  border-bottom: 3px double var(--c-ink);
+  display: flex;
+  align-items: center;
+  gap: 22px;
+  padding: 0 18px;
+}
+
+.paperName {
+  font-family: var(--f-display);
+  font-weight: 700;
+  font-size: 27px;
+  white-space: nowrap;
+}
+
+.edition {
+  font-family: var(--f-mono);
+  font-size: 10.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--c-ink-muted);
+  white-space: nowrap;
+}
+
+.stats {
+  display: flex;
+  gap: 22px;
+  margin-left: auto;
+}
+
+.stat {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.statLabel {
+  font-family: var(--f-mono);
+  font-size: 9.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--c-ink-muted);
+}
+
+.statValue,
+.statGood {
+  font-family: var(--f-mono);
+  font-size: 15px;
+}
+
+.statGood {
+  color: var(--c-green);
+}
+
+.headerButtons {
+  display: flex;
+  gap: 6px;
+}
+
+.headerButtons button {
+  font-family: var(--f-mono);
+  font-size: 10.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  background: transparent;
+  border: 1.5px solid var(--c-ink);
+  padding: 6px 10px;
+}
+
+.headerButtons button:disabled {
+  opacity: 0.35;
+}
+
+/* ---------- wire ---------- */
+.wire {
+  position: absolute;
+  left: 14px;
+  top: 78px;
+  width: 302px;
+  bottom: 12px;
+  display: flex;
+  flex-direction: column;
+}
+
+.wireTabs {
+  display: flex;
+  gap: 4px;
+}
+
+.wireTabs button {
+  flex: 1;
+  background: var(--c-paste-up-dark);
+  border: none;
+  border-bottom: 1.5px solid var(--c-ink);
+  padding: 8px 8px 6px;
+  text-align: left;
+  font-family: var(--f-display);
+  font-weight: 700;
+  font-size: 17px;
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+}
+
+.wireTabs button span {
+  font-size: 9px;
+  color: var(--c-ink-muted);
+}
+
+.wireTabs .tabOn {
+  background: var(--c-aged-paper);
+}
+
+.filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  padding: 8px;
+  background: var(--c-aged-paper);
+}
+
+.filters button {
+  font-family: var(--f-mono);
+  font-size: 9.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  background: transparent;
+  border: 1px solid var(--c-ink);
+  padding: 4px 7px;
+}
+
+.filters .filterOn {
+  background: var(--c-ink);
+  color: var(--c-newsprint);
+}
+
+.slips {
+  flex: 1;
+  overflow-y: auto;
+  padding: 10px 8px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  scrollbar-width: thin;
+  scrollbar-color: var(--c-ink-muted) transparent;
+}
+
+.slip {
+  background: var(--c-newsprint-light);
+  border: 1px dashed var(--c-ink-muted);
+  padding: 9px 11px 8px;
+  cursor: grab;
+  user-select: none;
+  touch-action: none;
+  transition: transform 120ms ease-out;
+}
+
+.slip:hover {
+  border: 1px solid var(--c-tiger);
+}
+
+.slipPlaced {
+  background: var(--c-aged-paper);
+  opacity: 0.78;
+}
+
+.slipMeta {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  font-family: var(--f-mono);
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--c-ink-muted);
+}
+
+.slipHead {
+  font-family: var(--f-display);
+  font-weight: 700;
+  font-size: 16.5px;
+  line-height: 1.15;
+  margin: 5px 0 6px;
+}
+
+.slipFoot {
+  display: flex;
+  gap: 10px;
+  font-family: var(--f-mono);
+  font-size: 9px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.sensitive {
+  color: var(--c-stamp-red);
+  border: 1px solid currentColor;
+  padding: 0 3px;
+}
+
+.slipStatus {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 6px;
+  font-family: var(--f-mono);
+  font-size: 9px;
+  letter-spacing: 0.04em;
+  color: var(--c-ink-muted);
+}
+
+.slipStatus a {
+  color: var(--c-ink-muted);
+}
+
+.onPage {
+  color: var(--c-rust);
+  text-transform: uppercase;
+}
+
+.pay {
+  color: var(--c-green);
+}
+
+.adSlip .slipHead {
+  font-size: 15px;
+}
+
+.adNote {
+  margin: 0;
+  font-size: 11.5px;
+  font-style: italic;
+  color: var(--c-newsprint);
+  opacity: 0.8;
+}
+
+.empty {
+  font-family: var(--f-mono);
+  font-size: 10px;
+  color: var(--c-newsprint);
+  opacity: 0.6;
+  text-transform: uppercase;
+}
+
+/* ---------- board ---------- */
+.board {
+  position: absolute;
+  left: 328px;
+  top: 74px;
+  width: 784px;
+  bottom: 6px;
+  background: var(--c-paste-up);
+  padding: 6px 14px 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.boardLabel {
+  align-self: flex-start;
+  font-family: var(--f-mono);
+  font-size: 9.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: var(--c-ink-muted);
+  height: 14px;
+}
+
+.pageTabs {
+  display: flex;
+  gap: 4px;
+  align-self: stretch;
+  justify-content: center;
+  height: 26px;
+}
+
+.pageTabs button {
+  font-family: var(--f-mono);
+  font-size: 10.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  background: var(--c-paste-up-dark);
+  border: 1px solid var(--c-ink-muted);
+  border-bottom: none;
+  padding: 0 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.pageTabs .pageTabOn {
+  background: var(--c-newsprint);
+  border-color: var(--c-ink);
+}
+
+.pageTabs .pageTabAdd {
+  background: transparent;
+  border-style: dashed;
+  color: var(--c-ink-muted);
+}
+
+.pageTabAdd span {
+  font-size: 9px;
+}
+
+.tabClose {
+  font-size: 13px;
+  line-height: 1;
+  color: var(--c-ink-muted);
+}
+
+.sheetWrap {
+  transform: rotate(-0.25deg);
+}
+
+/* ---------- inspector (memo paper) ---------- */
+.inspector {
+  position: absolute;
+  left: 1124px;
+  right: 14px;
+  top: 78px;
+  bottom: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.memo {
+  flex: 1;
+  overflow-y: auto;
+  background: var(--c-aged-paper);
+  padding: 14px 16px 18px;
+  transform: rotate(0.35deg);
+  scrollbar-width: thin;
+  scrollbar-color: var(--c-ink-muted) transparent;
+}
+
+.kicker {
+  font-family: var(--f-mono);
+  font-size: 9.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--c-rust);
+}
+
+.noteHead {
+  font-family: var(--f-display);
+  font-weight: 700;
+  font-size: 19px;
+  line-height: 1.15;
+  margin: 4px 0 6px;
+}
+
+.label {
+  font-family: var(--f-mono);
+  font-size: 9.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--c-ink-muted);
+  margin: 14px 0 6px;
+  padding-bottom: 3px;
+  border-bottom: 1px solid var(--c-ink);
+}
+
+.note {
+  font-size: 12px;
+  line-height: 1.45;
+  margin: 4px 0;
+}
+
+.keys {
+  font-family: var(--f-mono);
+  font-size: 9.5px;
+  line-height: 1.6;
+  color: var(--c-ink-muted);
+  margin: 0;
+}
+
+.segmented {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: 1fr;
+  border: 1.5px solid var(--c-ink);
+}
+
+.segmented button {
+  font-family: var(--f-mono);
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  background: transparent;
+  border: none;
+  border-right: 1px solid var(--c-ink);
+  padding: 7px 2px;
+}
+
+.segmented button:last-child {
+  border-right: none;
+}
+
+.segmented button:disabled {
+  color: var(--c-ink-faint);
+  text-decoration: line-through;
+}
+
+.segmented .segOn {
+  background: var(--c-ink);
+  color: var(--c-newsprint);
+}
+
+.fitLine,
+.smallRow,
+.spaceRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--f-mono);
+  font-size: 10px;
+  margin-top: 6px;
+}
+
+.spaceRow > span:first-child {
+  width: 104px;
+  flex: none;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.spaceRow > span:last-child {
+  width: 62px;
+  text-align: right;
+  flex: none;
+}
+
+.fitWord_fits,
+.fitWord_brief {
+  color: var(--c-green);
+  text-transform: uppercase;
+}
+
+.fitWord_trimmed,
+.fitWord_padded {
+  color: var(--c-rust);
+  text-transform: uppercase;
+}
+
+.fitWord_cutHard {
+  color: var(--c-stamp-red);
+  text-transform: uppercase;
+}
+
+.linkBtn {
+  background: none;
+  border: none;
+  padding: 0;
+  margin-top: 12px;
+  font-family: var(--f-mono);
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  text-decoration: underline;
+  color: var(--c-rust);
+}
+
+.smallRow .linkBtn {
+  margin-top: 0;
+}
+
+.money {
+  color: var(--c-green);
+  font-weight: 500;
+}
+
+.warnText {
+  color: var(--c-stamp-red);
+}
+
+.reporters {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.reporter {
+  display: grid;
+  grid-template-columns: 1fr 60px 52px;
+  align-items: center;
+  gap: 6px;
+  text-align: left;
+  background: transparent;
+  border: 1px solid transparent;
+  padding: 4px 5px;
+  font-size: 11.5px;
+}
+
+.reporter:hover {
+  border-color: var(--c-ink-muted);
+}
+
+.reporterOn {
+  border-color: var(--c-ink);
+  background: var(--c-newsprint-light);
+}
+
+.repName em {
+  font-family: var(--f-mono);
+  font-size: 9px;
+  font-style: normal;
+  color: var(--c-rust);
+  text-transform: uppercase;
+}
+
+.repCap {
+  font-family: var(--f-mono);
+  font-size: 9.5px;
+  color: var(--c-ink-muted);
+  text-align: right;
+}
+
+.reporter .warnText {
+  font-family: var(--f-mono);
+  font-size: 9.5px;
+  text-align: right;
+}
+
+.reporter:last-child {
+  grid-template-columns: 1fr auto;
+}
+
+.meter {
+  display: flex;
+  height: 7px;
+  background: var(--c-paste-up);
+  flex: 1;
+}
+
+.meterFill {
+  background: var(--c-ink);
+}
+
+.meterAd {
+  background: var(--c-rust);
+}
+
+.meterWarn {
+  background: var(--c-stamp-red);
+}
+
+.attrs {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 2px 10px;
+  margin-top: 8px;
+  padding: 6px 8px;
+  border: 1px dashed var(--c-ink-muted);
+}
+
+.attrVoice {
+  grid-column: 1 / -1;
+  font-style: italic;
+  font-size: 11px;
+  line-height: 1.35;
+  margin-bottom: 4px;
+}
+
+.attr {
+  display: flex;
+  justify-content: space-between;
+  font-family: var(--f-mono);
+  font-size: 9.5px;
+  text-transform: uppercase;
+}
+
+.attrHigh {
+  color: var(--c-green);
+}
+
+.attrLow {
+  color: var(--c-stamp-red);
+}
+
+.copy {
+  background: var(--c-newsprint-light);
+  padding: 8px 10px;
+  font-size: 11.5px;
+  line-height: 1.45;
+}
+
+.copy p {
+  margin: 4px 0 0;
+}
+
+.copyHead {
+  font-family: var(--f-display);
+  font-weight: 700;
+  font-size: 15px;
+  line-height: 1.15;
+}
+
+.copyDeck {
+  font-style: italic;
+  margin-top: 3px;
+}
+
+.copyByline {
+  font-family: var(--f-mono);
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-top: 4px;
+}
+
+.press {
+  height: 54px;
+  flex: none;
+  background: var(--c-tiger);
+  border: none;
+  font-family: var(--f-display);
+  font-weight: 700;
+  font-size: 22px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--c-ink);
+}
+
+.press:hover:not(:disabled) {
+  background: var(--c-stamp-red);
+}
+
+.press:disabled {
+  opacity: 0.45;
+}
+
+/* ---------- notice slip ---------- */
+.notice {
+  position: absolute;
+  left: 50%;
+  bottom: 26px;
+  transform: translateX(-50%) rotate(-0.8deg);
+  background: var(--c-newsprint-light);
+  border: 1.5px solid var(--c-stamp-red);
+  color: var(--c-stamp-red);
+  font-family: var(--f-mono);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  padding: 8px 14px;
+  z-index: 50;
+  cursor: pointer;
+}

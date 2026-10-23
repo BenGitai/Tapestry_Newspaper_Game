@@ -1,0 +1,56 @@
+/* Global base styles. Colors come from tokens.ts via --c-* custom properties. */
+@import '@fontsource/old-standard-tt/400.css';
+@import '@fontsource/old-standard-tt/400-italic.css';
+@import '@fontsource/old-standard-tt/700.css';
+@import '@fontsource/libre-caslon-text/400.css';
+@import '@fontsource/libre-caslon-text/400-italic.css';
+@import '@fontsource/libre-caslon-text/700.css';
+@import '@fontsource/ibm-plex-mono/400.css';
+@import '@fontsource/ibm-plex-mono/500.css';
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  margin: 0;
+  height: 100%;
+  overflow: hidden;
+  background: var(--c-desk);
+}
+
+body {
+  font-family: var(--f-body);
+  color: var(--c-ink);
+  -webkit-font-smoothing: antialiased;
+}
+
+button {
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+}
+
+button:disabled {
+  cursor: not-allowed;
+}
+
+:focus-visible {
+  outline: 2px solid var(--c-tiger);
+  outline-offset: 2px;
+}
+
+/* Shared type helpers */
+.mono {
+  font-family: var(--f-mono);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.display {
+  font-family: var(--f-display);
+}

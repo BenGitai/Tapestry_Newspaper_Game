@@ -1,0 +1,274 @@
+.paperBack {
+  position: absolute;
+  left: 140px;
+  top: 34px;
+  width: 820px;
+  height: 900px;
+  background: var(--c-paste-up);
+  transform: rotate(0.6deg);
+}
+
+.paper {
+  position: absolute;
+  left: 124px;
+  top: 26px;
+  width: 822px;
+  height: 900px;
+  background: var(--c-newsprint);
+  transform: rotate(-0.9deg);
+  padding: 30px 40px;
+  display: flex;
+  flex-direction: column;
+}
+
+.topline,
+.dateline {
+  display: flex;
+  justify-content: space-between;
+  font-family: var(--f-mono);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+}
+
+.topline {
+  border-bottom: 1px solid var(--c-ink);
+  padding-bottom: 6px;
+}
+
+.masthead {
+  font-family: var(--f-display);
+  font-weight: 700;
+  font-size: 96px;
+  line-height: 1;
+  text-align: center;
+  margin: 14px 0 10px;
+  letter-spacing: -0.01em;
+}
+
+.dateline {
+  border-top: 3px double var(--c-ink);
+  border-bottom: 1px solid var(--c-ink);
+  padding: 6px 0;
+}
+
+.lead,
+.side {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  text-align: left;
+  background: none;
+  border: none;
+  padding: 0;
+}
+
+.lead {
+  margin: 22px 0 0;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--c-ink);
+}
+
+.kicker {
+  font-family: var(--f-mono);
+  font-size: 11.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: var(--c-rust);
+}
+
+.leadHead {
+  font-family: var(--f-display);
+  font-weight: 700;
+  font-size: 54px;
+  line-height: 1.02;
+  text-transform: uppercase;
+  margin: 4px 0 8px;
+}
+
+.lead:hover .leadHead,
+.side:hover:not(:disabled) .sideHead {
+  color: var(--c-rust);
+}
+
+.deck {
+  font-style: italic;
+  font-size: 16px;
+}
+
+.columns {
+  display: grid;
+  grid-template-columns: 400px 1fr;
+  gap: 24px;
+  margin-top: 16px;
+}
+
+.left {
+  border-right: 1px solid var(--c-ink);
+  padding-right: 20px;
+}
+
+.caption {
+  font-family: var(--f-mono);
+  font-size: 10px;
+  letter-spacing: 0.04em;
+  margin: 6px 0 12px;
+  border-bottom: 1px solid var(--c-ink);
+  padding-bottom: 6px;
+}
+
+.wireLabel {
+  font-family: var(--f-mono);
+  font-size: 10.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+}
+
+.wireList {
+  list-style: none;
+  padding: 0;
+  margin: 8px 0 0;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.wireList li::before {
+  content: '· ';
+}
+
+.right {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.side {
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--c-ink);
+}
+
+.side:disabled {
+  opacity: 0.45;
+}
+
+.sideHead {
+  font-family: var(--f-display);
+  font-weight: 700;
+  font-size: 26px;
+  line-height: 1.1;
+  margin-top: 4px;
+}
+
+.classifieds {
+  border: 2px solid var(--c-ink);
+  padding: 10px 14px;
+  font-size: 12.5px;
+  line-height: 1.45;
+}
+
+.classifieds p {
+  margin: 6px 0;
+}
+
+.classTitle {
+  font-family: var(--f-display);
+  font-weight: 700;
+  font-size: 17px;
+  letter-spacing: 0.3em;
+  text-align: center;
+  text-transform: uppercase;
+  border-bottom: 1px solid var(--c-ink);
+  padding-bottom: 4px;
+}
+
+/* ---- press pass ---- */
+.pass {
+  position: absolute;
+  left: 1010px;
+  top: 118px;
+  width: 360px;
+  height: 350px;
+  background: var(--c-newsprint-light);
+  transform: rotate(2.2deg);
+  display: flex;
+  flex-direction: column;
+}
+
+.passTop {
+  background: var(--c-tiger);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 18px 20px;
+  font-family: var(--f-display);
+  font-weight: 700;
+  font-size: 34px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.passNo {
+  font-family: var(--f-mono);
+  font-weight: 400;
+  font-size: 11px;
+  letter-spacing: 0.1em;
+}
+
+.passLogo {
+  flex: 1;
+  margin: 16px 22px 8px;
+  background: var(--c-newsprint-light);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.passLogo img {
+  max-width: 100%;
+  max-height: 180px;
+}
+
+.passFoot {
+  text-align: center;
+  font-family: var(--f-mono);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  padding-bottom: 14px;
+}
+
+/* ---- wire slip ---- */
+.slip {
+  position: absolute;
+  left: 1050px;
+  top: 556px;
+  width: 336px;
+  background: var(--c-aged-paper);
+  border: 1px dashed var(--c-ink-muted);
+  transform: rotate(-2deg);
+  padding: 14px 18px;
+  font-family: var(--f-mono);
+  font-size: 13px;
+  line-height: 1.55;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.slipMeta {
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  color: var(--c-ink-muted);
+  margin-bottom: 6px;
+}
+
+.footer {
+  position: absolute;
+  right: 32px;
+  bottom: 26px;
+  font-family: var(--f-mono);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: var(--c-paste-up);
+  opacity: 0.7;
+}

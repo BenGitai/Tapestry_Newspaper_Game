@@ -1,0 +1,15 @@
+.viewport {
+  position: fixed;
+  inset: 0;
+  background: var(--c-desk);
+  overflow: hidden;
+}
+
+.stage {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform-origin: center center;
+  overflow: hidden;
+  background: var(--c-desk);
+}

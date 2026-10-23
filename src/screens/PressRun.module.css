@@ -1,0 +1,82 @@
+.sheet {
+  position: absolute;
+  left: 120px;
+  top: 22px;
+  transform: rotate(-0.7deg) scale(1.1);
+  transform-origin: top left;
+}
+
+.side {
+  position: absolute;
+  left: 960px;
+  top: 90px;
+  width: 400px;
+  background: var(--c-aged-paper);
+  transform: rotate(1.2deg);
+  padding: 26px 28px 28px;
+}
+
+.stamp {
+  display: inline-block;
+  font-family: var(--f-display);
+  font-weight: 700;
+  font-size: 40px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--c-stamp-red);
+  border: 4px double var(--c-stamp-red);
+  padding: 4px 18px;
+  transform: rotate(-6deg);
+  margin-bottom: 18px;
+}
+
+.kicker {
+  font-family: var(--f-mono);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--c-ink-muted);
+}
+
+.pages {
+  display: flex;
+  gap: 6px;
+  margin: 14px 0;
+}
+
+.pages button {
+  font-family: var(--f-mono);
+  font-size: 11px;
+  text-transform: uppercase;
+  background: transparent;
+  border: 1.5px solid var(--c-ink);
+  padding: 6px 14px;
+}
+
+.pages .on {
+  background: var(--c-ink);
+  color: var(--c-newsprint);
+}
+
+.note {
+  font-size: 13px;
+  line-height: 1.5;
+  font-style: italic;
+}
+
+.next {
+  width: 100%;
+  height: 52px;
+  margin-top: 10px;
+  background: var(--c-tiger);
+  border: none;
+  font-family: var(--f-display);
+  font-weight: 700;
+  font-size: 21px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.next:hover {
+  background: var(--c-stamp-red);
+}
