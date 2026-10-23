@@ -123,14 +123,20 @@ export const STYLE = {
 } as const;
 
 /** Starting staff: how many you may hire at the start, and the payroll you can afford per issue. */
-export const STARTING_STAFF = { min: 2, max: 4 } as const;
+export const STARTING_STAFF = { min: 2, max: 5 } as const;
+/**
+ * Starting payroll budget per issue. Average reporters cost about $100 and good
+ * ones about $135, so this buys 4-5 average or 3-4 good reporters.
+ */
 export const STARTING_PAYROLL_CAP: Record<'founded' | 'inherited' | 'bought', number> = {
-  founded: 360,
-  inherited: 440,
-  bought: 400,
+  founded: 500,
+  inherited: 580,
+  bought: 540,
 };
-/** Most reporters you can employ at once in the demo. */
-export const MAX_STAFF = 8;
+/** Most reporters you can employ at once (a late-game newsroom can pass 20). */
+export const MAX_STAFF = 24;
+/** Extra generated candidates added to the hiring market beyond the hand-written pool. */
+export const EXTRA_CANDIDATES = 18;
 
 /** Hiring mid-game costs a signing fee; releasing someone costs severance. Both are multiples of salary per issue. */
 export const SIGNING_FEE_MULTIPLIER = 2;

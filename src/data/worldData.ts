@@ -4,9 +4,11 @@ import storiesRaw from '../../data/stories.philly.json';
 import worldRaw from '../../data/districts.philly.json';
 import citiesRaw from '../../data/cities.json';
 import subtopicsRaw from '../../data/subtopics.json';
-import { cityListSchema, cityWorldSchema, subtopicFileSchema, type Category, type City, type CityWorld, type SubtopicMap } from './schemas.ts';
+import { cityListSchema, cityWorldSchema, reporterSchema, subtopicFileSchema, type Category, type City, type CityWorld, type SubtopicMap } from './schemas.ts';
 import { JsonStorySource, type StorySource } from './StorySource.ts';
 import { DemoStorySource } from './DemoStorySource.ts';
+import { generateCandidates } from './CandidateGenerator.ts';
+import { EXTRA_CANDIDATES } from '../sim/balance.ts';
 
 export interface GameData {
   world: CityWorld;
@@ -78,7 +80,11 @@ export function loadGameData(): GameData {
   validateSubtopics(hand, world, subtopics, hand.dayCount());
   const stories = new DemoStorySource(hand, world);
   const cities = cityListSchema.parse(citiesRaw).cities;
-  cached = { world, cities, stories, subtopics };
+  // Grow the hiring market with generated candidates (validated like the rest).
+  const extra = generateCandidates(world, subtopics, EXTRA_CANDIDATES).map((c) => reporterSchema.parse(c));
+  const full: CityWorld = { ...world, staff_pool: [...world.staff_pool, ...extra] };
+  validateSubtopics(hand, full, subtopics, hand.dayCount());
+  cached = { world: full, cities, stories, subtopics };
   return cached;
 }
 

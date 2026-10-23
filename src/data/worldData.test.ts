@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import worldRaw from '../../data/districts.philly.json';
 import storiesRaw from '../../data/stories.philly.json';
-import { DEMO_DAYS, GENERATED_PER_DAY } from '../sim/balance.ts';
+import { DEMO_DAYS, EXTRA_CANDIDATES, GENERATED_PER_DAY } from '../sim/balance.ts';
 import { storySchema } from './schemas.ts';
 import { JsonStorySource } from './StorySource.ts';
 import { displayName, loadGameData, parseWorld, validateSubtopics } from './worldData.ts';
@@ -42,12 +42,22 @@ describe('demo data', () => {
   });
 
   it('every reporter has a full set of 1-20 attributes', () => {
-    expect(world.staff_pool).toHaveLength(18);
+    expect(world.staff_pool).toHaveLength(18 + EXTRA_CANDIDATES);
     for (const r of world.staff_pool) {
       for (const v of Object.values(r.attributes)) {
         expect(v).toBeGreaterThanOrEqual(1);
         expect(v).toBeLessThanOrEqual(20);
       }
+    }
+  });
+
+  it('generated candidates are unique, fictional-looking hires with salaries in the normal range', () => {
+    const extra = world.staff_pool.filter((r) => r.id.startsWith('cand-'));
+    expect(extra).toHaveLength(EXTRA_CANDIDATES);
+    expect(new Set(world.staff_pool.map((r) => r.name)).size).toBe(world.staff_pool.length);
+    for (const r of extra) {
+      expect(r.salary_per_issue).toBeGreaterThanOrEqual(30);
+      expect(r.salary_per_issue).toBeLessThanOrEqual(220);
     }
   });
 

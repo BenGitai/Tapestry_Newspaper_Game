@@ -1,5 +1,15 @@
 # Devlog
 
+## 2026-10-23 · Bigger starting budgets, room for a big newsroom
+
+- Starting payroll budgets are now $500 (founded), $580 (inherited) and $540 (bought). That buys 4–5 average reporters (about $100 each) or 3–4 good ones (about $135). You can hire up to 5 on hiring day. Tests check both targets.
+- The newsroom cap went from 8 to 24 (`MAX_STAFF`).
+- The hiring market adds 18 generated candidates (`src/data/CandidateGenerator.ts`, deterministic, flagged for AI-content review), 36 in total. Most are average, with a few rookies and standouts, and salaries follow the hand-written pool by skill.
+- Balance (`npm run simulate`, 10 daily issues, suggested staff): a founder ends with about $12–20k, enough to grow staff. A 20-person payroll costs about $2k per issue, so a big newsroom is a later-game goal you earn with circulation.
+- Tests: 103 passing.
+
+**Next (pending design answers):** desk heads.
+
 ## 2026-10-23 · Ten issues, generated news, more copy, sub-focus
 
 **What changed**

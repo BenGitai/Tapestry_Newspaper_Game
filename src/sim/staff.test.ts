@@ -31,7 +31,15 @@ describe('starting staff', () => {
   it('enforces head count and payroll budget', () => {
     expect(checkStartingStaff(world, 'founded', ['okafor']).ok).toBe(false);
     expect(checkStartingStaff(world, 'founded', ['okafor', 'tran']).ok).toBe(true);
-    expect(checkStartingStaff(world, 'founded', ['ferraro', 'moreau', 'okafor']).ok).toBe(false); // $480 > $360
+    expect(checkStartingStaff(world, 'founded', ['ferraro', 'whitfield', 'moreau']).ok).toBe(false); // $550 > $500
+  });
+
+  it('the starting budget buys about 4-5 average reporters or 3-4 good ones', () => {
+    // Five average (skill 3) reporters fit a founder's budget...
+    expect(checkStartingStaff(world, 'founded', ['kowalczyk', 'tran', 'raman', 'nguyen', 'osei']).ok).toBe(true);
+    // ...three good (skill 4) ones fit, and four fit an inherited paper's budget.
+    expect(checkStartingStaff(world, 'founded', ['okafor', 'hale', 'castillo']).ok).toBe(true);
+    expect(checkStartingStaff(world, 'inherited', ['okafor', 'hale', 'castillo', 'adeyemi']).ok).toBe(true);
   });
 });
 
@@ -72,12 +80,14 @@ describe('hiring and releasing', () => {
   it('the newsroom has a size limit', () => {
     let g = start(['okafor', 'tran']);
     g = { ...g, cash: 100000 };
-    for (const id of ['hale', 'raman', 'brenner', 'ferraro', 'deluca', 'sato', 'nguyen']) {
-      const h = hire(g, world, id, 50);
+    for (const r of world.staff_pool) {
+      const h = hire(g, world, r.id, 50);
       if (h.ok) g = h.game;
     }
     expect(g.staff).toHaveLength(MAX_STAFF);
-    expect(hire(g, world, 'moreau', 50).ok).toBe(false);
+    const outside = world.staff_pool.find((r) => !g.staff.some((m) => m.reporterId === r.id))!;
+    expect(hire(g, world, outside.id, 50).ok).toBe(false);
+    expect(MAX_STAFF).toBeGreaterThanOrEqual(20);
   });
 
   it('releasing costs severance; you keep at least one reporter', () => {
