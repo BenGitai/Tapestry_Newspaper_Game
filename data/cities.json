@@ -1,0 +1,13 @@
+{
+  "_note": "Cities shown on the new game setup form. Only Philadelphia is playable in the demo. Difficulty tags are placeholder guesses, not market research.",
+  "cities": [
+    { "id": "new_york", "name": "New York", "difficulty": "Very hard", "enabled": false },
+    { "id": "chicago", "name": "Chicago", "difficulty": "Hard", "enabled": false },
+    { "id": "philadelphia", "name": "Philadelphia", "difficulty": "Medium", "enabled": true, "blurb": "Neighborhood pride runs deep, the sports page gets read first, and an established rival owns Center City and the Northwest." },
+    { "id": "houston", "name": "Houston", "difficulty": "Medium", "enabled": false },
+    { "id": "atlanta", "name": "Atlanta", "difficulty": "Medium", "enabled": false },
+    { "id": "seattle", "name": "Seattle", "difficulty": "Easy", "enabled": false },
+    { "id": "denver", "name": "Denver", "difficulty": "Easy", "enabled": false },
+    { "id": "pittsburgh", "name": "Pittsburgh", "difficulty": "Easy", "enabled": false }
+  ]
+}

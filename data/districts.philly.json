@@ -1,0 +1,204 @@
+{
+  "_note": "Placeholder game data for the demo. Population shares, lean mixes and incomes are rough game-balance guesses, NOT census data. All people, companies and organizations here are fictional. The map polygons are a stylized schematic on an 800x900 canvas, not real geography; redraw freely.",
+  "city": {
+    "id": "philadelphia",
+    "name": "Philadelphia",
+    "nickname": "Philly",
+    "print_reader_pool": 210000,
+    "map_viewbox": [0, 0, 800, 900],
+    "rivers": {
+      "schuylkill": [[40, 300], [150, 420], [250, 560], [290, 700], [330, 880]],
+      "delaware": [[790, 280], [720, 480], [600, 620], [560, 780], [520, 900]]
+    }
+  },
+
+  "reader_groups": [
+    {
+      "id": "students",
+      "name": "Students",
+      "interests": { "politics": 0.5, "economy": 0.3, "social": 0.7, "sports": 0.5, "culture": 0.8, "world": 0.6 },
+      "hard_news_pref": 0.6,
+      "price_sensitivity": 0.9
+    },
+    {
+      "id": "young_professionals",
+      "name": "Young professionals",
+      "interests": { "politics": 0.6, "economy": 0.7, "social": 0.5, "sports": 0.6, "culture": 0.7, "world": 0.5 },
+      "hard_news_pref": 0.5,
+      "price_sensitivity": 0.4
+    },
+    {
+      "id": "working_families",
+      "name": "Working families",
+      "interests": { "politics": 0.6, "economy": 0.8, "social": 0.8, "sports": 0.7, "culture": 0.3, "world": 0.2 },
+      "hard_news_pref": 0.6,
+      "price_sensitivity": 0.8
+    },
+    {
+      "id": "retirees",
+      "name": "Retirees",
+      "interests": { "politics": 0.8, "economy": 0.6, "social": 0.6, "sports": 0.6, "culture": 0.5, "world": 0.5 },
+      "hard_news_pref": 0.5,
+      "price_sensitivity": 0.5
+    },
+    {
+      "id": "small_business",
+      "name": "Small business owners",
+      "interests": { "politics": 0.7, "economy": 0.9, "social": 0.5, "sports": 0.5, "culture": 0.4, "world": 0.3 },
+      "hard_news_pref": 0.6,
+      "price_sensitivity": 0.4
+    },
+    {
+      "id": "sports_diehards",
+      "name": "Sports diehards",
+      "interests": { "politics": 0.3, "economy": 0.3, "social": 0.3, "sports": 1.0, "culture": 0.3, "world": 0.1 },
+      "hard_news_pref": 0.3,
+      "price_sensitivity": 0.6
+    }
+  ],
+
+  "districts": [
+    {
+      "id": "center_city",
+      "name": "Center City",
+      "example_neighborhoods": ["Rittenhouse", "Old City", "Washington Square West", "Chinatown"],
+      "population_share": 0.08,
+      "income_tier": 5,
+      "group_mix": { "students": 0.12, "young_professionals": 0.40, "working_families": 0.08, "retirees": 0.15, "small_business": 0.15, "sports_diehards": 0.10 },
+      "lean_mix": { "left": 0.55, "center": 0.35, "right": 0.10 },
+      "rival_strength": 0.6,
+      "polygon": [[260, 540], [470, 520], [560, 580], [520, 680], [300, 700]]
+    },
+    {
+      "id": "south_philly",
+      "name": "South Philly",
+      "example_neighborhoods": ["East Passyunk", "Pennsport", "Point Breeze", "Navy Yard"],
+      "population_share": 0.13,
+      "income_tier": 3,
+      "group_mix": { "students": 0.05, "young_professionals": 0.20, "working_families": 0.30, "retirees": 0.15, "small_business": 0.10, "sports_diehards": 0.20 },
+      "lean_mix": { "left": 0.50, "center": 0.30, "right": 0.20 },
+      "rival_strength": 0.3,
+      "polygon": [[300, 700], [520, 680], [600, 760], [500, 880], [320, 860]]
+    },
+    {
+      "id": "river_wards",
+      "name": "River Wards",
+      "example_neighborhoods": ["Fishtown", "Kensington", "Port Richmond", "Bridesburg"],
+      "population_share": 0.10,
+      "income_tier": 2,
+      "group_mix": { "students": 0.05, "young_professionals": 0.20, "working_families": 0.35, "retirees": 0.15, "small_business": 0.10, "sports_diehards": 0.15 },
+      "lean_mix": { "left": 0.45, "center": 0.30, "right": 0.25 },
+      "rival_strength": 0.2,
+      "polygon": [[520, 360], [780, 300], [700, 520], [560, 580], [470, 520]]
+    },
+    {
+      "id": "west_philly",
+      "name": "West Philly & University City",
+      "example_neighborhoods": ["University City", "Cedar Park", "Cobbs Creek", "Wynnefield"],
+      "population_share": 0.13,
+      "income_tier": 2,
+      "group_mix": { "students": 0.35, "young_professionals": 0.15, "working_families": 0.25, "retirees": 0.10, "small_business": 0.05, "sports_diehards": 0.10 },
+      "lean_mix": { "left": 0.70, "center": 0.22, "right": 0.08 },
+      "rival_strength": 0.3,
+      "polygon": [[40, 420], [150, 480], [260, 540], [300, 700], [60, 720]]
+    },
+    {
+      "id": "north_philly",
+      "name": "North Philly",
+      "example_neighborhoods": ["Fairhill", "Hunting Park", "Strawberry Mansion", "Temple area"],
+      "population_share": 0.17,
+      "income_tier": 1,
+      "group_mix": { "students": 0.15, "young_professionals": 0.05, "working_families": 0.45, "retirees": 0.15, "small_business": 0.05, "sports_diehards": 0.15 },
+      "lean_mix": { "left": 0.65, "center": 0.25, "right": 0.10 },
+      "rival_strength": 0.2,
+      "polygon": [[120, 360], [360, 330], [520, 360], [470, 520], [260, 540], [150, 480]]
+    },
+    {
+      "id": "northeast",
+      "name": "Northeast",
+      "example_neighborhoods": ["Mayfair", "Frankford", "Bustleton", "Somerton"],
+      "population_share": 0.22,
+      "income_tier": 3,
+      "group_mix": { "students": 0.03, "young_professionals": 0.10, "working_families": 0.35, "retirees": 0.25, "small_business": 0.12, "sports_diehards": 0.15 },
+      "lean_mix": { "left": 0.30, "center": 0.30, "right": 0.40 },
+      "rival_strength": 0.5,
+      "polygon": [[330, 60], [760, 40], [780, 300], [520, 360], [360, 330]]
+    },
+    {
+      "id": "northwest",
+      "name": "Northwest",
+      "example_neighborhoods": ["Germantown", "Mt. Airy", "Chestnut Hill", "Manayunk"],
+      "population_share": 0.11,
+      "income_tier": 4,
+      "group_mix": { "students": 0.05, "young_professionals": 0.20, "working_families": 0.25, "retirees": 0.25, "small_business": 0.15, "sports_diehards": 0.10 },
+      "lean_mix": { "left": 0.60, "center": 0.28, "right": 0.12 },
+      "rival_strength": 0.6,
+      "polygon": [[60, 60], [330, 60], [360, 330], [120, 360]]
+    },
+    {
+      "id": "southwest",
+      "name": "Southwest",
+      "example_neighborhoods": ["Eastwick", "Kingsessing", "Elmwood Park", "Grays Ferry"],
+      "population_share": 0.06,
+      "income_tier": 2,
+      "group_mix": { "students": 0.05, "young_professionals": 0.08, "working_families": 0.45, "retirees": 0.17, "small_business": 0.10, "sports_diehards": 0.15 },
+      "lean_mix": { "left": 0.55, "center": 0.30, "right": 0.15 },
+      "rival_strength": 0.25,
+      "polygon": [[60, 720], [300, 700], [320, 860], [120, 880]]
+    }
+  ],
+
+  "entities": [
+    { "id": "city_hall", "name": "City Hall", "type": "government", "ad_revenue_per_issue": 350, "note": "Buys public-notice ads. Annoyed by hard-hitting coverage that targets it." },
+    { "id": "transit_authority", "name": "Philadelphia Transit Authority (fictional)", "type": "government", "ad_revenue_per_issue": 200 },
+    { "id": "penn_treaty_dev", "name": "Penn Treaty Development Group (fictional)", "type": "advertiser", "sector": "real_estate", "ad_revenue_per_issue": 300 },
+    { "id": "helix_forge", "name": "Helix Forge Therapeutics (fictional)", "type": "advertiser", "sector": "biotech", "ad_revenue_per_issue": 200 },
+    { "id": "schuylkill_savings", "name": "Schuylkill Savings Bank (fictional)", "type": "advertiser", "sector": "banking", "ad_revenue_per_issue": 250 },
+    { "id": "passyunk_eats", "name": "Passyunk Eats Restaurant Group (fictional)", "type": "advertiser", "sector": "restaurants", "ad_revenue_per_issue": 120 },
+    { "id": "mariners_hardware", "name": "Mariner's Hardware (fictional)", "type": "advertiser", "sector": "retail", "ad_revenue_per_issue": 150 }
+  ],
+
+  "staff_pool": [
+    { "id": "okafor", "name": "Rosa Okafor", "desk": "city_hall", "skill": 4, "salary_per_issue": 140, "voice": "Dry and precise. Follows the money. Short sentences, numbers up top.", "starting_candidate": true },
+    { "id": "kowalczyk", "name": "Marty Kowalczyk", "desk": "sports", "skill": 3, "salary_per_issue": 90, "voice": "Loud, superstitious South Philly fan who still knows his stats. Writes like he's talking at a bar.", "starting_candidate": true },
+    { "id": "tran", "name": "June Tran", "desk": "neighborhoods", "skill": 3, "salary_per_issue": 100, "voice": "Warm. Notices small details about places and daily routines.", "starting_candidate": true },
+    { "id": "hale", "name": "Desmond Hale", "desk": "business", "skill": 4, "salary_per_issue": 130, "voice": "Measured. Explains what the numbers mean for ordinary people.", "starting_candidate": true },
+    { "id": "raman", "name": "Priya Raman", "desk": "culture", "skill": 3, "salary_per_issue": 95, "voice": "Playful, with vivid descriptions of food, art and music.", "starting_candidate": false },
+    { "id": "brenner", "name": "Walt Brenner", "desk": "city_hall", "skill": 2, "salary_per_issue": 60, "voice": "Breathless. Loves a dramatic lede. Prone to overstatement.", "starting_candidate": false },
+    { "id": "ferraro", "name": "Lucia Ferraro", "desk": "neighborhoods", "skill": 5, "salary_per_issue": 190, "voice": "Patient and thorough. Quietly devastating understatement.", "starting_candidate": false }
+  ],
+
+  "desk_categories": {
+    "city_hall": ["politics"],
+    "business": ["economy"],
+    "neighborhoods": ["social"],
+    "sports": ["sports"],
+    "culture": ["culture"],
+    "_note": "World/national stories have no desk; any reporter can rewrite them from the wire at a small quality penalty."
+  },
+
+  "rival": {
+    "id": "herald",
+    "name": "The Philadelphia Herald",
+    "fictional": true,
+    "stance": "center",
+    "price": 2.0,
+    "strong_districts": ["center_city", "northwest", "northeast"],
+    "front_page_rule": "Leads with the highest-importance politics or economy story of the day. Never runs Puff on the lead. Puts sports below the fold unless it is a playoff win.",
+    "starting_share": 0.35
+  },
+
+  "origins": {
+    "founded": { "name": "Founded it", "cash": 6000, "debt": 0, "starting_readers": 1500, "trust": 50, "morale": 70, "cost_multiplier": 1.0, "reader_age_skew": "young" },
+    "inherited": { "name": "Inherited a family paper", "cash": 9000, "debt": 0, "starting_readers": 9000, "trust": 68, "morale": 55, "cost_multiplier": 1.2, "reader_age_skew": "old" },
+    "bought": { "name": "Bought a dying paper", "cash": 4000, "debt": 20000, "starting_readers": 14000, "trust": 45, "morale": 35, "cost_multiplier": 1.1, "reader_age_skew": "old", "readership_decline_per_issue": 0.01 }
+  },
+
+  "pricing": {
+    "cover_price": 1.5,
+    "print_cost_per_copy": 0.45,
+    "distribution_cost_per_district_per_issue": 80,
+    "newsstand_cost": 250,
+    "bureau_cost": 900
+  }
+}

@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Title screen</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Old+Standard+TT:ital,wght@0,400;0,700;1,400&family=Libre+Caslon+Text:ital,wght@0,400;0,700;1,400&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#2B2520}
+a{color:#1C1B18;text-decoration:none}
+a:hover{color:#9A4413}
+a:hover .hl{text-decoration:underline;text-decoration-thickness:3px;text-underline-offset:6px}
+</style>
+</helmet>
+<div style="width: 1440px; height: 900px; position: relative; overflow: hidden; background: #2B2520; font-family: 'Libre Caslon Text', Georgia, serif; color: #1C1B18">
+
+<svg width="1440" height="900" aria-hidden="true" style="position: absolute; inset: 0">
+<g stroke="#342C26" stroke-width="2" fill="none">
+<path d="M0 70 C300 62 700 80 1440 66"/>
+<path d="M0 190 C400 200 900 180 1440 196"/>
+<path d="M0 330 C500 322 1000 342 1440 328"/>
+<path d="M0 480 C350 490 800 470 1440 486"/>
+<path d="M0 640 C450 632 950 652 1440 636"/>
+<path d="M0 800 C300 810 850 792 1440 806"/>
+</g>
+</svg>
+
+<div style="position: absolute; left: 132px; top: 52px; width: 820px; height: 900px; background: #D6CCB4; transform: rotate(1.2deg)"></div>
+
+<div style="position: absolute; left: 140px; top: 36px; width: 820px; height: 900px; box-sizing: border-box; background: #F1EAD7; transform: rotate(-1.6deg); padding: 30px 40px; display: flex; flex-direction: column; gap: 14px">
+
+<div style="display: flex; justify-content: space-between; font-family: 'IBM Plex Mono', monospace; font-size: 11px; text-transform: uppercase; letter-spacing: 1.5px; color: #4A4438; border-bottom: 1px solid #1C1B18; padding-bottom: 6px"><span>Vol. I · No. 1</span><span>Late city edition</span><span>Price: your integrity</span></div>
+
+<div style="text-align: center; font-family: 'Old Standard TT', serif; font-size: 104px; font-weight: 700; line-height: 0.95; letter-spacing: -1px">Above the Fold</div>
+
+<div style="border-top: 3px double #1C1B18; border-bottom: 1px solid #1C1B18; padding: 6px 0; display: flex; justify-content: space-between; font-family: 'IBM Plex Mono', monospace; font-size: 12px; text-transform: uppercase; letter-spacing: 1px; color: #3A362E"><span>Port Harrow</span><span>Thursday, October 22, 2026</span><span>All the news you choose to print</span></div>
+
+<a href="Setup.dc.html" style="display: flex; flex-direction: column; gap: 6px; padding: 6px 0 4px">
+<span style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; text-transform: uppercase; letter-spacing: 2px; color: #9A4413">▸ New game</span>
+<span class="hl" style="font-family: 'Old Standard TT', serif; font-size: 58px; font-weight: 700; line-height: 1; text-transform: uppercase">Upstart launches paper on a shoestring</span>
+<span style="font-style: italic; font-size: 17px; color: #3A362E">New owner promises “the news people actually need.” Rival Herald declines to comment.</span>
+</a>
+
+<div style="display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); gap: 22px; border-top: 1px solid #1C1B18; padding-top: 14px">
+
+<div style="display: flex; flex-direction: column; gap: 8px">
+<svg viewBox="0 0 420 230" width="100%" role="img" aria-label="Halftone print of the Port Harrow waterfront at dawn">
+<defs>
+<pattern id="dk" width="6" height="6" patternUnits="userSpaceOnUse"><circle cx="3" cy="3" r="2.3" fill="#1C1B18"/></pattern>
+<pattern id="md" width="6" height="6" patternUnits="userSpaceOnUse"><circle cx="3" cy="3" r="1.5" fill="#1C1B18"/></pattern>
+<pattern id="lt" width="6" height="6" patternUnits="userSpaceOnUse"><circle cx="3" cy="3" r="0.8" fill="#1C1B18"/></pattern>
+</defs>
+<rect width="420" height="230" fill="#F1EAD7"/>
+<rect width="420" height="150" fill="url(#lt)"/>
+<circle cx="320" cy="92" r="30" fill="#F1EAD7"/>
+<path d="M0 150 L0 110 L30 110 L30 90 L58 90 L58 120 L80 120 L80 70 L96 62 L112 70 L112 120 L140 120 L140 98 L170 98 L170 128 L200 128 L200 84 L230 84 L230 116 L262 116 L262 104 L290 104 L290 132 L420 132 L420 150 Z" fill="url(#dk)"/>
+<rect x="0" y="150" width="420" height="80" fill="url(#md)"/>
+<path d="M300 150 L312 128 L360 128 L372 150 Z" fill="url(#dk)"/>
+<line x1="336" y1="128" x2="336" y2="96" stroke="#1C1B18" stroke-width="3"/>
+<g stroke="#F1EAD7" stroke-width="2.5">
+<line x1="20" y1="172" x2="90" y2="172"/><line x1="140" y1="186" x2="230" y2="186"/><line x1="270" y1="170" x2="360" y2="170"/><line x1="60" y1="206" x2="170" y2="206"/><line x1="250" y1="214" x2="330" y2="214"/>
+</g>
+<rect width="420" height="230" fill="none" stroke="#1C1B18" stroke-width="1.5"/>
+</svg>
+<span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: #4A4438">The harbor at dawn, where every story starts. Photo: staff.</span>
+
+<div style="border-top: 1px solid #1C1B18; padding-top: 8px; display: flex; flex-direction: column; gap: 6px">
+<span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; text-transform: uppercase; letter-spacing: 1.5px; color: #4A4438">Off the real wire today</span>
+<span style="font-size: 14px; line-height: 1.4">· [Live headline from today's news]</span>
+<span style="font-size: 14px; line-height: 1.4">· [Live headline from today's news]</span>
+<span style="font-size: 14px; line-height: 1.4">· [Live headline from today's news]</span>
+</div>
+</div>
+
+<div style="display: flex; flex-direction: column; gap: 14px; border-left: 1px solid #1C1B18; padding-left: 20px">
+<a href="Map.dc.html" style="display: flex; flex-direction: column; gap: 4px">
+<span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; text-transform: uppercase; letter-spacing: 2px; color: #9A4413">▸ Continue</span>
+<span class="hl" style="font-family: 'Old Standard TT', serif; font-size: 28px; font-weight: 700; line-height: 1.05">Ledger reaches day 214, circulation climbing</span>
+</a>
+<a href="#archive" style="display: flex; flex-direction: column; gap: 4px; border-top: 1px solid #1C1B18; padding-top: 12px">
+<span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; text-transform: uppercase; letter-spacing: 2px; color: #9A4413">▸ Load game</span>
+<span class="hl" style="font-family: 'Old Standard TT', serif; font-size: 24px; font-weight: 700; line-height: 1.1">Old editions found in basement archive</span>
+</a>
+
+<div style="border: 2px solid #1C1B18; padding: 10px 12px; display: flex; flex-direction: column; gap: 8px">
+<span style="font-family: 'Old Standard TT', serif; font-size: 18px; font-weight: 700; text-align: center; border-bottom: 1px solid #1C1B18; padding-bottom: 4px; letter-spacing: 3px">CLASSIFIEDS</span>
+<a href="#settings" style="font-size: 14px; line-height: 1.35"><span class="hl" style="font-weight: 700">SETTINGS.</span> Sound, text size, which wire services to trust. Inquire within.</a>
+<a href="#credits" style="font-size: 14px; line-height: 1.35"><span class="hl" style="font-weight: 700">CREDITS.</span> The people who made this paper. Ask for the staff box.</a>
+<a href="#quit" style="font-size: 14px; line-height: 1.35"><span class="hl" style="font-weight: 700">STOP THE PRESSES.</span> Close up shop for the night.</a>
+</div>
+</div>
+</div>
+
+<svg width="150" height="150" aria-hidden="true" style="position: absolute; right: 30px; bottom: 120px">
+<circle cx="75" cy="75" r="56" fill="none" stroke="#B89F76" stroke-width="5" stroke-dasharray="230 40 60 20" opacity="0.7"/>
+<circle cx="75" cy="75" r="50" fill="none" stroke="#C9B48F" stroke-width="2" stroke-dasharray="120 60" opacity="0.6"/>
+</svg>
+</div>
+
+<div style="position: absolute; left: 1020px; top: 130px; width: 340px; transform: rotate(4deg); background: #FBF8F0; border: 1px solid #1C1B18; display: flex; flex-direction: column">
+<div style="position: absolute; top: -26px; left: 150px; width: 40px; height: 44px; background: #4A4F55; border: 2px solid #1C1B18"></div>
+<div style="background: #E08A2E; border-bottom: 1px solid #1C1B18; padding: 18px 20px 12px; display: flex; justify-content: space-between; align-items: baseline">
+<span style="font-family: 'Old Standard TT', serif; font-size: 34px; font-weight: 700; letter-spacing: 6px">PRESS</span>
+<span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; text-transform: uppercase; letter-spacing: 1px">No. 0001</span>
+</div>
+<div style="padding: 18px 20px; display: flex; flex-direction: column; gap: 12px; align-items: center">
+<img src="/_blob/5598096377cc4e5d24663434b662e2cb" alt="Tapestry Games logo" style="width: 280px; height: auto">
+<span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; text-transform: uppercase; letter-spacing: 2px; color: #3A362E">A Tapestry Games production</span>
+</div>
+</div>
+
+<div style="position: absolute; left: 1050px; top: 560px; width: 300px; transform: rotate(-3deg); background: #EFE6CF; border: 1px dashed #5E584C; padding: 14px 16px; display: flex; flex-direction: column; gap: 6px">
+<span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: #4A4438">Wire · 06:02 · Urgent</span>
+<span style="font-family: 'IBM Plex Mono', monospace; font-size: 14px; line-height: 1.45">EDITOR WANTED. MUST HANDLE DEADLINES, ANGRY MAYORS, AND THE TRUTH. START TODAY.</span>
+</div>
+
+<div style="position: absolute; right: 32px; bottom: 24px; font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: #B8AC94; text-transform: uppercase; letter-spacing: 1.5px">Prototype v0.1 · click a headline</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":900}}'>
+class Component extends DCLogic {
+renderVals() {
+return {};
+}
+}
+</script>
+</body>
+</html>

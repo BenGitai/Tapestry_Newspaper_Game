@@ -1,0 +1,182 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>New game setup</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Old+Standard+TT:ital,wght@0,400;0,700;1,400&family=Libre+Caslon+Text:ital,wght@0,400;0,700;1,400&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#2B2520}
+a{color:#1C1B18}a:hover{color:#9A4413}
+button{font:inherit;cursor:pointer}
+input[type=range]{accent-color:#1C1B18}
+</style>
+</helmet>
+<div style="width: 1440px; height: 900px; position: relative; overflow: hidden; background: #2B2520; font-family: 'Libre Caslon Text', Georgia, serif; color: #1C1B18">
+
+<svg width="1440" height="900" aria-hidden="true" style="position: absolute; inset: 0">
+<g stroke="#342C26" stroke-width="2" fill="none">
+<path d="M0 70 C300 62 700 80 1440 66"/>
+<path d="M0 190 C400 200 900 180 1440 196"/>
+<path d="M0 330 C500 322 1000 342 1440 328"/>
+<path d="M0 480 C350 490 800 470 1440 486"/>
+<path d="M0 640 C450 632 950 652 1440 636"/>
+<path d="M0 800 C300 810 850 792 1440 806"/>
+</g>
+</svg>
+
+<div style="position: absolute; left: 48px; top: 26px; width: 900px; height: 852px; box-sizing: border-box; background: #F1EAD7; transform: rotate(-0.8deg); padding: 26px 34px; display: flex; flex-direction: column; gap: 14px">
+
+<div style="display: flex; justify-content: space-between; align-items: flex-end; border-bottom: 3px double #1C1B18; padding-bottom: 8px">
+<div style="display: flex; flex-direction: column; gap: 2px">
+<span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; text-transform: uppercase; letter-spacing: 2px; color: #4A4438">Form 1-A · Bureau of Publications</span>
+<span style="font-family: 'Old Standard TT', serif; font-size: 34px; font-weight: 700; line-height: 1">Application to register a newspaper</span>
+</div>
+<a href="Main.dc.html" style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; text-transform: uppercase; letter-spacing: 1px; padding: 8px 12px; border: 1.5px solid #1C1B18; text-decoration: none">Quick start ▸</a>
+</div>
+
+<div style="display: flex; align-items: center; gap: 14px">
+<label for="paper-name" style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; text-transform: uppercase; letter-spacing: 1px; white-space: nowrap">1. Name of paper</label>
+<input id="paper-name" type="text" value="{{name}}" onChange="{{setName}}" style="flex: 1; height: 40px; border: none; border-bottom: 1.5px solid #1C1B18; background: transparent; font-family: 'Old Standard TT', serif; font-size: 24px; font-weight: 700; color: #1C1B18; padding: 0 4px; outline: none">
+</div>
+
+<div style="display: flex; flex-direction: column; gap: 8px">
+<span style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; text-transform: uppercase; letter-spacing: 1px">2. City of publication <span style="color: #4A4438">· sets your local news &amp; teams</span></span>
+<div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px">
+<sc-for list="{{cities}}" as="c" hint-placeholder-count="8">
+<button onClick="{{c.pick}}" style="height: 62px; border: 1.5px solid #1C1B18; background: {{c.bg}}; color: {{c.fg}}; display: flex; flex-direction: column; align-items: flex-start; justify-content: center; gap: 4px; padding: 0 12px; text-align: left">
+<span style="font-family: 'Old Standard TT', serif; font-size: 18px; font-weight: 700">{{c.name}}</span>
+<span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px">{{c.tag}}</span>
+</button>
+</sc-for>
+</div>
+</div>
+
+<div style="display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 22px">
+<div style="display: flex; flex-direction: column; gap: 8px">
+<span style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; text-transform: uppercase; letter-spacing: 1px">3. How you got the paper</span>
+<sc-for list="{{origins}}" as="o" hint-placeholder-count="3">
+<button onClick="{{o.pick}}" style="min-height: 52px; border: 1.5px solid #1C1B18; background: {{o.bg}}; color: {{o.fg}}; display: flex; flex-direction: column; align-items: flex-start; gap: 2px; padding: 8px 12px; text-align: left">
+<span style="font-family: 'Old Standard TT', serif; font-size: 17px; font-weight: 700">{{o.name}}</span>
+<span style="font-size: 12px">{{o.desc}}</span>
+</button>
+</sc-for>
+</div>
+
+<div style="display: flex; flex-direction: column; gap: 12px">
+<div style="display: flex; flex-direction: column; gap: 8px">
+<span style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; text-transform: uppercase; letter-spacing: 1px">4. Frequency</span>
+<div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); border: 1.5px solid #1C1B18">
+<sc-for list="{{freqs}}" as="f" hint-placeholder-count="3">
+<button onClick="{{f.pick}}" style="height: 44px; border: none; border-right: 1px solid #1C1B18; background: {{f.bg}}; color: {{f.fg}}; font-family: 'IBM Plex Mono', monospace; font-size: 12px; text-transform: uppercase">{{f.name}}</button>
+</sc-for>
+</div>
+<span style="font-size: 12px; font-style: italic; color: #3A362E">{{freqNote}}</span>
+</div>
+</div>
+</div>
+
+<div style="display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 22px">
+<div style="display: flex; flex-direction: column; gap: 6px">
+<span style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; text-transform: uppercase; letter-spacing: 1px">5. Coverage split</span>
+<sc-for list="{{desks}}" as="d" hint-placeholder-count="5">
+<div style="display: grid; grid-template-columns: 90px minmax(0, 1fr) 44px; align-items: center; gap: 10px; font-size: 13px">
+<label for="{{d.id}}">{{d.name}}</label>
+<input id="{{d.id}}" type="range" min="0" max="10" step="1" value="{{d.w}}" onChange="{{d.set}}" style="width: 100%">
+<span style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; text-align: right">{{d.pct}}</span>
+</div>
+</sc-for>
+</div>
+<div style="display: flex; flex-direction: column; gap: 8px">
+<span style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; text-transform: uppercase; letter-spacing: 1px">6. Stated editorial stance</span>
+<div style="display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); border: 1.5px solid #1C1B18">
+<sc-for list="{{stances}}" as="s" hint-placeholder-count="5">
+<button onClick="{{s.pick}}" style="height: 48px; border: none; border-right: 1px solid #1C1B18; background: {{s.bg}}; color: {{s.fg}}; font-family: 'IBM Plex Mono', monospace; font-size: 11px; text-transform: uppercase; line-height: 1.2; padding: 0 4px">{{s.name}}</button>
+</sc-for>
+</div>
+<span style="font-size: 12px; font-style: italic; color: #3A362E">This is only what you claim. Readers decide what you really are based on what you print.</span>
+</div>
+</div>
+</div>
+
+<div style="position: absolute; left: 1000px; top: 40px; width: 380px; transform: rotate(2deg); background: #FBF8F0; border: 1px solid #1C1B18; padding: 18px 20px; box-sizing: border-box; display: flex; flex-direction: column; gap: 10px">
+<span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; text-transform: uppercase; letter-spacing: 2px; color: #4A4438">Market report · {{city.name}}</span>
+<span style="font-family: 'Old Standard TT', serif; font-size: 24px; font-weight: 700; line-height: 1.1">{{city.headline}}</span>
+<span style="font-size: 13px; line-height: 1.5; color: #3A362E">{{city.blurb}}</span>
+<div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; font-family: 'IBM Plex Mono', monospace; font-size: 12px">
+<div style="border: 1px solid #1C1B18; padding: 8px 10px; display: flex; flex-direction: column; gap: 2px"><span style="font-size: 11px; color: #4A4438; text-transform: uppercase">Rivals</span><span style="font-weight: 500">{{city.rivals}}</span></div>
+<div style="border: 1px solid #1C1B18; padding: 8px 10px; display: flex; flex-direction: column; gap: 2px"><span style="font-size: 11px; color: #4A4438; text-transform: uppercase">Difficulty</span><span style="font-weight: 500">{{city.tag}}</span></div>
+</div>
+<span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: #4A4438">Local news, teams and districts load from the live feed for this city.</span>
+</div>
+
+<div style="position: absolute; left: 1010px; top: 380px; width: 360px; height: 300px; transform: rotate(-2.5deg); background: #F4EEDC; border: 1px solid #A39A85; padding: 14px 18px; box-sizing: border-box; display: flex; flex-direction: column; gap: 8px; overflow: hidden">
+<span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; text-transform: uppercase; letter-spacing: 1.5px; color: #4A4438; text-align: center">Proof · first edition</span>
+<span style="font-family: 'Old Standard TT', serif; font-size: 34px; font-weight: 700; line-height: 1; text-align: center; border-bottom: 3px double #1C1B18; padding-bottom: 6px">{{name}}</span>
+<div style="display: flex; justify-content: space-between; font-family: 'IBM Plex Mono', monospace; font-size: 11px; text-transform: uppercase; color: #3A362E"><span>{{city.name}}</span><span>{{freqLabel}}</span><span>Ten cents</span></div>
+<div style="font-family: 'Old Standard TT', serif; font-size: 22px; font-weight: 700; line-height: 1.1; text-transform: uppercase">{{proofHeadline}}</div>
+<div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; flex: 1">
+<div style="background: #CFC5AE"></div>
+<div style="display: flex; flex-direction: column; gap: 5px"><div style="height: 6px; background: #A39A85"></div><div style="height: 6px; background: #A39A85"></div><div style="height: 6px; background: #A39A85"></div><div style="height: 6px; width: 70%; background: #A39A85"></div></div>
+<div style="display: flex; flex-direction: column; gap: 5px"><div style="height: 6px; background: #A39A85"></div><div style="height: 6px; background: #A39A85"></div><div style="height: 6px; width: 60%; background: #A39A85"></div></div>
+</div>
+</div>
+
+<a href="Main.dc.html" aria-label="File the application and start the game" style="position: absolute; left: 1060px; top: 720px; width: 260px; height: 130px; transform: rotate(-6deg); border: 5px double #E35F3E; color: #E35F3E; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; text-decoration: none; background: transparent">
+<span style="font-family: 'Old Standard TT', serif; font-size: 40px; font-weight: 700; letter-spacing: 4px">APPROVED</span>
+<span style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; text-transform: uppercase; letter-spacing: 2px; color: #F1EAD7">Click to stamp &amp; begin</span>
+</a>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":900}}'>
+class Component extends DCLogic {
+constructor(props) {
+super(props);
+this.state = { name: 'The Evening Ledger', city: 'chicago', origin: 'startup', freq: 'daily', stance: 'center', w: { politics: 5, economy: 3, social: 3, sports: 4, culture: 2 } };
+}
+renderVals() {
+const s = this.state;
+const on = (v) => v ? { bg: '#1C1B18', fg: '#F1EAD7' } : { bg: 'transparent', fg: '#1C1B18' };
+const cityData = [
+{ id: 'nyc', name: 'New York', tag: 'Very hard', rivals: 'Many, entrenched', headline: 'The most crowded news market in the country', blurb: 'Huge audience, but every niche already has a paper. You need a sharp angle to survive.' },
+{ id: 'chicago', name: 'Chicago', tag: 'Hard', rivals: 'Several', headline: 'Big city, loud politics, loyal sports fans', blurb: 'Plenty of local news and devoted readers, with established papers to fight for them.' },
+{ id: 'philly', name: 'Philadelphia', tag: 'Medium', rivals: 'A few', headline: 'Neighborhood pride runs deep', blurb: 'Strong local identity rewards papers that know their blocks.' },
+{ id: 'houston', name: 'Houston', tag: 'Medium', rivals: 'A few', headline: 'Sprawling city, scattered coverage', blurb: 'Lots of ground nobody covers well. Distribution costs are high.' },
+{ id: 'atlanta', name: 'Atlanta', tag: 'Medium', rivals: 'A few', headline: 'Fast-growing and politically watched', blurb: 'New residents arriving every year, many without a paper yet.' },
+{ id: 'seattle', name: 'Seattle', tag: 'Easy', rivals: 'Few', headline: 'Readers who still pay for news', blurb: 'An audience that values local reporting and a thin field of rivals.' },
+{ id: 'denver', name: 'Denver', tag: 'Easy', rivals: 'Few', headline: 'Room to grow', blurb: 'A mid-size market with gaps in local coverage. Recommended for new players.' },
+{ id: 'pittsburgh', name: 'Pittsburgh', tag: 'Easy', rivals: 'Few', headline: 'A town that reads the sports page first', blurb: 'Smaller audience, fiercely loyal once won. Recommended for new players.' }
+];
+const cities = cityData.map((c) => ({ ...c, ...on(c.id === s.city), pick: () => this.setState({ city: c.id }) }));
+const city = cityData.find((c) => c.id === s.city);
+const origins = [
+{ id: 'startup', name: 'Founded it', desc: 'Small budget, no readers, no baggage.' },
+{ id: 'inherited', name: 'Inherited a family paper', desc: 'Loyal but aging readers. Old habits.' },
+{ id: 'bought', name: 'Bought a dying paper', desc: 'A famous name, a big debt, a bitter newsroom.' }
+].map((o) => ({ ...o, ...on(o.id === s.origin), pick: () => this.setState({ origin: o.id }) }));
+const freqNotes = { daily: 'Each issue pulls from the last day of real news. Fast, reactive, exhausting.', weekly: 'Each issue covers the past week. Pick the story that actually mattered.', monthly: 'Long-form and analysis. Slow to react, built on reputation.' };
+const freqs = ['daily', 'weekly', 'monthly'].map((id) => ({ name: id, ...on(id === s.freq), pick: () => this.setState({ freq: id }) }));
+const stanceList = [['left', 'Left'], ['cleft', 'Center-left'], ['center', 'Neutral'], ['cright', 'Center-right'], ['right', 'Right']];
+const stances = stanceList.map(([id, name]) => ({ name, ...on(id === s.stance), pick: () => this.setState({ stance: id }) }));
+const deskNames = [['politics', 'Politics'], ['economy', 'Economy'], ['social', 'Social'], ['sports', 'Sports'], ['culture', 'Culture']];
+const total = deskNames.reduce((a, [id]) => a + s.w[id], 0) || 1;
+const desks = deskNames.map(([id, name]) => ({ id: 'desk-' + id, name, w: s.w[id], pct: Math.round((s.w[id] / total) * 100) + '%', set: (e) => this.setState({ w: { ...this.state.w, [id]: Number(e.target.value) } }) }));
+const top = deskNames.reduce((best, d) => (s.w[d[0]] > s.w[best[0]] ? d : best));
+const proof = { politics: 'City Hall braces for a new watchdog', economy: 'New paper promises to follow the money', social: 'A paper for the neighborhoods, by the neighborhoods', sports: 'Finally, a paper that bleeds for the home team', culture: 'New paper puts the arts on page one' };
+return {
+name: s.name, setName: (e) => this.setState({ name: e.target.value }),
+cities, city, origins, freqs, stances, desks,
+freqNote: freqNotes[s.freq],
+freqLabel: s.freq,
+proofHeadline: proof[top[0]]
+};
+}
+}
+</script>
+</body>
+</html>
