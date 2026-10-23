@@ -1,10 +1,14 @@
 import { describe, expect, it } from 'vitest';
 import worldRaw from '../../data/districts.philly.json';
+import storiesRaw from '../../data/stories.philly.json';
+import { DEMO_DAYS, GENERATED_PER_DAY } from '../sim/balance.ts';
+import { storySchema } from './schemas.ts';
 import { JsonStorySource } from './StorySource.ts';
-import { displayName, loadGameData, parseWorld } from './worldData.ts';
+import { displayName, loadGameData, parseWorld, validateSubtopics } from './worldData.ts';
 
 describe('demo data', () => {
-  const { world, stories, cities } = loadGameData();
+  const { world, cities, subtopics } = loadGameData();
+  const stories = new JsonStorySource(storiesRaw);
 
   it('loads 30 stories over 4 days', () => {
     expect(stories.allStories()).toHaveLength(30);
@@ -15,6 +19,10 @@ describe('demo data', () => {
   it('every category has stories, including science and tech', () => {
     const cats = new Set(stories.allStories().map((s) => s.category));
     expect([...cats].sort()).toEqual(['culture', 'economy', 'politics', 'science', 'social', 'sports', 'world']);
+  });
+
+  it('every story has a subtopic from its category, and every reporter an interest', () => {
+    expect(() => validateSubtopics(stories, world, subtopics)).not.toThrow();
   });
 
   it('story lean signals are balanced between left and right', () => {
@@ -66,5 +74,57 @@ describe('demo data', () => {
 
   it('strips the fictional marker for print', () => {
     expect(displayName('Helix Forge Therapeutics (fictional)')).toBe('Helix Forge Therapeutics');
+  });
+});
+
+describe('generated news', () => {
+  const { world, stories, subtopics } = loadGameData();
+  const all = stories.allStories();
+  const generated = all.filter((s) => s.id.startsWith('g'));
+
+  it('covers every day of the demo with valid stories', () => {
+    expect(stories.dayCount()).toBe(DEMO_DAYS);
+    for (const d of [1, 2, 3, 4, 5, 33]) expect(stories.storiesForDay(d)).toHaveLength(GENERATED_PER_DAY);
+    expect(stories.storiesForDay(5)).toHaveLength(GENERATED_PER_DAY);
+    expect(stories.storiesForDay(DEMO_DAYS)).toHaveLength(GENERATED_PER_DAY);
+    for (const s of generated) expect(() => storySchema.parse(s)).not.toThrow();
+    expect(() => validateSubtopics(stories, world, subtopics)).not.toThrow();
+  });
+
+  it('is deterministic and ids resolve', () => {
+    const again = loadGameData().stories.storiesForDay(23);
+    expect(again).toEqual(stories.storiesForDay(23));
+    expect(stories.storyById(generated[100]!.id)).toEqual(generated[100]);
+  });
+
+  it('every number in a headline appears in the facts', () => {
+    for (const s of generated) {
+      const facts = s.facts.join(' ');
+      for (const num of s.wire_headline.match(/\d[\d,.]*/g) ?? []) expect(facts, s.wire_headline).toContain(num.replace(/[.,]$/, ''));
+    }
+  });
+
+  it('only references real districts and entities, and every category appears each day', () => {
+    const districtIds = new Set(world.districts.map((d) => d.id));
+    const entityIds = new Set(world.entities.map((e) => e.id));
+    for (const s of generated) {
+      for (const d of s.districts) expect(districtIds.has(d)).toBe(true);
+      for (const t of s.targets) expect(entityIds.has(t)).toBe(true);
+    }
+    for (let d = 5; d <= 12; d++) expect(new Set(stories.storiesForDay(d).map((s) => s.category)).size).toBe(7);
+  });
+
+  it('left and right lean stay balanced across the whole demo, also weighted by importance', () => {
+    for (const weight of [() => 1, (s: { importance: number }) => s.importance]) {
+      const left = generated.filter((s) => s.hard_hitting_lean < 0).reduce((a, s) => a + s.hard_hitting_lean * weight(s), 0);
+      const right = generated.filter((s) => s.hard_hitting_lean > 0).reduce((a, s) => a + s.hard_hitting_lean * weight(s), 0);
+      expect(Math.abs(left + right) / Math.max(1, right - left)).toBeLessThan(0.05);
+    }
+  });
+
+  it('hand-written days keep their designed headlines on top', () => {
+    for (let d = 1; d <= 4; d++) {
+      for (const s of stories.storiesForDay(d).filter((x) => x.id.startsWith('g'))) expect(s.importance).toBeLessThanOrEqual(3);
+    }
   });
 });

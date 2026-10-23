@@ -1,0 +1,56 @@
+{
+  "_note": "Sub-focuses within each category. Every story has one; every reporter has a personal interest; the player can set each reporter's focus. City-independent.",
+  "subtopics": {
+    "politics": [
+      { "id": "council", "name": "City Council & City Hall" },
+      { "id": "elections", "name": "Elections & campaigns" },
+      { "id": "policy", "name": "Budgets & policy" },
+      { "id": "state_federal", "name": "State & national politics" },
+      { "id": "courts", "name": "Courts & justice" }
+    ],
+    "economy": [
+      { "id": "jobs", "name": "Jobs & labor" },
+      { "id": "real_estate", "name": "Real estate & development" },
+      { "id": "small_business", "name": "Small business" },
+      { "id": "transit", "name": "Transit & infrastructure" },
+      { "id": "finance", "name": "Banks & markets" }
+    ],
+    "social": [
+      { "id": "education", "name": "Schools & education" },
+      { "id": "health", "name": "Public health" },
+      { "id": "housing", "name": "Housing" },
+      { "id": "safety", "name": "Public safety" },
+      { "id": "community", "name": "Community life" }
+    ],
+    "sports": [
+      { "id": "baseball", "name": "Baseball" },
+      { "id": "football", "name": "Football" },
+      { "id": "basketball", "name": "Basketball" },
+      { "id": "hockey", "name": "Hockey" },
+      { "id": "soccer", "name": "Soccer" },
+      { "id": "college", "name": "College & high school" }
+    ],
+    "culture": [
+      { "id": "music", "name": "Music" },
+      { "id": "food", "name": "Food & dining" },
+      { "id": "arts", "name": "Art & theater" },
+      { "id": "film", "name": "Film & TV" },
+      { "id": "heritage", "name": "History & heritage" }
+    ],
+    "science": [
+      { "id": "medicine", "name": "Health & medicine" },
+      { "id": "climate", "name": "Energy & climate" },
+      { "id": "tech", "name": "Tech & startups" },
+      { "id": "research", "name": "Research & universities" },
+      { "id": "cyber", "name": "Cybersecurity & data" }
+    ],
+    "world": [
+      { "id": "national", "name": "National" },
+      { "id": "americas", "name": "The Americas" },
+      { "id": "europe", "name": "Europe" },
+      { "id": "africa", "name": "Africa" },
+      { "id": "asia", "name": "Asia & Pacific" },
+      { "id": "middle_east", "name": "Middle East" }
+    ]
+  }
+}

@@ -127,3 +127,14 @@ describe('assignments, training and morale', () => {
     expect([...sw.strengths, ...sw.weaknesses]).not.toContain('charge');
   });
 });
+
+describe('focus morale', () => {
+  it('a focus on their interest lifts morale; another focus wears it down a little', () => {
+    const g = start(['kowalczyk', 'tran']);
+    const m = g.staff[0]!;
+    const happy = advanceStaff([{ ...m, assignment: { ...m.assignment, focus: 'baseball' } }], {}, world)[0]!;
+    const meh = advanceStaff([{ ...m, assignment: { ...m.assignment, focus: 'hockey' } }], {}, world)[0]!;
+    expect(happy.morale).toBeGreaterThan(m.morale);
+    expect(meh.morale).toBeLessThan(m.morale);
+  });
+});

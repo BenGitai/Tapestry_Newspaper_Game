@@ -1,6 +1,6 @@
 // Shared pieces for anything that shows reporters: attribute tables and the assignment editor.
 import { ATTRIBUTE_KEYS, CATEGORIES, type Attributes, type Reporter } from '../../data/schemas.ts';
-import { loadGameData } from '../../data/worldData.ts';
+import { loadGameData, subtopicName } from '../../data/worldData.ts';
 import { STYLE, WORKLOAD } from '../../sim/balance.ts';
 import {
   ATTRIBUTE_HELP,
@@ -12,7 +12,7 @@ import {
   scoutedRange,
   strengthsAndWeaknesses,
 } from '../../sim/staff.ts';
-import type { StaffAssignment, StaffMember, Workload, WritingStyle } from '../../sim/types.ts';
+import type { Frequency, StaffAssignment, StaffMember, Workload, WritingStyle } from '../../sim/types.ts';
 import styles from './StaffParts.module.css';
 
 const STYLE_LABEL: Record<WritingStyle, string> = { news: 'News', feature: 'Feature', investigative: 'Investigative' };
@@ -37,7 +37,8 @@ export function patchLabel(patch: string): string {
 }
 
 export function assignmentSummary(a: StaffAssignment): string {
-  return `${CATEGORY_LABEL[a.beat]} · ${patchLabel(a.patch)} · ${STYLE_LABEL[a.style]} · ${WORKLOAD_LABEL[a.workload]}`;
+  const focus = a.focus !== 'none' ? ` (${subtopicName(a.focus)})` : '';
+  return `${CATEGORY_LABEL[a.beat]}${focus} · ${patchLabel(a.patch)} · ${STYLE_LABEL[a.style]} · ${WORKLOAD_LABEL[a.workload]}`;
 }
 
 /** 1-20 attributes as numbers with bars. Unscouted candidates show a range instead. */
@@ -103,6 +104,7 @@ export function ReporterHeader({ reporter, sub }: { reporter: Reporter; sub?: st
       <div className={styles.meta}>
         {DESK_LABEL[reporter.desk]} desk · ${reporter.salary_per_issue}/issue{sub ? ` · ${sub}` : ''}
       </div>
+      <div className={styles.interest}>Loves writing about: {subtopicName(reporter.interest)}</div>
       <div className={styles.voice}>“{reporter.voice}”</div>
     </div>
   );
@@ -114,22 +116,41 @@ interface EditorProps {
   member?: StaffMember;
   onChange: (a: StaffAssignment) => void;
   compact?: boolean;
+  frequency?: Frequency;
 }
 
 /** Beat, patch, writing style, workload and training for one reporter. */
-export function AssignmentEditor({ reporter, value, member, onChange, compact }: EditorProps) {
-  const { world } = loadGameData();
+export function AssignmentEditor({ reporter, value, member, onChange, compact, frequency = 'daily' }: EditorProps) {
+  const { world, subtopics } = loadGameData();
   const home = homeBeat(world, reporter);
-  const cap = filingCapacity(reporter, member ? { ...member, assignment: value } : { reporterId: reporter.id, hiredIssue: 0, morale: 50, growth: {}, assignment: value });
+  const cap = filingCapacity(reporter, member ? { ...member, assignment: value } : { reporterId: reporter.id, hiredIssue: 0, morale: 50, growth: {}, assignment: value }, frequency);
+  const setBeat = (beat: StaffAssignment['beat']) => {
+    // Keep the focus only if it belongs to the new beat; prefer their own interest if it does.
+    const subs = subtopics[beat].map((s) => s.id);
+    const focus = subs.includes(value.focus) ? value.focus : subs.includes(reporter.interest) ? reporter.interest : 'none';
+    onChange({ ...value, beat, focus });
+  };
   return (
     <div className={`${styles.editor} ${compact ? styles.compact : ''}`}>
       <label className={styles.row}>
         <span>Beat</span>
-        <select value={value.beat} onChange={(e) => onChange({ ...value, beat: e.target.value as StaffAssignment['beat'] })}>
+        <select value={value.beat} onChange={(e) => setBeat(e.target.value as StaffAssignment['beat'])}>
           {CATEGORIES.map((c) => (
             <option key={c} value={c}>
               {CATEGORY_LABEL[c]}
               {c === home ? ' (home desk)' : ''}
+            </option>
+          ))}
+        </select>
+      </label>
+      <label className={styles.row}>
+        <span>Focus</span>
+        <select value={value.focus} onChange={(e) => onChange({ ...value, focus: e.target.value })}>
+          <option value="none">No particular focus</option>
+          {subtopics[value.beat].map((s) => (
+            <option key={s.id} value={s.id}>
+              {s.name}
+              {s.id === reporter.interest ? ' ★ their favorite' : ''}
             </option>
           ))}
         </select>
@@ -179,6 +200,8 @@ export function AssignmentEditor({ reporter, value, member, onChange, compact }:
       <div className={styles.preview}>
         Files about <b>{cap} in</b> per issue · writes <b>{ANGLE_LABEL[STYLE[value.style].angle]}</b> by default
         {value.beat !== home ? <span className={styles.warn}> · off their home desk</span> : null}
+        {value.focus !== 'none' && value.focus === reporter.interest ? <span className={styles.good}> · happy with this focus</span> : null}
+        {value.focus !== 'none' && value.focus !== reporter.interest ? <span className={styles.warn}> · not their favorite (small morale cost)</span> : null}
         {!compact ? <div className={styles.help}>{STYLE_HELP[value.style]} {WORKLOAD_HELP[value.workload]}</div> : null}
       </div>
     </div>

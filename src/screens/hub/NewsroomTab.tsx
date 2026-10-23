@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { articleSource } from '../../data/ArticleSource.ts';
 import { ANGLES, type Angle, type Reporter } from '../../data/schemas.ts';
-import { loadGameData } from '../../data/worldData.ts';
+import { loadGameData, subtopicName } from '../../data/worldData.ts';
 import { articleInches, backlog, hasRoomFor, isCovered, remainingCapacity, selectedForPrint, wireForIssue } from '../../sim/newsroom.ts';
 import { activeStaff, CATEGORY_LABEL, currentAttributes, filingCapacity, reporterById, shownAssignment } from '../../sim/staff.ts';
 import type { Article, GameState, StaffMember } from '../../sim/types.ts';
@@ -152,7 +152,7 @@ function RosterCard({ game, member, on, onClick }: { game: GameState; member: St
   const r = reporterById(world, member.reporterId);
   if (!r) return null;
   const starts = member.hiredIssue > game.issueNumber;
-  const cap = filingCapacity(r, member);
+  const cap = filingCapacity(r, member, game.setup.frequency);
   const used = cap - remainingCapacity(game, world, member);
   const filed = backlog(game).filter((a) => a.reporterId === r.id && a.issueFiled === game.issueNumber).length;
   const waiting = backlog(game).filter((a) => a.reporterId === r.id && a.issueFiled < game.issueNumber).length;
@@ -199,10 +199,11 @@ function ArticleSlip({ game, article, on, tilt, onOpen }: { game: GameState; art
       <div className={n.slipMeta}>
         <span>
           {bylineOf(article)} · {STYLE_SHORT[article.style]} · {ANGLE_LABEL[article.angle]} · {article.inches} in
+          {article.onFocus ? <em className={n.focus}> · ★ focus</em> : null}
         </span>
         <span>
           {article.commissioned ? <em className={n.commissioned}>Commissioned · </em> : null}
-          {sc.superseded ? <em className={n.stale}>Overtaken by events</em> : age > 0 ? <em className={n.stale}>{age} issue{age > 1 ? 's' : ''} old</em> : CATEGORY_LABEL[sc.story.category]}
+          {sc.superseded ? <em className={n.stale}>Overtaken by events</em> : age > 0 ? <em className={n.stale}>{age} issue{age > 1 ? 's' : ''} old</em> : subtopicName(sc.story.subtopic)}
         </span>
       </div>
       <div className={n.slipHead}>{articleSource().get({ storyId: article.storyId, journalistId: article.reporterId, angle: article.angle, tier: 'secondary' }, sc.story).headline}</div>
@@ -236,7 +237,7 @@ function ArticleDetail({ game, article }: { game: GameState; article: Article })
   return (
     <>
       <div className={styles.kicker}>
-        {CATEGORY_LABEL[story.category]} · via {src?.name} · {story.filed_at} · importance {story.importance}/5
+        {CATEGORY_LABEL[story.category]} · {subtopicName(story.subtopic)} · via {src?.name} · importance {story.importance}/5
       </div>
       <div className={n.detailHead}>{copy.headline}</div>
       <div className={n.detailMeta}>
@@ -333,7 +334,7 @@ function WireDesk({ game }: { game: GameState }) {
           <div key={s.id} className={n.wireSlip}>
             <div className={n.slipMeta}>
               <span>
-                {CATEGORY_LABEL[s.category]} · {s.filed_at} · {s.base_column_inches} in
+                {CATEGORY_LABEL[s.category]} · {subtopicName(s.subtopic)} · {s.base_column_inches} in
               </span>
               <span>{'■'.repeat(s.importance)}{'□'.repeat(5 - s.importance)}</span>
             </div>

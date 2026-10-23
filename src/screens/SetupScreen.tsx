@@ -17,8 +17,8 @@ const ORIGIN_DESC: Record<string, string> = {
 };
 
 const FREQ: { id: Frequency; label: string; note: string; enabled: boolean }[] = [
-  { id: 'daily', label: 'Daily', note: 'An issue every day. Fast, reactive, exhausting. Four issues in the demo.', enabled: true },
-  { id: 'weekly', label: 'Weekly', note: 'One issue covers the whole week: more stories to choose from, one shot to get it right.', enabled: true },
+  { id: 'daily', label: 'Daily', note: 'An issue every day: one day of news each time. Fast, reactive, exhausting. Ten issues in the demo.', enabled: true },
+  { id: 'weekly', label: 'Weekly', note: 'One issue per week: the week’s biggest stories, a week of reporting, one shot to get it right. Ten issues in the demo.', enabled: true },
   { id: 'monthly', label: 'Monthly', note: 'Long-form and analysis. Not in the demo.', enabled: false },
 ];
 

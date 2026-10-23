@@ -107,7 +107,7 @@ export const FRONT_PAGE_AD_MULTIPLIER = 1.25;
 // ---------------------------------------------------------------------------
 
 /** Column inches a reporter can file per issue = (base + speed x perSpeed) x workload x style pace. Speed is 1-20. */
-export const FILING_CAPACITY = { base: 4, perSpeed: 0.8 } as const;
+export const FILING_CAPACITY = { base: 12, perSpeed: 1.5 } as const;
 
 export const WORKLOAD = {
   light: { capacity: 0.8, moralePerIssue: 3, correctionRisk: 0.8 },
@@ -267,9 +267,9 @@ export const MONEY = {
   /** Share of the debt you must repay each issue. */
   debtRepayment: 0.03,
   /** Rent, editors, utilities: per issue, times the origin's cost multiplier. */
-  overheadPerIssue: 2000,
+  overheadPerIssue: 2200,
   /** Delivery and newsstand cut, per copy sold. */
-  deliveryPerCopy: 0.5,
+  deliveryPerCopy: 0.6,
   /** The wire service charges for each wire-copy story you print. */
   wireCopyFee: 60,
   /** Distribution is only paid in districts with at least this many readers or a newsstand. */
@@ -310,3 +310,48 @@ export const AWARDS = { moraleBonus: 10 } as const;
 
 /** Morale effects of the simulation. */
 export const MORALE_EVENTS = { correction: -8 } as const;
+
+// ---------------------------------------------------------------------------
+// Demo length and news volume
+// ---------------------------------------------------------------------------
+
+/** The demo ends after this many issues. */
+export const MAX_ISSUES = 10;
+/** Days of wire the demo can supply (10 weekly issues). */
+export const DEMO_DAYS = 70;
+/** Wire stories per day (hand-written days are topped up to this with generated news). */
+export const GENERATED_PER_DAY = 20;
+/**
+ * Once their beat is covered, reporters with copy left over pick up other
+ * uncovered stories (general assignment), at the off-desk quality penalty.
+ */
+export const GENERAL_ASSIGNMENT = true;
+/** Share of each reporter's copy that their own filing leaves free for the editor's commissions. */
+export const COMMISSION_RESERVE = 0.3;
+/** A weekly issue's wire is the week's most important stories, up to this many. */
+export const WEEKLY_WIRE_SIZE = 40;
+/** Reporters file this many times more copy for a weekly issue (a week of work). */
+export const FREQUENCY_CAPACITY = { daily: 1, weekly: 2.5, monthly: 6 } as const;
+
+// ---------------------------------------------------------------------------
+// Sub-focus: what a reporter is asked to concentrate on within their beat
+// ---------------------------------------------------------------------------
+
+export const FOCUS = {
+  /** When choosing what to file, a story on their focus counts as this much more important... */
+  filingPriority: 1.5,
+  /** ...and one on their personal interest this much more. */
+  interestPriority: 0.5,
+  /** Readership bonus (0..1 scale) for writing on their focus, and on their interest. */
+  readershipFocus: 0.06,
+  readershipInterest: 0.06,
+  /** On their focus they write with this much more accuracy and impact. */
+  attributeBonus: 2,
+  /** On their interest they write with this much more flair. */
+  interestFlair: 2,
+  /** Award chance multiplier on focus. */
+  awardFocus: 1.2,
+  /** Morale per issue when their focus is their interest, or something else. */
+  moraleWhenInterest: 2,
+  moraleWhenOther: -1,
+} as const;

@@ -3,13 +3,44 @@
 import storiesRaw from '../../data/stories.philly.json';
 import worldRaw from '../../data/districts.philly.json';
 import citiesRaw from '../../data/cities.json';
-import { cityListSchema, cityWorldSchema, type City, type CityWorld } from './schemas.ts';
+import subtopicsRaw from '../../data/subtopics.json';
+import { cityListSchema, cityWorldSchema, subtopicFileSchema, type Category, type City, type CityWorld, type SubtopicMap } from './schemas.ts';
 import { JsonStorySource, type StorySource } from './StorySource.ts';
+import { DemoStorySource } from './DemoStorySource.ts';
 
 export interface GameData {
   world: CityWorld;
   cities: City[];
   stories: StorySource;
+  subtopics: SubtopicMap;
+}
+
+export function parseSubtopics(raw: unknown): SubtopicMap {
+  return subtopicFileSchema.parse(raw).subtopics as SubtopicMap;
+}
+
+/** Every story's subtopic must belong to its category; every reporter's interest must exist. */
+export function validateSubtopics(stories: StorySource, world: CityWorld, subtopics: SubtopicMap, days = stories.dayCount()): void {
+  const all = new Set(Object.values(subtopics).flat().map((s) => s.id));
+  for (let d = 1; d <= days; d++) {
+    for (const s of stories.storiesForDay(d)) {
+      if (!subtopics[s.category].some((x) => x.id === s.subtopic)) throw new Error(`Story ${s.id}: subtopic ${s.subtopic} is not in ${s.category}`);
+    }
+  }
+  for (const r of world.staff_pool) if (!all.has(r.interest)) throw new Error(`Reporter ${r.id}: unknown interest ${r.interest}`);
+}
+
+export function subtopicName(id: string): string {
+  for (const list of Object.values(loadGameData().subtopics)) {
+    const s = list.find((x) => x.id === id);
+    if (s) return s.name;
+  }
+  return id;
+}
+
+export function categoryOfSubtopic(id: string): Category | undefined {
+  for (const [cat, list] of Object.entries(loadGameData().subtopics)) if (list.some((x) => x.id === id)) return cat as Category;
+  return undefined;
 }
 
 export function parseWorld(raw: unknown): CityWorld {
@@ -41,10 +72,13 @@ let cached: GameData | undefined;
 export function loadGameData(): GameData {
   if (cached) return cached;
   const world = parseWorld(worldRaw);
-  const stories = new JsonStorySource(storiesRaw);
-  validateStoryRefs(stories, world);
+  const hand = new JsonStorySource(storiesRaw);
+  validateStoryRefs(hand, world);
+  const subtopics = parseSubtopics(subtopicsRaw);
+  validateSubtopics(hand, world, subtopics, hand.dayCount());
+  const stories = new DemoStorySource(hand, world);
   const cities = cityListSchema.parse(citiesRaw).cities;
-  cached = { world, cities, stories };
+  cached = { world, cities, stories, subtopics };
   return cached;
 }
 

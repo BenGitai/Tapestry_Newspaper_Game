@@ -1,5 +1,43 @@
 # Devlog
 
+## 2026-10-23 · Ten issues, generated news, more copy, sub-focus
+
+**What changed**
+- **Ten issues per game** (`MAX_ISSUES`). Weekly papers get a new week of news each issue (days 1–70).
+- **News generator.** `src/data/NewsGenerator.ts` holds about 90 templates across all 37 subtopics. It's deterministic by day, fictional, and flagged `AI-CONTENT-REVIEW`. `DemoStorySource` merges it with the hand-written stories behind the same `StorySource` interface. Twenty stories a day; a weekly wire is the week's top 40.
+- **Subtopics** (`data/subtopics.json`):
+  - Each story has one, and each reporter has an interest (added to the data).
+  - The assignment editor has a Focus picker, with the reporter's favorite starred.
+  - Slips show the subtopic and a ★ focus marker.
+  - Focus affects filing priority, the scorecard and morale.
+- **More articles per writer.**
+  - Capacity raised (base 12 + 1.5 × speed), ×2.5 for a weekly.
+  - General assignment after the beat is covered.
+  - A 30% reserve for commissions, so commissioning works in practice.
+- **Tests:** 101 passing. New ones cover:
+  - Every generated story is valid, and headline numbers appear in its facts.
+  - Lean balance, raw and importance-weighted.
+  - Determinism.
+  - Full 10-issue daily and weekly games with no repeated news.
+  - More copy than space.
+  - Focus effects.
+  - The mirror test now flips the whole feed, generated news included.
+
+**Problems found and fixed**
+- Template headlines and facts could disagree on numbers (drawn twice). Number draws are now stable within a story.
+- The Flyers template gave a score in the headline that the facts never mentioned. The test caught it.
+- Generated lean was balanced by count but tilted left by importance. Balancing is now importance-weighted, and two right-leaning templates were added.
+- Once reporters filed to capacity, commissions became impossible. Added the commission reserve.
+
+**Balance** (`npm run simulate`, 10 daily issues)
+- Founded: about 1,500 → 10,000–11,500 readers, cash $6k → $5–18k depending on ads.
+- Wire copy now trades cash (fees) for readers.
+- All-puff costs about 20 trust points.
+- Printing nothing goes bankrupt.
+- Right stances still trail left in Philadelphia because of the district data (rules verified symmetric).
+
+**What's next:** the summarizer milestone. Article text is still built from the facts by templates.
+
 ## 2026-10-23 · Full gameplay loop, city map, more reporters
 
 **What changed**

@@ -1,13 +1,12 @@
 import { describe, expect, it } from 'vitest';
 import type { CityWorld, Story } from '../data/schemas.ts';
-import { JsonStorySource, type StorySource } from '../data/StorySource.ts';
+import type { StorySource } from '../data/StorySource.ts';
 import { loadGameData } from '../data/worldData.ts';
-import storiesRaw from '../../data/stories.philly.json';
-import { ADVERTISERS } from './balance.ts';
+import { ADVERTISERS, GENERATED_PER_DAY, WEEKLY_WIRE_SIZE } from './balance.ts';
 import { newStoryBlock, putBlock } from './layout.ts';
 import { writeLetters } from './letters.ts';
-import { createGame, defaultSetup, type Hire } from './newGame.ts';
-import { updateArticle } from './newsroom.ts';
+import { advanceIssue, createGame, defaultSetup, issueCount, type Hire } from './newGame.ts';
+import { updateArticle, wireForIssue } from './newsroom.ts';
 import { addNewsstand, openBureau, paperReport } from './paperStats.ts';
 import { leanFit, totalReaders } from './readers.ts';
 import { rivalFrontPage } from './rival.ts';
@@ -47,10 +46,16 @@ function mirrorWorld(w: CityWorld): CityWorld {
   return { ...w, districts: w.districts.map((d) => ({ ...d, lean_mix: { left: d.lean_mix.right, center: d.lean_mix.center, right: d.lean_mix.left } })) };
 }
 
+/** The demo's whole news feed with every lean flipped. */
 function mirrorStories(): StorySource {
-  const raw = structuredClone(storiesRaw) as { stories: Story[] };
-  for (const s of raw.stories) s.hard_hitting_lean = -s.hard_hitting_lean;
-  return new JsonStorySource(raw);
+  const flip = (s: Story | undefined): Story | undefined => s && { ...s, hard_hitting_lean: -s.hard_hitting_lean };
+  return {
+    wireSources: () => stories.wireSources(),
+    storiesForDay: (d) => stories.storiesForDay(d).map((s) => flip(s)!),
+    allStories: () => stories.allStories().map((s) => flip(s)!),
+    dayCount: () => stories.dayCount(),
+    storyById: (id) => flip(stories.storyById(id)),
+  };
 }
 
 describe('political symmetry (mirror test)', () => {
@@ -176,5 +181,40 @@ describe('letters', () => {
     expect(a).toHaveLength(2);
     expect(a.map((l) => l.tone).sort()).toEqual(['complaint', 'praise']);
     expect(a.find((l) => l.tone === 'complaint')!.text).toContain('Transit board approves fare increase');
+  });
+});
+
+describe('a full game', () => {
+  for (const frequency of ['daily', 'weekly'] as const) {
+    it(`a ${frequency} paper plays all 10 issues`, () => {
+      const setup: PaperSetup = { ...defaultSetup(), frequency, origin: 'inherited' };
+      let g = createGame(setup, world, stories, hires(['okafor', 'kowalczyk', 'tran', 'hale']), 5);
+      const seen = new Set<string>();
+      for (let i = 1; i <= 10; i++) {
+        expect(g.issueNumber).toBe(i);
+        const wire = wireForIssue(g, stories);
+        expect(wire.length).toBe(frequency === 'daily' ? GENERATED_PER_DAY : WEEKLY_WIRE_SIZE);
+        for (const s of wire) {
+          expect(seen.has(s.id)).toBe(false); // every issue brings new news
+          seen.add(s.id);
+        }
+        g = resolveIssue(printAll(g), world, stories).game;
+        expect(g.endReason).toBeUndefined();
+        if (i < 10) g = advanceIssue(g, world, stories);
+      }
+      expect(g.results).toHaveLength(10);
+      expect(issueCount(frequency, stories.dayCount())).toBe(10);
+    });
+  }
+
+  it('there is more news than space: four reporters file more than fits on two pages', () => {
+    for (const frequency of ['daily', 'weekly'] as const) {
+      const g = createGame({ ...defaultSetup(), frequency }, world, stories, hires(['okafor', 'kowalczyk', 'tran', 'hale']), 5);
+      const filedArea = g.articles.reduce((a, x) => a + x.inches * 1.4, 0); // text plus headline and gutter
+      const twoPages = 6 * 17 + 6 * 19;
+      if (frequency === 'weekly') expect(filedArea).toBeGreaterThan(twoPages);
+      expect(wireForIssue(g, stories).reduce((a, s) => a + s.base_column_inches * 1.4, 0)).toBeGreaterThan(twoPages);
+      expect(g.articles.length).toBeGreaterThanOrEqual(frequency === 'daily' ? 8 : 18);
+    }
   });
 });

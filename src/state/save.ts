@@ -18,7 +18,7 @@ export interface SaveStore {
   list(): SaveMeta[];
 }
 
-const VERSION = 1;
+const VERSION = 2;
 const KEY = (slot: SlotId) => `above-the-fold.save.v${VERSION}.${slot}`;
 const SLOTS: SlotId[] = ['autosave', 'slot1', 'slot2', 'slot3'];
 

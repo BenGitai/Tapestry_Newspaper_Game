@@ -91,7 +91,7 @@ export function HiringScreen() {
                   <b>{r.name}</b>
                   <button onClick={() => toggle(r)}>Let go</button>
                 </div>
-                <AssignmentEditor reporter={r} value={h.assignment} onChange={(a) => setAssignment(r.id, a)} compact />
+                <AssignmentEditor reporter={r} value={h.assignment} onChange={(a) => setAssignment(r.id, a)} compact frequency={setup.frequency} />
               </div>
             );
           })}

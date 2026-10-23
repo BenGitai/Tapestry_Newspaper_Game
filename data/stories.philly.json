@@ -24,6 +24,7 @@
       "filed_at": "00:20",
       "wire_source": "keystone",
       "category": "sports",
+      "subtopic": "baseball",
       "scope": "local",
       "districts": [
         "south_philly",
@@ -58,6 +59,7 @@
       "filed_at": "06:40",
       "wire_source": "keystone",
       "category": "politics",
+      "subtopic": "council",
       "scope": "local",
       "districts": [
         "river_wards"
@@ -93,6 +95,7 @@
       "filed_at": "07:15",
       "wire_source": "dvps",
       "category": "economy",
+      "subtopic": "transit",
       "scope": "local",
       "districts": [
         "center_city",
@@ -135,6 +138,7 @@
       "filed_at": "08:10",
       "wire_source": "dvps",
       "category": "science",
+      "subtopic": "tech",
       "scope": "local",
       "districts": [
         "river_wards"
@@ -165,6 +169,7 @@
       "filed_at": "09:05",
       "wire_source": "dvps",
       "category": "culture",
+      "subtopic": "food",
       "scope": "local",
       "districts": [
         "center_city"
@@ -195,6 +200,7 @@
       "filed_at": "10:30",
       "wire_source": "keystone",
       "category": "social",
+      "subtopic": "community",
       "scope": "local",
       "districts": [
         "west_philly"
@@ -229,6 +235,7 @@
       "filed_at": "11:50",
       "wire_source": "natwire",
       "category": "world",
+      "subtopic": "national",
       "scope": "national",
       "districts": [],
       "wire_headline": "Pennsylvania awarded $410 million in federal bridge repair grants",
@@ -257,6 +264,7 @@
       "filed_at": "13:20",
       "wire_source": "keystone",
       "category": "science",
+      "subtopic": "climate",
       "scope": "local",
       "districts": [
         "river_wards",
@@ -287,6 +295,7 @@
       "filed_at": "00:05",
       "wire_source": "dvps",
       "category": "sports",
+      "subtopic": "soccer",
       "scope": "local",
       "districts": [
         "southwest",
@@ -319,6 +328,7 @@
       "filed_at": "05:10",
       "wire_source": "dvps",
       "category": "social",
+      "subtopic": "safety",
       "scope": "local",
       "districts": [
         "north_philly"
@@ -350,6 +360,7 @@
       "filed_at": "06:55",
       "wire_source": "keystone",
       "category": "politics",
+      "subtopic": "policy",
       "scope": "local",
       "districts": [
         "center_city",
@@ -390,6 +401,7 @@
       "filed_at": "08:20",
       "wire_source": "keystone",
       "category": "economy",
+      "subtopic": "jobs",
       "scope": "local",
       "districts": [
         "center_city",
@@ -431,6 +443,7 @@
       "filed_at": "09:40",
       "wire_source": "keystone",
       "category": "science",
+      "subtopic": "climate",
       "scope": "local",
       "districts": [
         "west_philly",
@@ -463,6 +476,7 @@
       "filed_at": "10:10",
       "wire_source": "keystone",
       "category": "economy",
+      "subtopic": "jobs",
       "scope": "local",
       "districts": [
         "south_philly"
@@ -495,6 +509,7 @@
       "filed_at": "11:30",
       "wire_source": "dvps",
       "category": "culture",
+      "subtopic": "arts",
       "scope": "local",
       "districts": [
         "north_philly"
@@ -527,6 +542,7 @@
       "filed_at": "15:05",
       "wire_source": "dvps",
       "category": "science",
+      "subtopic": "climate",
       "scope": "local",
       "districts": [
         "north_philly",
@@ -562,6 +578,7 @@
       "filed_at": "00:10",
       "wire_source": "dvps",
       "category": "sports",
+      "subtopic": "baseball",
       "scope": "local",
       "districts": [
         "south_philly",
@@ -596,6 +613,7 @@
       "filed_at": "04:30",
       "wire_source": "natwire",
       "category": "world",
+      "subtopic": "europe",
       "scope": "world",
       "districts": [],
       "wire_headline": "Late-season heat wave forces water limits in southern Europe",
@@ -624,6 +642,7 @@
       "filed_at": "07:00",
       "wire_source": "keystone",
       "category": "economy",
+      "subtopic": "transit",
       "scope": "local",
       "districts": [
         "center_city",
@@ -665,6 +684,7 @@
       "filed_at": "08:45",
       "wire_source": "dvps",
       "category": "politics",
+      "subtopic": "council",
       "scope": "local",
       "districts": [
         "river_wards"
@@ -699,6 +719,7 @@
       "filed_at": "09:40",
       "wire_source": "keystone",
       "category": "social",
+      "subtopic": "safety",
       "scope": "local",
       "districts": [
         "center_city",
@@ -732,6 +753,7 @@
       "filed_at": "10:15",
       "wire_source": "keystone",
       "category": "social",
+      "subtopic": "health",
       "scope": "local",
       "districts": [
         "river_wards",
@@ -761,6 +783,7 @@
       "filed_at": "11:30",
       "wire_source": "keystone",
       "category": "science",
+      "subtopic": "cyber",
       "scope": "local",
       "districts": [
         "center_city"
@@ -793,6 +816,7 @@
       "filed_at": "00:15",
       "wire_source": "keystone",
       "category": "sports",
+      "subtopic": "baseball",
       "scope": "local",
       "districts": [
         "south_philly",
@@ -827,6 +851,7 @@
       "filed_at": "01:30",
       "wire_source": "keystone",
       "category": "economy",
+      "subtopic": "jobs",
       "scope": "local",
       "districts": [
         "center_city",
@@ -868,6 +893,7 @@
       "filed_at": "08:05",
       "wire_source": "dvps",
       "category": "politics",
+      "subtopic": "policy",
       "scope": "local",
       "districts": [
         "northeast",
@@ -903,6 +929,7 @@
       "filed_at": "09:20",
       "wire_source": "keystone",
       "category": "economy",
+      "subtopic": "real_estate",
       "scope": "local",
       "districts": [
         "southwest"
@@ -934,6 +961,7 @@
       "filed_at": "10:00",
       "wire_source": "dvps",
       "category": "social",
+      "subtopic": "education",
       "scope": "local",
       "districts": [
         "center_city",
@@ -973,6 +1001,7 @@
       "filed_at": "10:50",
       "wire_source": "dvps",
       "category": "science",
+      "subtopic": "tech",
       "scope": "local",
       "districts": [
         "center_city",
@@ -1008,6 +1037,7 @@
       "filed_at": "11:00",
       "wire_source": "dvps",
       "category": "culture",
+      "subtopic": "food",
       "scope": "local",
       "districts": [
         "south_philly"

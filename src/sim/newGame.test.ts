@@ -54,18 +54,19 @@ describe('new game', () => {
 });
 
 describe('calendar', () => {
-  it('daily runs one issue per wire day', () => {
+  it('daily runs one issue per wire day, capped at 10', () => {
+    expect(issueCount('daily', 70)).toBe(10);
     expect(issueCount('daily', 4)).toBe(4);
-    expect(issueDays('daily', 3, 4)).toEqual([3]);
+    expect(issueDays('daily', 3)).toEqual([3]);
   });
 
-  it('weekly runs one issue from every day', () => {
-    expect(issueCount('weekly', 4)).toBe(1);
-    expect(issueDays('weekly', 1, 4)).toEqual([1, 2, 3, 4]);
+  it('weekly issues each cover a week, capped at 10', () => {
+    expect(issueCount('weekly', 70)).toBe(10);
+    expect(issueDays('weekly', 2)).toEqual([8, 9, 10, 11, 12, 13, 14]);
   });
 
   it('day 1 is a Wednesday', () => {
-    expect(issueDate('daily', 1, 4).getDay()).toBe(3);
-    expect(issueDate('daily', 3, 4).getDay()).toBe(5);
+    expect(issueDate('daily', 1).getDay()).toBe(3);
+    expect(issueDate('daily', 3).getDay()).toBe(5);
   });
 });

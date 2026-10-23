@@ -19,6 +19,8 @@ export const storySchema = z.object({
   filed_at: z.string().regex(/^\d\d:\d\d$/),
   wire_source: z.string(),
   category: categorySchema,
+  /** Sub-focus within the category (see data/subtopics.json). */
+  subtopic: z.string(),
   scope: z.enum(['local', 'national', 'world']),
   districts: z.array(z.string()),
   wire_headline: z.string(),
@@ -96,6 +98,8 @@ export const reporterSchema = z.object({
   id: z.string(),
   name: z.string(),
   desk: deskSchema,
+  /** The sub-focus they most like to write about. */
+  interest: z.string(),
   skill: z.number().int().min(1).max(5),
   salary_per_issue: z.number().nonnegative(),
   attributes: attributesSchema,
@@ -164,3 +168,8 @@ export const citySchema = z.object({
 });
 export type City = z.infer<typeof citySchema>;
 export const cityListSchema = z.object({ cities: z.array(citySchema) });
+
+export const subtopicSchema = z.object({ id: z.string(), name: z.string() });
+export type Subtopic = z.infer<typeof subtopicSchema>;
+export const subtopicFileSchema = z.object({ subtopics: z.record(categorySchema, z.array(subtopicSchema).min(1)) });
+export type SubtopicMap = Record<Category, Subtopic[]>;

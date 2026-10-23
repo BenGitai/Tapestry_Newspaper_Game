@@ -64,5 +64,15 @@ Changes how many stories come through per issue. Daily gets one wire day per iss
 - **Save and load.** Autosave every issue, a manual save slot, and Continue/Load on the title page.
 - **18 reporters** in the pool. Up to 8 on staff.
 
+## Ten issues, more news, sub-focus (2026-10-23, third update)
+- **10 issues per game.** Daily: one day of wire per issue. Weekly: one week per issue, and the wire is the week's 40 most important stories.
+- **Generic generated news.** `src/data/NewsGenerator.ts` fills 70 days at 20 stories a day. Days 1–4 keep the hand-written stories (topped up to 20) and their headlines. Every category appears every day. Left and right lean are balanced, also when weighted by importance.
+- **More copy per reporter.** Capacity went up (speed 11 means about 29 inches a day). A weekly gives a week of work (×2.5). Once their beat is covered, reporters pick up other uncovered stories (general assignment, at the off-desk penalty). Their own filing leaves 30% of their time free for your commissions. Four reporters now file more than two pages can hold.
+- **Sub-focus.** Every story has a subtopic (data/subtopics.json). Every reporter has a personal interest. You set each reporter's focus within their beat.
+  - Reporters prefer stories on their focus when choosing what to file.
+  - On their focus: +2 accuracy and impact, better readership and award odds.
+  - On their interest: +2 flair and better readership.
+  - Morale: +2 per issue when the focus is their interest, −1 otherwise.
+
 ## Future (not in the demo)
 - **Generated local news.** The full game should generate local sports and local politics rather than take them from real news. Real news remains the source for everything else.

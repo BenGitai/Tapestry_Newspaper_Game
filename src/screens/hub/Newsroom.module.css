@@ -339,3 +339,7 @@
   white-space: nowrap;
   color: var(--c-ink-muted);
 }
+
+.focus {
+  color: var(--c-rust);
+}

@@ -275,7 +275,7 @@ export function resolveIssue(game: GameState, world: CityWorld, stories: StorySo
   if (Math.abs(drift) > 0.15) cues.push({ kind: 'lean_drift', direction: drift < 0 ? 'left' : 'right', district: ranked[Math.floor(ranked.length / 2)]?.[0] ?? 'center_city' });
   const letters = writeLetters(world, cues, seedFor(game.seed, issue, 'letters'));
 
-  const dateLabel = formatIssueDate(issueDate(game.setup.frequency, issue, stories.dayCount()));
+  const dateLabel = formatIssueDate(issueDate(game.setup.frequency, issue));
   const previousCopies = totalReaders(game.districts);
   const result: IssueResult = {
     issueNumber: issue,

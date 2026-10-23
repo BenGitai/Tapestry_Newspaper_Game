@@ -1,7 +1,10 @@
 // Staff management: attributes with training, capacity, scouting, hiring and morale.
 import { ATTRIBUTE_KEYS, type Attributes, type CityWorld, type Desk, type Reporter, type Story } from '../data/schemas.ts';
+import { categoryOfSubtopic } from '../data/worldData.ts';
 import {
   FILING_CAPACITY,
+  FOCUS,
+  FREQUENCY_CAPACITY,
   MAX_STAFF,
   MORALE,
   REFERENCE_CHECK_COST,
@@ -14,7 +17,7 @@ import {
   TRAINING_PER_ISSUE,
   WORKLOAD,
 } from './balance.ts';
-import type { Category, GameState, OriginId, StaffAssignment, StaffMember } from './types.ts';
+import type { Category, Frequency, GameState, OriginId, StaffAssignment, StaffMember } from './types.ts';
 
 export const DESK_LABEL: Record<Desk, string> = {
   city_hall: 'City Hall',
@@ -82,13 +85,13 @@ export function currentAttributes(reporter: Reporter, member?: StaffMember): Att
   return out;
 }
 
-/** Column inches a reporter can file this issue. */
-export function filingCapacity(reporter: Reporter, member?: StaffMember): number {
+/** Column inches a reporter can file per issue (a weekly issue gives them a week). */
+export function filingCapacity(reporter: Reporter, member?: StaffMember, frequency: Frequency = 'daily'): number {
   const a = currentAttributes(reporter, member);
   const asg = member?.assignment;
   const workload = asg ? WORKLOAD[asg.workload].capacity : 1;
   const pace = asg ? STYLE[asg.style].pace : 1;
-  return Math.round((FILING_CAPACITY.base + a.speed * FILING_CAPACITY.perSpeed) * workload * pace);
+  return Math.round((FILING_CAPACITY.base + a.speed * FILING_CAPACITY.perSpeed) * workload * pace * FREQUENCY_CAPACITY[frequency]);
 }
 
 export function strengthsAndWeaknesses(attrs: Attributes): { strengths: (keyof Attributes)[]; weaknesses: (keyof Attributes)[] } {
@@ -129,7 +132,10 @@ export function isScouted(game: Pick<GameState, 'scouted' | 'staff'>, reporterId
 // ---------------------------------------------------------------------------
 
 export function defaultAssignment(world: CityWorld, reporter: Reporter): StaffAssignment {
-  return { beat: homeBeat(world, reporter), patch: 'citywide', style: 'news', workload: 'normal', training: 'none' };
+  const beat = homeBeat(world, reporter);
+  // Start them on their own interest if it belongs to their beat.
+  const focus = categoryOfSubtopic(reporter.interest) === beat ? reporter.interest : 'none';
+  return { beat, focus, patch: 'citywide', style: 'news', workload: 'normal', training: 'none' };
 }
 
 export function newStaffMember(world: CityWorld, reporter: Reporter, issue: number, morale: number, assignment?: StaffAssignment): StaffMember {
@@ -215,15 +221,25 @@ export function setAssignment(game: GameState, reporterId: string, next: StaffAs
   };
 }
 
+/** Morale change per issue from their focus: happy on their interest, a little worn otherwise. */
+export function focusMorale(asg: StaffAssignment, reporter: Reporter | undefined): number {
+  if (!reporter || asg.focus === 'none') return 0;
+  return asg.focus === reporter.interest ? FOCUS.moraleWhenInterest : FOCUS.moraleWhenOther;
+}
+
 /** Between issues: apply queued assignments, training and morale changes. */
-export function advanceStaff(staff: StaffMember[], publishedBy: Record<string, number>): StaffMember[] {
+export function advanceStaff(staff: StaffMember[], publishedBy: Record<string, number>, world?: CityWorld): StaffMember[] {
   return staff.map((m) => {
     const asg = m.assignment;
     const growth = { ...m.growth };
     if (asg.training !== 'none') growth[asg.training] = (growth[asg.training] ?? 0) + TRAINING_PER_ISSUE;
+    const reporter = world ? reporterById(world, m.reporterId) : undefined;
     const morale = Math.max(
       MORALE.min,
-      Math.min(MORALE.max, m.morale + WORKLOAD[asg.workload].moralePerIssue + (publishedBy[m.reporterId] ?? 0) * MORALE.perPublished),
+      Math.min(
+        MORALE.max,
+        m.morale + WORKLOAD[asg.workload].moralePerIssue + (publishedBy[m.reporterId] ?? 0) * MORALE.perPublished + focusMorale(asg, reporter),
+      ),
     );
     return { ...m, growth, morale, assignment: m.pendingAssignment ?? m.assignment, pendingAssignment: undefined };
   });

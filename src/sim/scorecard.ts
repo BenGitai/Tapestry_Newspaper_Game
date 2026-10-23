@@ -3,7 +3,7 @@
 // until the paper is printed (correction risk, award chance). Built from the
 // story's content and the reporter's attributes.
 import type { CityWorld, Story } from '../data/schemas.ts';
-import { SCORECARD, WORKLOAD } from './balance.ts';
+import { FOCUS, SCORECARD, WORKLOAD } from './balance.ts';
 import { currentAttributes, isOnDesk, reporterById } from './staff.ts';
 import type { Article, Attributes, StaffMember } from './types.ts';
 
@@ -45,12 +45,21 @@ export function isSensational(article: Pick<Article, 'angle'>, story: Pick<Story
 export function scorecard(article: Article, story: Story, world: CityWorld, member: StaffMember | undefined, freshness = 1): Scorecard {
   const s = SCORECARD;
   const reporter = article.reporterId ? reporterById(world, article.reporterId) : undefined;
-  const attrs = reporter ? currentAttributes(reporter, member) : WIRE_COPY;
+  const base = reporter ? currentAttributes(reporter, member) : WIRE_COPY;
+  // Writing on their focus sharpens accuracy and impact; on their interest, flair.
+  const attrs: Attributes = {
+    ...base,
+    accuracy: Math.min(20, base.accuracy + (article.onFocus ? FOCUS.attributeBonus : 0)),
+    impact: Math.min(20, base.impact + (article.onFocus ? FOCUS.attributeBonus : 0)),
+    flair: Math.min(20, base.flair + (article.onInterest ? FOCUS.interestFlair : 0)),
+  };
   const notes: string[] = [];
   const offBeat = reporter ? !isOnDesk(reporter, story, world) : false;
   if (offBeat) notes.push('Written off their usual desk.');
   if (!reporter) notes.push('Wire copy: no byline, no local reporting.');
   if (article.onPatch) notes.push('Written from their own patch: local knowledge shows.');
+  if (article.onFocus) notes.push('On their assigned focus: sharper and more accurate.');
+  if (article.onInterest) notes.push('Their favorite subject: it shows in the writing.');
   if (freshness < 1) notes.push(`Getting stale: worth ${Math.round(freshness * 100)}% of a fresh piece.`);
 
   const light = story.importance <= 2;
@@ -62,7 +71,9 @@ export function scorecard(article: Article, story: Story, world: CityWorld, memb
       (attrs.flair / 20) * r.flair +
       (article.onPatch ? r.onPatch : 0) +
       (styleMatch ? r.styleMatch : 0) +
-      (offBeat ? r.offBeat : 0)) *
+      (offBeat ? r.offBeat : 0) +
+      (article.onFocus ? FOCUS.readershipFocus : 0) +
+      (article.onInterest ? FOCUS.readershipInterest : 0)) *
       freshness,
   );
 
@@ -93,6 +104,7 @@ export function scorecard(article: Article, story: Story, world: CityWorld, memb
       s.awardBase *
       (article.style === 'investigative' ? s.awardInvestigative : 1) *
       (sensational ? s.sensationalSwing : 1) *
+      (article.onFocus ? FOCUS.awardFocus : 1) *
       freshness,
   );
 

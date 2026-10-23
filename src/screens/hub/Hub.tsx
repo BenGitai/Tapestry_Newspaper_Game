@@ -44,7 +44,7 @@ export function Hub() {
   if (!game) return null;
   const { world, stories } = loadGameData();
   const dayCount = stories.dayCount();
-  const dateLabel = issueDate(game.setup.frequency, game.issueNumber, dayCount).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+  const dateLabel = issueDate(game.setup.frequency, game.issueNumber).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
   const forPrint = selectedForPrint(game).length;
 
   return (

@@ -101,7 +101,7 @@ export function advanceIssue(game: GameState, world: CityWorld, stories: StorySo
   const next: GameState = {
     ...settled,
     issueNumber: settled.issueNumber + 1,
-    staff: advanceStaff(settled.staff, publishedBy),
+    staff: advanceStaff(settled.staff, publishedBy, world),
     draft: emptyDraft(),
   };
   return fileBeatArticles(next, world, stories);

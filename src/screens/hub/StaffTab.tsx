@@ -48,7 +48,7 @@ export function StaffTab() {
                   <b>{r.name}</b>
                   <span>{assignmentSummary(shownAssignment(m))}</span>
                   <span className={s.rowMeta}>
-                    {filingCapacity(r, m)} in/issue · morale {Math.round(m.morale)}
+                    {filingCapacity(r, m, game.setup.frequency)} in/issue · morale {Math.round(m.morale)}
                     {m.pendingAssignment ? ' · changes next issue' : ''}
                     {m.hiredIssue > game.issueNumber ? ' · starts next issue' : ''}
                   </span>
@@ -151,7 +151,7 @@ function ManageReporter({ game, member }: { game: GameState; member: StaffMember
       </div>
 
       <div className={styles.label}>Assignment {startsLater ? '' : '· changes apply from next issue'}</div>
-      <AssignmentEditor reporter={r} member={member} value={shownAssignment(member)} onChange={(a) => setAssignment(r.id, a)} />
+      <AssignmentEditor reporter={r} member={member} value={shownAssignment(member)} onChange={(a) => setAssignment(r.id, a)} frequency={game.setup.frequency} />
       {member.pendingAssignment ? (
         <p className={s.pending}>
           Now: {assignmentSummary(member.assignment)}. Next issue: {assignmentSummary(member.pendingAssignment)}.

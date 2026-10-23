@@ -54,6 +54,8 @@ export type Patch = string;
 
 export interface StaffAssignment {
   beat: Category;
+  /** Sub-focus within the beat (a subtopic id), or 'none'. */
+  focus: string;
   patch: Patch;
   style: WritingStyle;
   workload: Workload;
@@ -93,6 +95,10 @@ export interface Article {
   commissioned: boolean;
   /** Filed by a reporter working their own patch (local knowledge). */
   onPatch: boolean;
+  /** The story is on the reporter's assigned focus. */
+  onFocus: boolean;
+  /** The story is on the reporter's personal interest. */
+  onInterest: boolean;
   favorite: boolean;
   /** Picked for the next issue. Only selected articles show up on the layout tab. */
   selected: boolean;

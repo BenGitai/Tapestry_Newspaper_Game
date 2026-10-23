@@ -239,7 +239,7 @@ export const useStore = create<Store>((set, get) => {
       const game = get().game;
       if (!game) return;
       const { stories } = loadGameData();
-      const dateLabel = formatIssueDate(issueDate(game.setup.frequency, game.issueNumber, stories.dayCount()));
+      const dateLabel = formatIssueDate(issueDate(game.setup.frequency, game.issueNumber));
       const articles: Record<string, Article> = {};
       for (const page of activePages(game.draft)) {
         for (const b of game.draft.pages[page]) {

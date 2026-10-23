@@ -2,14 +2,21 @@
 // commissions extra pieces, and unpublished work waits in the backlog.
 import type { Angle, CityWorld, Story } from '../data/schemas.ts';
 import type { StorySource } from '../data/StorySource.ts';
-import { STALENESS_FLOOR, STALENESS_PER_ISSUE, STYLE, SUPERSEDED_VALUE } from './balance.ts';
+import { COMMISSION_RESERVE, FOCUS, GENERAL_ASSIGNMENT, STALENESS_FLOOR, STALENESS_PER_ISSUE, STYLE, SUPERSEDED_VALUE, WEEKLY_WIRE_SIZE } from './balance.ts';
 import { findStoryBlock } from './layout.ts';
 import { issueDays } from './calendar.ts';
 import { activeStaff, filingCapacity, reporterById } from './staff.ts';
 import type { Article, GameState, StaffMember, WritingStyle } from './types.ts';
 
+/**
+ * The wire for an issue. A daily sees the whole day. A weekly sees the week's
+ * most important stories (WEEKLY_WIRE_SIZE), shown in the order they were filed.
+ */
 export function wireForIssue(game: Pick<GameState, 'setup' | 'issueNumber'>, stories: StorySource): Story[] {
-  return issueDays(game.setup.frequency, game.issueNumber, stories.dayCount()).flatMap((d) => stories.storiesForDay(d));
+  const all = issueDays(game.setup.frequency, game.issueNumber).flatMap((d) => stories.storiesForDay(d));
+  if (game.setup.frequency === 'daily') return all;
+  const top = [...all].sort((a, b) => b.importance - a.importance || a.day - b.day || a.filed_at.localeCompare(b.filed_at)).slice(0, WEEKLY_WIRE_SIZE);
+  return top.sort((a, b) => a.day - b.day || a.filed_at.localeCompare(b.filed_at));
 }
 
 export function articleId(storyId: string, issue: number): string {
@@ -42,13 +49,18 @@ export function inchesFiled(game: Pick<GameState, 'articles' | 'issueNumber'>, r
  * Can this reporter take on a piece of this length now? Capacity limits extra
  * pieces, but everyone can file their first piece of the issue, however long.
  */
-export function hasRoomFor(game: Pick<GameState, 'articles' | 'issueNumber'>, world: CityWorld, member: StaffMember, inches: number): boolean {
-  return inchesFiled(game, member.reporterId) === 0 || inches <= remainingCapacity(game, world, member);
+export function hasRoomFor(game: Pick<GameState, 'articles' | 'issueNumber' | 'setup'>, world: CityWorld, member: StaffMember, inches: number, reserve = 0): boolean {
+  return inchesFiled(game, member.reporterId) === 0 || inches <= remainingCapacity(game, world, member) - reserve * capacityOf(game, world, member);
 }
 
-export function remainingCapacity(game: Pick<GameState, 'articles' | 'issueNumber'>, world: CityWorld, member: StaffMember): number {
+function capacityOf(game: Pick<GameState, 'setup'>, world: CityWorld, member: StaffMember): number {
   const r = reporterById(world, member.reporterId);
-  return r ? filingCapacity(r, member) - inchesFiled(game, member.reporterId) : 0;
+  return r ? filingCapacity(r, member, game.setup.frequency) : 0;
+}
+
+export function remainingCapacity(game: Pick<GameState, 'articles' | 'issueNumber' | 'setup'>, world: CityWorld, member: StaffMember): number {
+  const r = reporterById(world, member.reporterId);
+  return r ? filingCapacity(r, member, game.setup.frequency) - inchesFiled(game, member.reporterId) : 0;
 }
 
 /** A story is covered once any non-spiked article of it exists. */
@@ -70,22 +82,40 @@ export function fileBeatArticles(game: GameState, world: CityWorld, stories: Sto
     return (rb?.attributes.speed ?? 0) - (ra?.attributes.speed ?? 0) || a.reporterId.localeCompare(b.reporterId);
   });
   for (const member of order) {
+    const interest = reporterById(world, member.reporterId)?.interest;
+    // They prefer their focus (and their own interest), but still file the big stories.
+    const priority = (s: Story): number =>
+      s.importance + (s.subtopic === member.assignment.focus ? FOCUS.filingPriority : 0) + (s.subtopic === interest ? FOCUS.interestPriority : 0);
     const candidates = wire
       .filter((s) => !isCovered(state, s.id))
       .map((s) => ({ s, fit: onAssignment(member, s) }))
       .filter(({ fit }) => fit.beat && fit.patch)
-      .sort((a, b) => b.s.importance - a.s.importance || Number(b.s.districts.includes(member.assignment.patch)) - Number(a.s.districts.includes(member.assignment.patch)) || a.s.filed_at.localeCompare(b.s.filed_at));
+      .sort((a, b) => priority(b.s) - priority(a.s) || Number(b.s.districts.includes(member.assignment.patch)) - Number(a.s.districts.includes(member.assignment.patch)) || a.s.filed_at.localeCompare(b.s.filed_at));
     for (const { s } of candidates) {
       const inches = articleInches(s, member.assignment.style);
-      if (!hasRoomFor(state, world, member, inches)) continue;
-      state = { ...state, articles: [...state.articles, makeArticle(state, member, s, false)] };
+      if (!hasRoomFor(state, world, member, inches, COMMISSION_RESERVE)) continue;
+      state = { ...state, articles: [...state.articles, makeArticle(state, world, member, s, false)] };
+    }
+  }
+  if (!GENERAL_ASSIGNMENT) return state;
+  // General assignment: anyone with copy left picks up uncovered stories off their beat
+  // (still inside their patch), most important first, in the same speed order.
+  for (const member of order) {
+    const offBeat = wire
+      .filter((s) => !isCovered(state, s.id) && s.category !== member.assignment.beat && onAssignment(member, s).patch)
+      .sort((a, b) => b.importance - a.importance || a.filed_at.localeCompare(b.filed_at));
+    for (const s of offBeat) {
+      const inches = articleInches(s, member.assignment.style);
+      if (inches > remainingCapacity(state, world, member) - COMMISSION_RESERVE * capacityOf(state, world, member)) continue;
+      state = { ...state, articles: [...state.articles, makeArticle(state, world, member, s, false)] };
     }
   }
   return state;
 }
 
-function makeArticle(game: GameState, member: StaffMember, story: Story, commissioned: boolean, angle?: Angle): Article {
+function makeArticle(game: GameState, world: CityWorld, member: StaffMember, story: Story, commissioned: boolean, angle?: Angle): Article {
   const style = member.assignment.style;
+  const interest = reporterById(world, member.reporterId)?.interest;
   return {
     id: articleId(story.id, game.issueNumber),
     storyId: story.id,
@@ -96,6 +126,8 @@ function makeArticle(game: GameState, member: StaffMember, story: Story, commiss
     issueFiled: game.issueNumber,
     commissioned,
     onPatch: member.assignment.patch !== 'citywide' && story.districts.includes(member.assignment.patch),
+    onFocus: member.assignment.focus !== 'none' && story.subtopic === member.assignment.focus,
+    onInterest: story.subtopic === interest,
     favorite: false,
     selected: false,
     status: 'backlog',
@@ -124,6 +156,8 @@ export function commission(game: GameState, world: CityWorld, stories: StorySour
       issueFiled: game.issueNumber,
       commissioned: true,
       onPatch: false,
+      onFocus: false,
+      onInterest: false,
       favorite: false,
       selected: true,
       status: 'backlog',
@@ -137,7 +171,7 @@ export function commission(game: GameState, world: CityWorld, stories: StorySour
   const inches = articleInches(story, member.assignment.style);
   const room = remainingCapacity(game, world, member);
   if (!hasRoomFor(game, world, member, inches)) return { ok: false, reason: `${r.name} has ${Math.max(0, Math.floor(room))} in left this issue; this piece needs ${inches}` };
-  return { ok: true, game: { ...game, articles: [...game.articles, { ...makeArticle(game, member, story, true, angle), selected: true }] } };
+  return { ok: true, game: { ...game, articles: [...game.articles, { ...makeArticle(game, world, member, story, true, angle), selected: true }] } };
 }
 
 export function updateArticle(game: GameState, id: string, patch: Partial<Pick<Article, 'favorite' | 'selected' | 'angle' | 'status'>>): GameState {

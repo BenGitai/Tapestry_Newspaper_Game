@@ -18,6 +18,8 @@ function article(storyId: string, reporterId: string | null, angle: Angle, extra
     issueFiled: 1,
     commissioned: false,
     onPatch: false,
+    onFocus: false,
+    onInterest: false,
     favorite: false,
     selected: false,
     status: 'backlog',
@@ -83,5 +85,18 @@ describe('scorecard', () => {
     const fresh = scorecard(article(s.id, null, 'straight'), s, world, undefined, 1);
     const stale = scorecard(article(s.id, null, 'straight'), s, world, undefined, 0.5);
     expect(stale.shown.readership).toBeLessThan(fresh.shown.readership);
+  });
+});
+
+describe('focus and interest', () => {
+  it('writing on focus and interest scores better', () => {
+    const s = stories.storyById('d1-phillies')!;
+    const r = reporterById(world, 'kowalczyk')!;
+    const m = newStaffMember(world, r, 1, 50, defaultAssignment(world, r));
+    const plain = scorecard(article(s.id, r.id, 'straight'), s, world, m);
+    const focused = scorecard(article(s.id, r.id, 'straight', { onFocus: true, onInterest: true }), s, world, m);
+    expect(focused.shown.readership).toBeGreaterThan(plain.shown.readership);
+    expect(focused.hidden.correctionRisk).toBeLessThan(plain.hidden.correctionRisk);
+    expect(focused.hidden.awardChance).toBeGreaterThan(plain.hidden.awardChance);
   });
 });

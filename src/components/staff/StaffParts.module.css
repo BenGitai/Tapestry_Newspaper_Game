@@ -193,3 +193,15 @@
 .oneColumn {
   grid-template-columns: 1fr;
 }
+
+.interest {
+  font-family: var(--f-mono);
+  font-size: 9.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--c-rust);
+}
+
+.good {
+  color: var(--c-green);
+}

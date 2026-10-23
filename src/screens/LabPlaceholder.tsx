@@ -11,7 +11,9 @@ export function LabPlaceholder() {
   const goto = useStore((s) => s.goto);
   const hasGame = useStore((s) => s.game !== null);
   const { stories } = loadGameData();
-  const [id, setId] = useState(stories.allStories()[0]?.id ?? '');
+  // Stories from the first 10 days (the daily demo); the full feed runs to day 70.
+  const list = Array.from({ length: 10 }, (_, i) => stories.storiesForDay(i + 1)).flat();
+  const [id, setId] = useState(list[0]?.id ?? '');
   const story = stories.storyById(id);
 
   return (
@@ -20,7 +22,7 @@ export function LabPlaceholder() {
         <b>Summarizer lab</b>
         <span>dev tool · template fallback only until milestone 3</span>
         <select value={id} onChange={(e) => setId(e.target.value)}>
-          {stories.allStories().map((s) => (
+          {list.map((s) => (
             <option key={s.id} value={s.id}>
               {s.id} · {s.wire_headline}
             </option>

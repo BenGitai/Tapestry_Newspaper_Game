@@ -28,8 +28,8 @@ export function Editor() {
   useEditorKeys();
 
   if (!game) return null;
-  const { world, stories } = loadGameData();
-  const dateLabel = formatIssueDate(issueDate(game.setup.frequency, game.issueNumber, stories.dayCount()));
+  const { world } = loadGameData();
+  const dateLabel = formatIssueDate(issueDate(game.setup.frequency, game.issueNumber));
   const pages = activePages(game.draft);
   const articles: Record<string, Article> = {};
   for (const a of backlog(game)) articles[a.storyId] = a;

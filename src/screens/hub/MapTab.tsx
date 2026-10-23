@@ -69,13 +69,22 @@ export function MapTab() {
   const district = world.districts.find((d) => d.id === selected);
 
   // Story pins: one per story on today's wire, at its first district (spread out a little).
+  // Pins for the most important local stories (a weekly wire has too many to pin them all).
+  const PIN_LIMIT = 14;
+  const pinned = new Set(
+    [...wire]
+      .filter((s) => s.districts.length && s.districts.length < world.districts.length)
+      .sort((a, b) => b.importance - a.importance)
+      .slice(0, PIN_LIMIT)
+      .map((s) => s.id),
+  );
   const pins = wire
-    .filter((s) => s.districts.length && s.districts.length < world.districts.length)
+    .filter((s) => pinned.has(s.id))
     .map((s, i) => {
       const d = world.districts.find((x) => x.id === s.districts[0])!;
       const [cx, cy] = centroid(d);
-      const sameBefore = wire.slice(0, i).filter((x) => x.districts[0] === s.districts[0]).length;
-      return { story: s, n: i + 1, x: cx + 34 + sameBefore * 30, y: cy + 26 };
+      const sameBefore = wire.filter((x) => pinned.has(x.id)).slice(0, i).filter((x) => x.districts[0] === s.districts[0]).length;
+      return { story: s, n: i + 1, x: cx + 34 + (sameBefore % 3) * 30, y: cy + 26 + Math.floor(sameBefore / 3) * 30 };
     });
 
   return (
