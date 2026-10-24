@@ -168,3 +168,20 @@ describe('body length', () => {
     expect(factCheck({ ...short, body: 'Won.' }, story, 'lead').problems.some((p) => p.startsWith('Body has only'))).toBe(true);
   });
 });
+
+describe('number words at the start of a sentence', () => {
+  it('are checked as numbers, not flagged as names', () => {
+    const story = loadGameData().stories.storyById('d1-robotics')!;
+    const ok = factCheck({ headline: 'Robotics team heads to finals', deck: '', body: 'Fourteen Kensington students built the robot.', facts_used: [1] }, story, 'brief');
+    expect(ok.flags).toEqual([]);
+    const bad = factCheck({ headline: 'Robotics team heads to finals', deck: '', body: 'Fifteen Kensington students built the robot.', facts_used: [1] }, story, 'brief');
+    expect(bad.flags.map((x) => x.kind)).toEqual(['number']);
+  });
+
+  it('length overruns are warnings unless far off target', () => {
+    const story = loadGameData().stories.storyById('d1-robotics')!;
+    const r = factCheck({ headline: 'Kensington robotics team of students heads to the finals', deck: '', body: 'A Kensington public high school robotics team qualified for a national championship in Houston next month. The team has 14 students.', facts_used: [0, 1] }, story, 'brief');
+    expect(r.passed).toBe(true);
+    expect(r.warnings.length).toBeGreaterThan(0);
+  });
+});

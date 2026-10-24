@@ -4,7 +4,7 @@
 import type { CityWorld, Story } from '../data/schemas.ts';
 import { TIERS } from '../sim/balance.ts';
 import type { Tier } from '../sim/types.ts';
-import { BODY_LENGTH_RANGE, HEADLINE_MAX_WORDS } from './config.ts';
+import { BODY_LENGTH_HARD_MAX, BODY_LENGTH_RANGE, HEADLINE_MAX_WORDS, HEADLINE_SLACK } from './config.ts';
 import type { ArticleText } from './types.ts';
 
 export type Field = 'headline' | 'deck' | 'body';
@@ -21,8 +21,13 @@ export interface Flag {
 
 export interface FactCheckResult {
   flags: Flag[];
-  /** Structural problems: bad facts_used, empty fields, headline or body length. */
+  /** Problems that fail the article: bad facts_used, empty or too-short text, lengths far over target. */
   problems: string[];
+  /**
+   * Style notes that don't fail it: a headline a word or two long, a body somewhat
+   * over target. The layout already shrinks headlines and fits bodies.
+   */
+  warnings: string[];
   passed: boolean;
 }
 
@@ -39,6 +44,12 @@ const SCALE: Record<string, number> = { hundred: 100, thousand: 1e3, million: 1e
 const WORD = Object.keys(SMALL).concat(Object.keys(SCALE), 'dozen').join('|');
 const NUMBER_WORDS = new RegExp(`\\b(?:${WORD})(?:(?:[\\s-]+|[\\s-]+and[\\s-]+)(?:${WORD}))*\\b`, 'gi');
 const DIGITS = /\d+(?:,\d{3})*(?:\.\d+)?(?:\s*(million|billion|thousand)\b)?/gi;
+
+/** "Four", "Fourteen", "twenty-one": made only of number words. */
+function isNumberWord(word: string): boolean {
+  const parts = word.toLowerCase().split('-').filter(Boolean);
+  return parts.length > 0 && parts.every((p) => p in SMALL || p in SCALE || p === 'dozen');
+}
 
 function wordsToNumber(phrase: string): number | undefined {
   const tokens = phrase.toLowerCase().split(/[\s-]+/).filter((t) => t && t !== 'and');
@@ -145,6 +156,8 @@ export function unknownNames(text: string, allowed: Set<string>): { text: string
   const out: { text: string; start: number; end: number }[] = [];
   tokens.forEach((t, i) => {
     if (!isCapital(t.text) || t.text.length === 1) return;
+    // "Four" at the start of a sentence is a number (checked as one), not a name.
+    if (isNumberWord(t.text)) return;
     if (t.sentenceStart) {
       const next = tokens[i + 1];
       const nextIsCapital = next !== undefined && isCapital(next.text) && !/[.!?]\s*$/.test(text.slice(t.end, next.start));
@@ -190,18 +203,22 @@ export function factCheck(article: ArticleText, story: Story, tier: Tier, extraN
   }
 
   const problems: string[] = [];
+  const warnings: string[] = [];
   if (!article.headline.trim()) problems.push('Empty headline');
   if (!article.body.trim()) problems.push('Empty body');
   const max = HEADLINE_MAX_WORDS[tier];
-  if (wc(article.headline) > max) problems.push(`Headline has ${wc(article.headline)} words (limit ${max} for ${tier})`);
+  const headWords = wc(article.headline);
+  if (headWords > max + HEADLINE_SLACK) problems.push(`Headline has ${headWords} words (limit ${max} for ${tier})`);
+  else if (headWords > max) warnings.push(`Headline has ${headWords} words (limit ${max} for ${tier})`);
   const target = TIERS[tier].words;
   const bodyWords = wc(article.body);
-  if (bodyWords > target * BODY_LENGTH_RANGE.max) problems.push(`Body has ${bodyWords} words (target ${target})`);
+  if (bodyWords > target * BODY_LENGTH_HARD_MAX) problems.push(`Body has ${bodyWords} words (target ${target})`);
+  else if (bodyWords > target * BODY_LENGTH_RANGE.max) warnings.push(`Body has ${bodyWords} words (target ${target})`);
   // A story with few facts cannot fill a long slot without padding, so the minimum shrinks with the facts.
   const factWords = story.facts.reduce((a, f) => a + wc(f), 0);
   if (bodyWords < Math.min(target * BODY_LENGTH_RANGE.min, factWords * 0.5)) problems.push(`Body has only ${bodyWords} words (target ${target})`);
   for (const i of article.facts_used) {
     if (!Number.isInteger(i) || i < 0 || i >= story.facts.length) problems.push(`facts_used index ${i} is not a fact of this story`);
   }
-  return { flags, problems, passed: flags.length === 0 && problems.length === 0 };
+  return { flags, problems, warnings, passed: flags.length === 0 && problems.length === 0 };
 }

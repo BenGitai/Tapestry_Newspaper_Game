@@ -34,8 +34,12 @@ export const FALLBACK_PRICE: ModelPrice = MODEL_PRICES['claude-haiku-5-5']!;
 /** Maximum headline length in words, by tier. The prompt asks for it and the check enforces it. */
 export const HEADLINE_MAX_WORDS: Record<Tier, number> = { lead: 12, secondary: 9, brief: 7 };
 
-/** Body length accepted by the check, as a share of the tier's word target. */
+/** Body length the check is happy with, as a share of the tier's word target (outside it: a warning). */
 export const BODY_LENGTH_RANGE = { min: 0.4, max: 1.5 } as const;
+/** A body longer than this share of the target fails the check. */
+export const BODY_LENGTH_HARD_MAX = 2.2;
+/** A headline may run this many words over its limit with only a warning. */
+export const HEADLINE_SLACK = 2;
 
 /** Output cap. Short rewrites; a lead is ~120 words, so this leaves plenty of room. */
 export const MAX_OUTPUT_TOKENS = 1024;

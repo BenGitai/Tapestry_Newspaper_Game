@@ -300,7 +300,7 @@ export function TechDemo() {
                               {f.kind} “{f.text}” in {f.field}
                             </li>
                           ))}
-                          {v.check.problems.map((m, i) => (
+                          {[...v.check.problems, ...v.check.warnings.map((w) => `note: ${w}`)].map((m, i) => (
                             <li key={`p${i}`}>{m}</li>
                           ))}
                         </ul>
