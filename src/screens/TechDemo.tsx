@@ -5,6 +5,7 @@
 // the pre-generated cache, then templates, so it runs with no key at all.
 import { Fragment, useEffect, useMemo, useState } from 'react';
 import { DeskSurface } from '../components/desk/DeskSurface.tsx';
+import { OriginalStoryLink } from '../components/newsroom/ArticleParts.tsx';
 import { bundledCache } from '../data/ArticleSource.ts';
 import { ANGLES, type Angle, type Story } from '../data/schemas.ts';
 import { loadGameData } from '../data/worldData.ts';
@@ -245,6 +246,7 @@ export function TechDemo() {
             </ul>
             <div className={styles.label}>Wire text</div>
             <p className={styles.wireText}>{story.wire_text}</p>
+            <OriginalStoryLink story={story} />
           </div>
 
           {ANGLES.map((angle) => {
