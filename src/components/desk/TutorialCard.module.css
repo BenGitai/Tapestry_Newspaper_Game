@@ -1,0 +1,80 @@
+.memo {
+  position: absolute;
+  z-index: 50;
+  width: 430px;
+  background: var(--c-memo);
+  border: 1.5px solid var(--c-ink);
+  padding: 22px 20px 14px;
+  transform: rotate(-0.6deg);
+  color: var(--c-ink);
+}
+
+/* a strip of tape holding the memo to the desk */
+.memo::before {
+  content: '';
+  position: absolute;
+  top: -10px;
+  left: 50%;
+  width: 90px;
+  height: 20px;
+  margin-left: -45px;
+  background: var(--c-paste-up);
+  opacity: 0.85;
+  transform: rotate(2deg);
+}
+
+.kicker {
+  font-family: var(--f-mono);
+  font-size: 10.5px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--c-rust);
+}
+
+.title {
+  font-family: var(--f-display);
+  font-weight: 700;
+  font-size: 21px;
+  line-height: 1.15;
+  margin: 4px 0 8px;
+}
+
+.lines {
+  margin: 0;
+  padding-left: 18px;
+  font-family: var(--f-body);
+  font-size: 13px;
+  line-height: 1.4;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 12px;
+}
+
+.ok {
+  font-family: var(--f-mono);
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  background: var(--c-ink);
+  color: var(--c-memo);
+  border: none;
+  padding: 7px 16px;
+  cursor: pointer;
+}
+
+.off {
+  font-family: var(--f-mono);
+  font-size: 11px;
+  background: none;
+  border: none;
+  text-decoration: underline;
+  color: var(--c-ink-muted);
+  cursor: pointer;
+}

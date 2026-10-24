@@ -1,5 +1,6 @@
 import { DragLayer } from './components/drag/DragLayer.tsx';
 import { Stage } from './components/desk/Stage.tsx';
+import { TutorialCard } from './components/desk/TutorialCard.tsx';
 import { DevMenu } from './screens/DevMenu.tsx';
 import { EndScreen } from './screens/EndScreen.tsx';
 import { HiringScreen } from './screens/HiringScreen.tsx';
@@ -21,6 +22,7 @@ export function App() {
       {screen === 'press' ? <PressRun /> : null}
       {screen === 'end' ? <EndScreen /> : null}
       {screen === 'techdemo' ? <TechDemo /> : null}
+      <TutorialCard />
       <DragLayer />
       {import.meta.env.DEV ? <DevMenu /> : null}
     </Stage>

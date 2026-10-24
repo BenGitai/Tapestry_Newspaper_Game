@@ -15,7 +15,14 @@ const step = async (name, fn) => {
   await fn();
   await page.waitForTimeout(250);
   await page.screenshot({ path: `${out}/${name}.png` });
+  // The how-to-play guide is on by default: read the memo, then put it away.
+  const memo = page.getByRole('button', { name: 'Got it' });
+  if (await memo.count()) {
+    tips++;
+    await memo.click();
+  }
 };
+let tips = 0;
 
 await page.waitForLoadState('domcontentloaded');
 await step('01-title', async () => {});
@@ -47,12 +54,13 @@ await step('08-results', () => page.getByRole('button', { name: 'Send to press' 
 await step('09-next', () => page.getByRole('button', { name: /Next issue/ }).click());
 await step('10-staff', () => page.getByRole('button', { name: 'Staff', exact: true }).click());
 await step('11-map', () => page.getByRole('button', { name: 'City map', exact: true }).click());
-await step('12-district', () => page.locator('polygon').nth(4).click({ force: true }));
+await step('12-district', () => page.locator('path[class*="district"]').nth(4).click({ force: true }));
 await step('13-saved', () => page.getByRole('button', { name: 'Save', exact: true }).click());
 await step('14-title', () => page.getByRole('button', { name: 'Menu', exact: true }).click());
 await step('15-continue', () => page.getByText(/reaches issue 2/).click());
 
 await app.close();
+if (tips < 6) errors.push(`Expected a how-to-play memo on each screen, saw ${tips}`);
 if (errors.length) {
   console.error('Page errors:\n' + errors.join('\n'));
   process.exit(1);
