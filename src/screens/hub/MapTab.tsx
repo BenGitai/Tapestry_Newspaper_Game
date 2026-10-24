@@ -4,17 +4,18 @@
 // actually prints.
 import { useState } from 'react';
 import type { District } from '../../data/schemas.ts';
+import { cityMap } from '../../data/cityMap.ts';
 import { displayName, loadGameData } from '../../data/worldData.ts';
 import { CIRCULATION } from '../../sim/balance.ts';
 import { findStoryBlock, placementLabel } from '../../sim/layout.ts';
-import { wireForIssue } from '../../sim/newsroom.ts';
+import { localLeads, localPoolForIssue, wireForIssue } from '../../sim/newsroom.ts';
 import { leanLabel, paperReport } from '../../sim/paperStats.ts';
 import { nextUnlock, totalNewsstands } from '../../sim/pages.ts';
 import { averageTrust, districtInterests, leanFit, reach, totalReaders } from '../../sim/readers.ts';
 import { CATEGORY_LABEL, initials, reporterById } from '../../sim/staff.ts';
 import type { GameState } from '../../sim/types.ts';
 import { useStore } from '../../state/store.ts';
-import { palette } from '../../theme/tokens.ts';
+import { mapRamps, palette } from '../../theme/tokens.ts';
 import styles from './Hub.module.css';
 import m from './Map.module.css';
 
@@ -30,9 +31,9 @@ const LAYERS: { id: Layer; label: string; help: string }[] = [
 
 const STYLE_LABEL = { record: 'Paper of record', neighborhood: 'Neighborhood paper', tabloid: 'Tabloid' } as const;
 
+/** Where a district's label and pins go on the real map. */
 function centroid(d: District): [number, number] {
-  const n = d.polygon.length;
-  return [d.polygon.reduce((a, p) => a + p[0], 0) / n, d.polygon.reduce((a, p) => a + p[1], 0) / n];
+  return cityMap().districts[d.id]?.label ?? [0, 0];
 }
 
 /** 0..1 value for a district under a layer. */
@@ -66,25 +67,29 @@ export function MapTab() {
   const [selected, setSelected] = useState<string | null>(null);
   const { world, stories } = loadGameData();
   const wire = wireForIssue(game, stories);
-  const [vx, vy, vw, vh] = world.city.map_viewbox;
+  // Pins are this issue's Philadelphia stories; only those your local reporters are digging up are filled in.
+  const local = localPoolForIssue(game, stories);
+  const leads = new Set(localLeads(game, stories).map((s) => s.id));
+  const map = cityMap();
+  const [vx, vy, vw, vh] = map.viewbox;
   const district = world.districts.find((d) => d.id === selected);
 
-  // Story pins: one per story on today's wire, at its first district (spread out a little).
-  // Pins for the most important local stories (a weekly wire has too many to pin them all).
+  // Story pins: one per local story, at its first district (spread out a little).
+  // Pins for the most important local stories (a weekly pool has too many to pin them all).
   const PIN_LIMIT = 14;
   const pinned = new Set(
-    [...wire]
+    [...local]
       .filter((s) => s.districts.length && s.districts.length < world.districts.length)
       .sort((a, b) => b.importance - a.importance)
       .slice(0, PIN_LIMIT)
       .map((s) => s.id),
   );
-  const pins = wire
+  const pins = local
     .filter((s) => pinned.has(s.id))
     .map((s, i) => {
       const d = world.districts.find((x) => x.id === s.districts[0])!;
       const [cx, cy] = centroid(d);
-      const sameBefore = wire.filter((x) => pinned.has(x.id)).slice(0, i).filter((x) => x.districts[0] === s.districts[0]).length;
+      const sameBefore = local.filter((x) => pinned.has(x.id)).slice(0, i).filter((x) => x.districts[0] === s.districts[0]).length;
       return { story: s, n: i + 1, x: cx + 34 + (sameBefore % 3) * 30, y: cy + 26 + Math.floor(sameBefore / 3) * 30 };
     });
 
@@ -107,7 +112,7 @@ export function MapTab() {
             {[4, 2, 0].map((lvl) => (
               <div key={lvl}>
                 <svg width={30} height={18}>
-                  <rect width={30} height={18} fill={`url(#ht-${layer === 'rival' ? 'r' : 'i'}${lvl})`} stroke={palette.ink} strokeWidth={0.8} />
+                  <rect width={30} height={18} fill={mapRamps[layer][lvl]} stroke={palette.ink} strokeWidth={0.8} />
                 </svg>
                 <span>{lvl === 4 ? 'High' : lvl === 2 ? 'Some' : 'Low'}</span>
               </div>
@@ -116,13 +121,13 @@ export function MapTab() {
               <svg width={30} height={18}>
                 <circle cx={15} cy={9} r={7} fill={palette.tiger} stroke={palette.ink} strokeWidth={1} />
               </svg>
-              <span>Story on today’s wire</span>
+              <span>Local lead your reporters found</span>
             </div>
           </div>
           <div className={m.worldDesk}>
             <div className={styles.kicker}>Off the map</div>
-            <b>{wire.filter((s) => !s.districts.length || s.districts.length === world.districts.length).length} citywide or world stories</b>
-            <p>Stories with no single district, like fares and national news, reach every neighborhood.</p>
+            <b>{wire.length} national &amp; world stories</b>
+            <p>The wire reaches every neighborhood. Hollow pins are city stories nobody on your staff is digging up: put a reporter on a local patch to find them.</p>
           </div>
         </div>
       </section>
@@ -130,54 +135,37 @@ export function MapTab() {
       {/* ---------- map ---------- */}
       <section className={m.board}>
         <svg viewBox={`${vx} ${vy} ${vw} ${vh}`} className={m.map} role="img" aria-label={`Map of ${world.city.name}, ${LAYERS.find((l) => l.id === layer)?.label}`}>
-          <defs>
-            <pattern id="water" width={24} height={10} patternUnits="userSpaceOnUse">
-              <path d="M0 5 Q6 1 12 5 T24 5" fill="none" stroke={palette.inkFaint} strokeWidth={0.8} opacity={0.6} />
-            </pattern>
-            {Array.from({ length: LEVELS }, (_, lvl) => (
-              <g key={lvl}>
-                <pattern id={`ht-i${lvl}`} width={9} height={9} patternUnits="userSpaceOnUse">
-                  <rect width={9} height={9} fill={palette.newsprint} />
-                  {lvl > 0 ? <circle cx={4.5} cy={4.5} r={0.6 + lvl * 0.75} fill={palette.ink} /> : <circle cx={4.5} cy={4.5} r={0.5} fill={palette.inkFaint} />}
-                </pattern>
-                <pattern id={`ht-r${lvl}`} width={9} height={9} patternUnits="userSpaceOnUse">
-                  <rect width={9} height={9} fill={palette.newsprint} />
-                  {lvl > 0 ? <circle cx={4.5} cy={4.5} r={0.6 + lvl * 0.75} fill={palette.rust} /> : <circle cx={4.5} cy={4.5} r={0.5} fill={palette.inkFaint} />}
-                </pattern>
-              </g>
-            ))}
-          </defs>
-          <rect x={vx} y={vy} width={vw} height={vh} fill={palette.newsprintLight} />
-          <rect x={vx} y={vy} width={vw} height={vh} fill="url(#water)" />
+          <rect x={vx} y={vy} width={vw} height={vh} fill={palette.mapLand} />
 
           {world.districts.map((d) => {
             const v = layerValue(layer, game, d);
             const lvl = Math.max(0, Math.min(LEVELS - 1, Math.round(v * (LEVELS - 1))));
             return (
-              <polygon
+              <path
                 key={d.id}
-                points={d.polygon.map((p) => p.join(',')).join(' ')}
-                fill={`url(#ht-${layer === 'rival' ? 'r' : 'i'}${lvl})`}
+                d={map.districts[d.id]?.path}
+                fill={mapRamps[layer][lvl]}
                 stroke={palette.ink}
-                strokeWidth={1.6}
+                strokeWidth={1.4}
+                strokeLinejoin="round"
                 className={m.district}
                 onClick={() => setSelected(d.id)}
               >
                 <title>{d.name}</title>
-              </polygon>
+              </path>
             );
           })}
 
-          {Object.entries(world.city.rivers).map(([name, pts]) => (
-            <g key={name} pointerEvents="none">
-              <polyline points={pts.map((p) => p.join(',')).join(' ')} fill="none" stroke={palette.ink} strokeWidth={9} strokeLinejoin="round" />
-              <polyline points={pts.map((p) => p.join(',')).join(' ')} fill="none" stroke={palette.newsprintLight} strokeWidth={6} strokeLinejoin="round" />
-            </g>
-          ))}
+          <g pointerEvents="none">
+            {map.parks.map((p, i) => (
+              <path key={i} d={p} fill={palette.park} opacity={0.55} />
+            ))}
+            {map.water.map((p, i) => (
+              <path key={i} d={p} fill={palette.water} stroke={palette.waterInk} strokeWidth={0.6} />
+            ))}
+          </g>
 
-          {district ? (
-            <polygon points={district.polygon.map((p) => p.join(',')).join(' ')} fill="none" stroke={palette.tiger} strokeWidth={5} pointerEvents="none" />
-          ) : null}
+          {district ? <path d={map.districts[district.id]?.path} fill="none" stroke={palette.tiger} strokeWidth={4} strokeLinejoin="round" pointerEvents="none" /> : null}
 
           {world.districts.map((d) => {
             const [cx, cy] = centroid(d);
@@ -185,8 +173,8 @@ export function MapTab() {
             const st = game.districts[d.id]!;
             return (
               <g key={d.id} pointerEvents="none">
-                <rect x={cx - name.length * 5.4} y={cy - 13} width={name.length * 10.8} height={22} fill={palette.newsprint} />
-                <text x={cx} y={cy + 4} textAnchor="middle" fontFamily="Old Standard TT, serif" fontWeight={700} fontSize={16} fill={palette.ink}>
+                <rect x={cx - name.length * 4.6} y={cy - 11} width={name.length * 9.2} height={19} fill={palette.newsprint} stroke={palette.ink} strokeWidth={0.8} opacity={0.92} />
+                <text x={cx} y={cy + 4} textAnchor="middle" fontFamily="Old Standard TT, serif" fontWeight={700} fontSize={14} fill={palette.ink}>
                   {name}
                 </text>
                 {st.bureau ? (
@@ -203,11 +191,11 @@ export function MapTab() {
 
           {pins.map((p) => (
             <g key={p.story.id} className={m.pin} onClick={() => setSelected(p.story.districts[0]!)}>
-              <circle cx={p.x} cy={p.y} r={13} fill={palette.tiger} stroke={palette.ink} strokeWidth={1.5} />
+              <circle cx={p.x} cy={p.y} r={13} fill={leads.has(p.story.id) ? palette.tiger : palette.newsprint} stroke={palette.ink} strokeWidth={1.5} />
               <text x={p.x} y={p.y + 4.5} textAnchor="middle" fontFamily="IBM Plex Mono, monospace" fontSize={12} fill={palette.ink}>
                 {p.n}
               </text>
-              <title>{p.story.wire_headline}</title>
+              <title>{leads.has(p.story.id) ? p.story.wire_headline : 'A city story nobody is digging up'}</title>
             </g>
           ))}
 
@@ -228,6 +216,9 @@ export function MapTab() {
               READERSHIP SURVEY · ISSUE {game.issueNumber}
             </text>
           </g>
+          <text x={vx + vw - 8} y={vy + vh - 8} textAnchor="end" fontFamily="IBM Plex Mono, monospace" fontSize={10} fill={palette.inkMuted} pointerEvents="none">
+            {map.attribution}
+          </text>
         </svg>
       </section>
 
@@ -270,7 +261,7 @@ function DistrictPanel({ game, district, pins }: { game: GameState; district: Di
   const interests = districtInterests(world, district).slice(0, 5);
   const maxW = interests[0]?.weight ?? 1;
   const history = game.results.map((r) => r.districts[district.id]?.readers ?? 0);
-  const here = wireForIssue(game, stories).filter((s) => s.districts.includes(district.id));
+  const here = localLeads(game, stories).filter((s) => s.districts.includes(district.id));
 
   return (
     <>
@@ -298,7 +289,7 @@ function DistrictPanel({ game, district, pins }: { game: GameState; district: Di
       ))}
 
       <div className={styles.label}>Today in {district.name}</div>
-      {here.length === 0 ? <p className={styles.note}>Nothing on the wire from here this issue.</p> : null}
+      {here.length === 0 ? <p className={styles.note}>No local leads from here this issue. A reporter on this district or the Philadelphia patch would find them.</p> : null}
       {here.map((s) => {
         const pin = pins.find((p) => p.story.id === s.id);
         const a = game.articles.find((x) => x.storyId === s.id && x.status !== 'spiked');
