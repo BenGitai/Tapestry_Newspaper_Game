@@ -4,7 +4,7 @@ import { useState } from 'react';
 import type { Reporter } from '../data/schemas.ts';
 import { loadGameData } from '../data/worldData.ts';
 import { STARTING_STAFF } from '../sim/balance.ts';
-import { suggestStartingStaff, type Hire } from '../sim/newGame.ts';
+import type { Hire } from '../sim/newGame.ts';
 import { checkStartingStaff, defaultAssignment, payroll, startingPayrollCap } from '../sim/staff.ts';
 import type { StaffAssignment } from '../sim/types.ts';
 import { useStore } from '../state/store.ts';
@@ -17,9 +17,8 @@ export function HiringScreen() {
   const startGame = useStore((s) => s.startGame);
   const goto = useStore((s) => s.goto);
   const { world } = loadGameData();
-  const [hires, setHires] = useState<Hire[]>(() =>
-    setup ? suggestStartingStaff(world, setup).map((r) => ({ reporterId: r.id, assignment: defaultAssignment(world, r) })) : [],
-  );
+  // Nobody is pre-hired: the player picks their own newsroom.
+  const [hires, setHires] = useState<Hire[]>([]);
   if (!setup) return null;
 
   const cap = startingPayrollCap(setup.origin);

@@ -21,6 +21,9 @@ await page.waitForLoadState('domcontentloaded');
 await step('01-title', async () => {});
 await step('02-setup', () => page.getByText('Upstart launches paper on a shoestring').click());
 await step('03-hiring', () => page.getByRole('button', { name: /Approved/i }).click());
+await step('03b-hired', async () => {
+  for (const name of ['Rosa Okafor', 'Marty Kowalczyk', 'June Tran']) await page.getByRole('button', { name: new RegExp(name) }).first().click();
+});
 await step('04-newsroom', () => page.getByRole('button', { name: 'Open the newsroom' }).click());
 await step('05-picked', async () => {
   const pick = page.getByRole('button', { name: 'For print', exact: true });
