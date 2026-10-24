@@ -1,5 +1,18 @@
 # Devlog
 
+## 2026-10-24 · Offline article cache filled; tested in the desktop app
+
+- **Article cache filled** with `claude-haiku-5-5`: 5,455 of 5,541 planned articles (98.4%) are pre-generated in `data/generated/summaries.cache.json`. The game reads them offline through `ArticleSource` (newsroom, layout, printed pages, tech demo). The other 86 failed the fact check (for example "two decades" for 19 years, invented weekdays and cities) and use templates.
+- **Real cost** about $1.50 in total: three passes, roughly $0.00021 per article, with prompts around 1,100 tokens rather than the dry-run's estimate. At full scale (200 stories a day for 30 days) that's about $1.23 a month for one article per story.
+- **Fact check:**
+  - Headlines a word or two over, and bodies up to 2.2× target, are now warnings, not rejections. They made up most of the first run's 1,109 rejections, and the layout already fits them.
+  - Capitalized number words ("Fourteen ...") are checked as numbers.
+  - Invented numbers and names still fail.
+- **Tech demo fixes:** the squeezed status line, and no dev-endpoint calls in the offline build. The desktop play-through passes on the branch.
+- **Original-story links** wherever an article is read. Real `https://` links open in the system browser. Demo placeholders say they're placeholders.
+- Tests: 176 passing, including checks that the shipped cache covers more than 95% of the 10-issue set.
+- **Key handling:** the API key lives only in `.env` (gitignored). Rotate it if it was ever shared.
+
 ## 2026-10-24 · Summarizer: tech demo and offline pre-generated articles
 
 **What changed**
