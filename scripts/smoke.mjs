@@ -36,6 +36,8 @@ await step('05-picked', async () => {
   const pick = page.getByRole('button', { name: 'For print', exact: true });
   while ((await pick.count()) > 0) await pick.first().click();
 });
+await step('05b-wire', () => page.getByRole('button', { name: /The wire & local leads/ }).click());
+await page.getByRole('button', { name: /Filed articles/ }).click();
 await step('06-layout', () => page.getByRole('button', { name: /To the layout/ }).click());
 
 // Drag the first picked article onto the front page.
@@ -50,9 +52,12 @@ await page.mouse.move(from.x + from.width / 2 + 30, from.y + 40, { steps: 4 });
 await page.mouse.move(to.x + to.width * 0.3, to.y + to.height * 0.22, { steps: 12 });
 await page.mouse.up();
 await step('07-placed', async () => {});
+await step('07b-ads', () => page.getByRole('button', { name: /Ad desk/ }).click());
 await step('08-results', () => page.getByRole('button', { name: 'Send to press' }).click());
+await step('08b-districts', () => page.getByRole('button', { name: 'Districts', exact: true }).click());
 await step('09-next', () => page.getByRole('button', { name: /Next issue/ }).click());
 await step('10-staff', () => page.getByRole('button', { name: 'Staff', exact: true }).click());
+await step('10b-market', () => page.getByRole('button', { name: /Help wanted/ }).click());
 await step('11-map', () => page.getByRole('button', { name: 'City map', exact: true }).click());
 await step('12-district', () => page.locator('path[class*="district"]').nth(4).click({ force: true }));
 await step('13-saved', () => page.getByRole('button', { name: 'Save', exact: true }).click());

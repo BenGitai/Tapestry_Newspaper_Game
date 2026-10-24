@@ -70,8 +70,6 @@
   display: flex;
   flex-direction: column;
   gap: 10px;
-  scrollbar-width: thin;
-  scrollbar-color: var(--c-ink-muted) transparent;
 }
 
 .slip {
@@ -283,8 +281,6 @@
   background: var(--c-aged-paper);
   padding: 14px 16px 18px;
   transform: rotate(0.35deg);
-  scrollbar-width: thin;
-  scrollbar-color: var(--c-ink-muted) transparent;
 }
 
 .kicker {
@@ -613,4 +609,101 @@
   display: flex;
   align-items: center;
   cursor: help;
+}
+
+/* ---------- ad desk ---------- */
+.adRules {
+  background: var(--c-memo);
+  color: var(--c-ink);
+  border: 1px solid var(--c-ink);
+  padding: 9px 11px;
+  font-size: 11.5px;
+  line-height: 1.35;
+}
+
+.adRules p {
+  margin: 4px 0 0;
+}
+
+.adRulesHead {
+  font-family: var(--f-mono);
+  font-size: 9.5px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--c-rust);
+}
+
+.adLocked {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.adReason {
+  font-size: 11.5px;
+  font-style: italic;
+  margin-top: 3px;
+}
+
+.adWarn {
+  color: var(--c-rust);
+}
+
+.adBad {
+  color: var(--c-stamp-red);
+}
+
+.goodwill {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 4px;
+  font-family: var(--f-mono);
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--c-ink-muted);
+}
+
+.goodwillBar {
+  position: relative;
+  flex: 1;
+  height: 6px;
+  background: var(--c-proof-block);
+}
+
+.goodwillBar i {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  background: var(--c-green);
+}
+
+.goodwillBar i.goodwillLow {
+  background: var(--c-stamp-red);
+}
+
+/* where they pull their ads */
+.goodwillBar b {
+  position: absolute;
+  top: -3px;
+  bottom: -3px;
+  width: 1.5px;
+  background: var(--c-ink);
+}
+
+/* Inspector: advertisers named in the selected story */
+.adInfo,
+.adAlert {
+  margin-top: 8px;
+  padding: 6px 9px;
+  font-size: 12px;
+  line-height: 1.35;
+  border: 1px solid var(--c-ink-muted);
+}
+
+.adAlert {
+  border-color: var(--c-rust);
+  background: var(--c-memo);
+  color: var(--c-ink);
 }

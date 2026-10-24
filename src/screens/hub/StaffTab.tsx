@@ -20,6 +20,7 @@ import type { DeskDuties, GameState, StaffMember } from '../../sim/types.ts';
 import { useStore } from '../../state/store.ts';
 import { assignmentSummary, AssignmentEditor, AttributeTable, ReporterHeader, StrengthsLine } from '../../components/staff/StaffParts.tsx';
 import styles from './Hub.module.css';
+import { SubNav } from './SubNav.tsx';
 import s from './Staff.module.css';
 
 export function StaffTab() {
@@ -29,95 +30,123 @@ export function StaffTab() {
   const [candidate, setCandidate] = useState<string | null>(null);
   const member = game.staff.find((m) => m.reporterId === selected);
   const market = world.staff_pool.filter((r) => !game.staff.some((m) => m.reporterId === r.id));
+  const [view, setView] = useState<'staff' | 'market'>('staff');
+  const col = `${styles.col} ${styles.belowNav}`;
+  const picked = candidate ? reporterById(world, candidate) : undefined;
 
   return (
     <>
-      {/* ---------- your staff ---------- */}
-      <section className={styles.col} style={{ left: 14, width: 300 }}>
-        <div className={`${styles.paper} ${s.listPaper}`}>
-          <div className={styles.colHead}>
-            <span className={styles.colTitle}>Newsroom</span>
-            <span className={styles.colSub}>
-              {game.staff.length}/{MAX_STAFF} · ${payroll(world, game.staff)}/issue
-            </span>
-          </div>
-          <div className={styles.scroll}>
-            {deskGroups(game).map((group) => (
-              <div key={group.key} className={s.deskGroup}>
-                <div className={s.deskHead}>
-                  <b>{group.label}</b>
-                  <span>
-                    {group.members.length} on desk
-                    {group.desk ? (headOf(game, group.desk) ? (headActive(game, world, group.desk) ? ' · has a head' : ' · head inactive') : group.members.length >= HEAD.minDesk ? ' · can promote a head' : '') : ''}
-                  </span>
-                </div>
-                {group.members.map((m) => {
-                  const r = reporterById(world, m.reporterId);
-                  if (!r) return null;
-                  return (
-                    <button key={m.reporterId} className={`${s.staffRow} ${selected === m.reporterId && !candidate ? s.on : ''}`} onClick={() => { setSelected(m.reporterId); setCandidate(null); }}>
-                      <b>
-                        {r.name}
-                        {m.role === 'head' ? <em className={s.headTag}>Desk head</em> : null}
-                      </b>
-                      <span>{m.role === 'head' ? 'Edits and runs the desk' : assignmentSummary(shownAssignment(m))}</span>
-                      <span className={s.rowMeta}>
-                        {filingCapacity(r, m, game.setup.frequency)} in/issue · morale {Math.round(m.morale)} · ${salaryOf(world, m)}
-                        {m.pendingAssignment ? ' · changes next issue' : ''}
-                        {m.hiredIssue > game.issueNumber ? ' · starts next issue' : ''}
+      <SubNav
+        items={[
+          { id: 'staff', label: `Your staff (${game.staff.length})` },
+          { id: 'market', label: `Help wanted (${market.length})` },
+        ]}
+        value={view}
+        onChange={setView}
+      />
+      {view === 'staff' ? (
+        <>
+          {/* ---------- your staff ---------- */}
+          <section className={col} style={{ left: 14, width: 340 }}>
+            <div className={`${styles.paper} ${s.listPaper}`}>
+              <div className={styles.colHead}>
+                <span className={styles.colTitle}>Newsroom</span>
+                <span className={styles.colSub}>
+                  {game.staff.length}/{MAX_STAFF} · ${payroll(world, game.staff)}/issue
+                </span>
+              </div>
+              <div className={styles.scroll}>
+                {deskGroups(game).map((group) => (
+                  <div key={group.key} className={s.deskGroup}>
+                    <div className={s.deskHead}>
+                      <b>{group.label}</b>
+                      <span>
+                        {group.members.length} on desk
+                        {group.desk ? (headOf(game, group.desk) ? (headActive(game, world, group.desk) ? ' · has a head' : ' · head inactive') : group.members.length >= HEAD.minDesk ? ' · can promote a head' : '') : ''}
                       </span>
+                    </div>
+                    {group.members.map((m) => {
+                      const r = reporterById(world, m.reporterId);
+                      if (!r) return null;
+                      return (
+                        <button key={m.reporterId} className={`${s.staffRow} ${selected === m.reporterId ? s.on : ''}`} onClick={() => setSelected(m.reporterId)}>
+                          <b>
+                            {r.name}
+                            {m.role === 'head' ? <em className={s.headTag}>Desk head</em> : null}
+                          </b>
+                          <span>{m.role === 'head' ? 'Edits and runs the desk' : assignmentSummary(shownAssignment(m))}</span>
+                          <span className={s.rowMeta}>
+                            {filingCapacity(r, m, game.setup.frequency)} in/issue · morale {Math.round(m.morale)} · ${salaryOf(world, m)}
+                            {m.pendingAssignment ? ' · changes next issue' : ''}
+                            {m.hiredIssue > game.issueNumber ? ' · starts next issue' : ''}
+                          </span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                ))}
+              </div>
+            </div>
+          </section>
+
+          {/* ---------- manage selected ---------- */}
+          <section className={col} style={{ left: 364, right: 14 }}>
+            <div className={`${styles.paper} ${s.managePaper}`}>
+              {member ? <ManageReporter game={game} member={member} /> : <p className={styles.note}>Pick a reporter, or hire one under Help wanted.</p>}
+            </div>
+          </section>
+        </>
+      ) : (
+        <>
+          {/* ---------- recruitment market ---------- */}
+          <section className={col} style={{ left: 14, width: 860 }}>
+            <div className={`${styles.paper} ${s.marketPaper}`}>
+              <div className={styles.colHead}>
+                <span className={styles.colTitle}>Help wanted</span>
+                <span className={styles.colSub}>{market.length} available</span>
+              </div>
+              <p className={styles.note}>
+                Reporters on the market. Until you check references (${REFERENCE_CHECK_COST}), you only have a rough idea of their abilities.
+              </p>
+              <div className={`${styles.scroll} ${s.marketGrid}`}>
+                {market.map((r) => {
+                  const scouted = isScouted(game, r.id);
+                  return (
+                    <button key={r.id} className={`${s.candidate} ${candidate === r.id ? s.on : ''}`} onClick={() => setCandidate(r.id)}>
+                      <div className={s.candHead}>
+                        <b>{r.name}</b>
+                        <span>
+                          {DESK_LABEL[r.desk]} · ${r.salary_per_issue}/issue
+                        </span>
+                      </div>
+                      <AttributeTable reporter={r} attrs={r.attributes} scouted={scouted} />
+                      {!scouted ? <span className={s.rough}>Rough estimate</span> : null}
                     </button>
                   );
                 })}
+                {market.length === 0 ? <p className={styles.note}>Nobody else is looking for work.</p> : null}
               </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ---------- manage selected ---------- */}
-      <section className={styles.col} style={{ left: 324, width: 560 }}>
-        <div className={`${styles.paper} ${s.managePaper}`}>
-          {candidate ? (
-            <CandidateFile game={game} reporter={reporterById(world, candidate)!} onHired={(id) => { setSelected(id); setCandidate(null); }} />
-          ) : member ? (
-            <ManageReporter game={game} member={member} />
+            </div>
+          </section>
+          <section className={col} style={{ left: 884, right: 14 }}>
+            <div className={`${styles.paper} ${s.managePaper}`}>
+              {picked ? (
+                <CandidateFile
+                  game={game}
+                  reporter={picked}
+                  onHired={(id) => {
+                    setSelected(id);
+                    setCandidate(null);
+                    setView('staff');
+                  }}
+                />
           ) : (
-            <p className={styles.note}>Pick a reporter.</p>
-          )}
-        </div>
-      </section>
-
-      {/* ---------- recruitment market ---------- */}
-      <section className={styles.col} style={{ left: 894, right: 14 }}>
-        <div className={`${styles.paper} ${s.marketPaper}`}>
-          <div className={styles.colHead}>
-            <span className={styles.colTitle}>Help wanted</span>
-            <span className={styles.colSub}>{market.length} available</span>
-          </div>
-          <p className={styles.note}>
-            Reporters on the market. Until you check references (${REFERENCE_CHECK_COST}), you only have a rough idea of their abilities.
-          </p>
-          <div className={styles.scroll}>
-            {market.map((r) => {
-              const scouted = isScouted(game, r.id);
-              return (
-                <button key={r.id} className={`${s.candidate} ${candidate === r.id ? s.on : ''}`} onClick={() => setCandidate(r.id)}>
-                  <div className={s.candHead}>
-                    <b>{r.name}</b>
-                    <span>
-                      {DESK_LABEL[r.desk]} · ${r.salary_per_issue}/issue
-                    </span>
-                  </div>
-                  <AttributeTable reporter={r} attrs={r.attributes} scouted={scouted} />
-                  {!scouted ? <span className={s.rough}>Rough estimate</span> : null}
-                </button>
-              );
-            })}
-            {market.length === 0 ? <p className={styles.note}>Nobody else is looking for work.</p> : null}
-          </div>
-        </div>
-      </section>
+                <p className={styles.note}>Click a candidate to see their file, check references or hire them.</p>
+              )}
+            </div>
+          </section>
+        </>
+      )}
     </>
   );
 }

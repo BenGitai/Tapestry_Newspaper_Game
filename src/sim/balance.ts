@@ -304,6 +304,10 @@ export const ADVERTISERS = {
   /** Relationships recover this much each issue. */
   recovery: 6,
   start: 75,
+  /** Extra recovery in an issue that runs (non-hard) coverage on a desk they like. */
+  likedBonus: 4,
+  /** Relationship bands shown on the ad desk: at or above happy, at or above content, at or above uneasy; below is angry. */
+  mood: { happy: 80, content: 60, uneasy: 45 },
 } as const;
 
 export const RIVAL_SIM = {

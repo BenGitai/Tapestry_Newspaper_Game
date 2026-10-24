@@ -81,8 +81,6 @@
   flex: 1;
   overflow-y: auto;
   padding-right: 6px;
-  scrollbar-width: thin;
-  scrollbar-color: var(--c-ink-muted) transparent;
 }
 
 .scroll section {
@@ -302,4 +300,27 @@
 
 .next:hover {
   background: var(--c-stamp-red);
+}
+
+.tabs {
+  display: flex;
+  gap: 4px;
+  border-bottom: 1.5px solid var(--c-ink);
+}
+
+.tabs button {
+  font-family: var(--f-mono);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  background: transparent;
+  border: 1px solid var(--c-ink);
+  border-bottom: none;
+  padding: 7px 14px;
+  cursor: pointer;
+}
+
+.tabs .on {
+  background: var(--c-ink);
+  color: var(--c-newsprint);
 }

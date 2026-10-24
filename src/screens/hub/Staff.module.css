@@ -12,7 +12,6 @@
   background: var(--c-newsprint);
   transform: rotate(-0.2deg);
   overflow-y: auto;
-  scrollbar-width: thin;
 }
 
 .marketPaper {
@@ -230,4 +229,11 @@
   font-style: italic;
   color: var(--c-ink-soft);
   margin: 4px 0;
+}
+
+.marketGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  align-content: start;
+  gap: 10px;
 }

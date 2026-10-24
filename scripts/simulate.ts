@@ -7,7 +7,8 @@ import { createGame, defaultSetup, issueCount, suggestStartingStaff } from '../s
 import { backlog, commission, updateArticle, wireForIssue } from '../src/sim/newsroom.ts';
 import { leanLabel } from '../src/sim/paperStats.ts';
 import { averageTrust, totalReaders } from '../src/sim/readers.ts';
-import { adsAvailable, resolveIssue } from '../src/sim/simulate.ts';
+import { resolveIssue } from '../src/sim/simulate.ts';
+import { adStatus } from '../src/sim/ads.ts';
 import { advanceIssue } from '../src/sim/newGame.ts';
 import { defaultAssignment, hire, payroll } from '../src/sim/staff.ts';
 import { CITY_PATCH } from '../src/sim/types.ts';
@@ -76,7 +77,7 @@ function makeUpPaper(game: GameState, s: Strategy): GameState {
   });
   let sold = 0;
   for (const e of [...world.entities].sort((a, b) => b.ad_revenue_per_issue - a.ad_revenue_per_issue)) {
-    if (sold >= s.ads || !adsAvailable(g, e.id)) continue;
+    if (sold >= s.ads || adStatus(g, e).state !== 'open') continue;
     const block = newAdBlock(e.id, { col: 0, row: 0 });
     const spot = findFreeSpot(g.draft, 'a2', block) ?? findFreeSpot(g.draft, 'front', block);
     if (!spot) continue;

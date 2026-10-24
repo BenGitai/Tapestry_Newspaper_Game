@@ -19,6 +19,7 @@ import {
   TRUST,
 } from './balance.ts';
 import { formatIssueDate, issueDate } from './calendar.ts';
+import { adStatus } from './ads.ts';
 import { activePages, adRevenue, fitOf, prominenceOf } from './layout.ts';
 import { writeLetters, type LetterCue } from './letters.ts';
 import { articleForStory, freshness, wireForIssue } from './newsroom.ts';
@@ -173,11 +174,15 @@ export function resolveIssue(game: GameState, world: CityWorld, stories: StorySo
   for (const id of missed) signal -= (stories.storyById(id)?.hard_hitting_lean ?? 0) * LEAN.omission;
   const perceivedLean = clamp(game.perceivedLean + signal * LEAN.rate, -1, 1);
 
-  // ---- advertisers ----
+  // ---- advertisers (rules explained on the ad desk; see ads.ts) ----
   const advertisers = { ...game.advertisers };
   const hit = new Map<string, number>();
+  const liked = new Set<string>();
   for (const p of pieces) {
-    if (p.article.angle !== 'hard') continue;
+    if (p.article.angle !== 'hard') {
+      for (const e of world.entities) if (e.likes.includes(p.story.category)) liked.add(e.id);
+      continue;
+    }
     for (const t of p.story.targets) hit.set(t, (hit.get(t) ?? 0) + p.prominence);
   }
   for (const e of world.entities) {
@@ -192,7 +197,7 @@ export function resolveIssue(game: GameState, world: CityWorld, stories: StorySo
         events.push(`${e.name.replace(/\s*\(fictional\)/, '')} is unhappy with your coverage.`);
       }
     } else {
-      a.relationship = clamp(a.relationship + ADVERTISERS.recovery, 0, 100);
+      a.relationship = clamp(a.relationship + ADVERTISERS.recovery + (liked.has(e.id) ? ADVERTISERS.likedBonus : 0), 0, 100);
     }
     advertisers[e.id] = a;
   }
@@ -238,7 +243,8 @@ export function resolveIssue(game: GameState, world: CityWorld, stories: StorySo
   const extraPages = game.draft.extraPages.length;
   const revenue = {
     sales: Math.round(copies * world.pricing.cover_price),
-    ads: adRevenue(game.draft, world.entities),
+    // Only advertisers who'd actually buy this issue pay (signed and not pulled).
+    ads: adRevenue(game.draft, world.entities.filter((e) => adStatus(game, e).state === 'open')),
     prizes: revealed.filter((o) => o.award).length * MONEY.awardPrize,
   };
   const costs = {

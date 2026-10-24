@@ -82,6 +82,10 @@ export const entitySchema = z.object({
   type: z.enum(['government', 'advertiser']),
   sector: z.string().optional(),
   ad_revenue_per_issue: z.number().nonnegative(),
+  /** Total readers the paper needs before this advertiser will buy space. */
+  min_readers: z.number().int().nonnegative().default(0),
+  /** Desks whose (not hard-hitting) coverage this advertiser likes to sit next to. */
+  likes: z.array(z.enum(CATEGORIES)).default([]),
   note: z.string().optional(),
 });
 export type Entity = z.infer<typeof entitySchema>;

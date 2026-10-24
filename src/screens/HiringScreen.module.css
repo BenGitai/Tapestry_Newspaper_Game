@@ -50,7 +50,6 @@
   gap: 12px;
   align-content: start;
   padding: 4px;
-  scrollbar-width: thin;
 }
 
 .resume {
@@ -145,7 +144,6 @@
   display: flex;
   flex-direction: column;
   gap: 10px;
-  scrollbar-width: thin;
 }
 
 .assign {

@@ -20,6 +20,7 @@ import {
   textInches,
   togglePhoto,
 } from '../../sim/layout.ts';
+import { hitPreview } from '../../sim/ads.ts';
 import { articleForStory, selectedForPrint } from '../../sim/newsroom.ts';
 import { payroll } from '../../sim/staff.ts';
 import { nextUnlock, totalNewsstands } from '../../sim/pages.ts';
@@ -127,6 +128,8 @@ function StoryNotes({ block, page }: { block: StoryBlock; page: PageId }) {
           </button>
         ))}
       </div>
+
+      <AdvertiserWarning targets={story.targets} hard={article.angle === 'hard'} prominence={prominenceOf(page, block)} />
 
       <div className={styles.label}>Scouting report · placement multiplies it ×{prominenceOf(page, block).toFixed(2)}</div>
       <ScoutingReport card={sc.card} />
@@ -251,5 +254,30 @@ function NextPage() {
       Next page, {next.page.toUpperCase()}: {readers.toLocaleString()}/{next.readers.toLocaleString()} readers · {stands}/{next.newsstands} newsstands (add
       them on the City map).
     </p>
+  );
+}
+
+/** Advertisers this story is about, and what running it hard-hitting would do to them. */
+function AdvertiserWarning({ targets, hard, prominence }: { targets: string[]; hard: boolean; prominence: number }) {
+  const game = useStore((s) => s.game)!;
+  const { world } = loadGameData();
+  const ads = world.entities.filter((e) => targets.includes(e.id));
+  if (!ads.length) return null;
+  return (
+    <div className={hard ? styles.adAlert : styles.adInfo}>
+      {ads.map((e) => {
+        const p = hitPreview(game, e.id, prominence);
+        return (
+          <div key={e.id}>
+            <b>{displayName(e.name)}</b>{' '}
+            {hard
+              ? p.wouldPull
+                ? `will pull their ads ($${e.ad_revenue_per_issue}/issue) after this hard-hitting story (−${p.loss} goodwill).`
+                : `won't like this hard-hitting story (−${p.loss} goodwill), but will keep buying.`
+              : 'is in this story. Run it hard-hitting and they lose goodwill.'}
+          </div>
+        );
+      })}
+    </div>
   );
 }

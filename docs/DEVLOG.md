@@ -1,5 +1,21 @@
 # Devlog
 
+## 2026-10-24 · Sub-pages, ad desk upgrade, results tabs, scrollbars
+
+- **Less clutter: sub-pages.**
+  - Newsroom: *Filed articles* (staff, pile, article details) and *The wire & local leads* (national/world wire and Philadelphia leads side by side).
+  - Staff: *Your staff* (roster plus a wide reporter file) and *Help wanted* (the market in two columns, candidate file on the right).
+- **Results sheet in tabs:** The books (with what happened), Districts, Your stories, The rival, Letters. No more scrolling.
+- **Scrollbars:** one thin ink line everywhere, no arrows (`src/theme/global.css`). Removed the per-panel `scrollbar-width` rules that brought back the chunky Windows bar.
+- **Ad desk upgrade** (`src/sim/ads.ts`):
+  - Each advertiser shows a goodwill bar (with the pull-out line), a mood line, the desks it likes, and its pay.
+  - A memo explains how to get more ads (the next advertiser signs at N readers), how you lose them (hard-hitting stories about them; under 45 they pull out for 2 issues) and how to win them back (+6 an issue, +10 when you run a desk they like).
+  - Six new fictional advertisers sign at 2.5k–16k readers, so growth now brings ad money.
+  - Ads from advertisers who haven't signed or have pulled out can't be placed and pay nothing.
+  - The layout inspector warns when a hard-hitting story would make an advertiser pull out.
+- Tests: 184 (ads). The smoke test now visits the wire page, the ad desk, the results tabs and Help wanted.
+- Next: playtest the ad thresholds (16k readers for the biggest may be too far for a founded paper).
+
 ## 2026-10-24 · Real news, local patches, color, real map, how-to-play guide
 
 **What changed**

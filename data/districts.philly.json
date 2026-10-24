@@ -149,13 +149,19 @@
   ],
 
   "entities": [
-    { "id": "city_hall", "name": "City Hall", "type": "government", "ad_revenue_per_issue": 350, "note": "Buys public-notice ads. Annoyed by hard-hitting coverage that targets it." },
-    { "id": "transit_authority", "name": "Philadelphia Transit Authority (fictional)", "type": "government", "ad_revenue_per_issue": 200 },
-    { "id": "penn_treaty_dev", "name": "Penn Treaty Development Group (fictional)", "type": "advertiser", "sector": "real_estate", "ad_revenue_per_issue": 300 },
-    { "id": "helix_forge", "name": "Helix Forge Therapeutics (fictional)", "type": "advertiser", "sector": "biotech", "ad_revenue_per_issue": 200 },
-    { "id": "schuylkill_savings", "name": "Schuylkill Savings Bank (fictional)", "type": "advertiser", "sector": "banking", "ad_revenue_per_issue": 250 },
-    { "id": "passyunk_eats", "name": "Passyunk Eats Restaurant Group (fictional)", "type": "advertiser", "sector": "restaurants", "ad_revenue_per_issue": 120 },
-    { "id": "mariners_hardware", "name": "Mariner's Hardware (fictional)", "type": "advertiser", "sector": "retail", "ad_revenue_per_issue": 150 }
+    { "id": "city_hall", "name": "City Hall", "type": "government", "ad_revenue_per_issue": 350, "note": "Buys public-notice ads. Annoyed by hard-hitting coverage that targets it.", "min_readers": 0, "likes": ["politics"] },
+    { "id": "transit_authority", "name": "Philadelphia Transit Authority (fictional)", "type": "government", "ad_revenue_per_issue": 200, "min_readers": 0, "likes": ["economy"] },
+    { "id": "penn_treaty_dev", "name": "Penn Treaty Development Group (fictional)", "type": "advertiser", "sector": "real_estate", "ad_revenue_per_issue": 300, "min_readers": 0, "likes": ["economy"] },
+    { "id": "helix_forge", "name": "Helix Forge Therapeutics (fictional)", "type": "advertiser", "sector": "biotech", "ad_revenue_per_issue": 200, "min_readers": 0, "likes": ["science"] },
+    { "id": "schuylkill_savings", "name": "Schuylkill Savings Bank (fictional)", "type": "advertiser", "sector": "banking", "ad_revenue_per_issue": 250, "min_readers": 0, "likes": ["economy"] },
+    { "id": "passyunk_eats", "name": "Passyunk Eats Restaurant Group (fictional)", "type": "advertiser", "sector": "restaurants", "ad_revenue_per_issue": 120, "min_readers": 0, "likes": ["culture"] },
+    { "id": "mariners_hardware", "name": "Mariner's Hardware (fictional)", "type": "advertiser", "sector": "retail", "ad_revenue_per_issue": 150, "min_readers": 0, "likes": ["social"] },
+    { "id": "liberty_brewing", "name": "Liberty Ward Brewing Co. (fictional)", "type": "advertiser", "sector": "drinks", "ad_revenue_per_issue": 180, "min_readers": 2500, "likes": ["sports", "culture"], "note": "AI-CONTENT-REVIEW: placeholder advertiser." },
+    { "id": "delval_health", "name": "Delaware Valley Health Network (fictional)", "type": "advertiser", "sector": "health", "ad_revenue_per_issue": 320, "min_readers": 4000, "likes": ["social", "science"], "note": "AI-CONTENT-REVIEW: placeholder advertiser." },
+    { "id": "broad_auto", "name": "Broad Street Auto Group (fictional)", "type": "advertiser", "sector": "autos", "ad_revenue_per_issue": 280, "min_readers": 6000, "likes": ["sports"], "note": "AI-CONTENT-REVIEW: placeholder advertiser." },
+    { "id": "keystone_mutual", "name": "Keystone Mutual Insurance (fictional)", "type": "advertiser", "sector": "insurance", "ad_revenue_per_issue": 400, "min_readers": 9000, "likes": ["economy"], "note": "AI-CONTENT-REVIEW: placeholder advertiser." },
+    { "id": "fairmount_univ", "name": "Fairmount University (fictional)", "type": "advertiser", "sector": "education", "ad_revenue_per_issue": 300, "min_readers": 12000, "likes": ["science", "culture"], "note": "AI-CONTENT-REVIEW: placeholder advertiser." },
+    { "id": "market_st_grocers", "name": "Market Street Grocers (fictional)", "type": "advertiser", "sector": "groceries", "ad_revenue_per_issue": 450, "min_readers": 16000, "likes": ["social"], "note": "AI-CONTENT-REVIEW: placeholder advertiser." }
   ],
 
   "_staff_note": "interest is the sub-focus they most like to write about (see subtopics.json). attributes are 1-20 (football-manager style), placeholder values. speed: column inches filed per issue. accuracy: lowers correction risk. impact: strength of reader reaction. charge: how politically charged the writing is (magnitude only; direction comes from the story and angle, so it stays symmetric). flair: readability and light-news appeal. tact: handling of sensitive stories; low tact plus high charge reads as sensational.",

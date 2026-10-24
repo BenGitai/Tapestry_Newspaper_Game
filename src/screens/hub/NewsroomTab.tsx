@@ -11,6 +11,7 @@ import { useStore } from '../../state/store.ts';
 import { ANGLE_LABEL, articleScorecard, bylineOf, OriginalStoryLink, ScoreChips, ScoutingReport, STYLE_SHORT } from '../../components/newsroom/ArticleParts.tsx';
 import { assignmentSummary, AttributeTable, ReporterHeader, StrengthsLine } from '../../components/staff/StaffParts.tsx';
 import { PhotoBox } from '../../components/paper/Halftone.tsx';
+import { SubNav } from './SubNav.tsx';
 import styles from './Hub.module.css';
 import n from './Newsroom.module.css';
 
@@ -24,7 +25,7 @@ export function NewsroomTab() {
   const selectArticle = useStore((s) => s.selectArticle);
   const setTab = useStore((s) => s.setHubTab);
   const [pile, setPile] = useState<Pile>('issue');
-  const [side, setSide] = useState<'details' | 'wire'>('wire');
+  const [view, setView] = useState<'articles' | 'wire'>('articles');
   const { world } = loadGameData();
 
   const all = backlog(game);
@@ -38,15 +39,23 @@ export function NewsroomTab() {
   const selected = game.articles.find((a) => a.id === selectedId);
   const focusMember = game.staff.find((m) => m.reporterId === focus);
 
-  const openArticle = (id: string) => {
-    selectArticle(id);
-    setSide('details');
-  };
+  const openArticle = (id: string) => selectArticle(id);
+  const wireCount = wireForIssue(game, loadGameData().stories).filter((s) => !isCovered(game, s.id)).length;
+  const leadCount = localLeads(game, loadGameData().stories).filter((s) => !isCovered(game, s.id)).length;
+  const col = `${styles.col} ${styles.belowNav}`;
 
   return (
     <>
+      <SubNav
+        items={[
+          { id: 'articles', label: `Filed articles (${piles.issue.length + piles.backlog.length})` },
+          { id: 'wire', label: `The wire & local leads (${wireCount + leadCount} open)` },
+        ]}
+        value={view}
+        onChange={setView}
+      />
       {/* ---------- roster ---------- */}
-      <section className={styles.col} style={{ left: 14, width: 322 }}>
+      <section className={col} style={{ left: 14, width: 322 }}>
         <div className={`${styles.paper} ${n.rosterPaper}`}>
           <div className={styles.colHead}>
             <span className={styles.colTitle}>Your staff</span>
@@ -64,7 +73,7 @@ export function NewsroomTab() {
                 on={focus === m.reporterId}
                 onClick={() => {
                   setFocus(focus === m.reporterId ? null : m.reporterId);
-                  setSide('details');
+                  setView('articles');
                   selectArticle(null);
                 }}
               />
@@ -76,64 +85,63 @@ export function NewsroomTab() {
         </div>
       </section>
 
-      {/* ---------- article pile ---------- */}
-      <section className={styles.col} style={{ left: 346, width: 616 }}>
-        <div className={n.pileHead}>
-          <div className={styles.subTabs}>
-            {(
-              [
-                ['issue', `Filed this issue (${piles.issue.length})`],
-                ['backlog', `Backlog (${piles.backlog.length})`],
-                ['favorites', `★ Favorites (${piles.favorites.length})`],
-                ['print', `For print (${piles.print.length})`],
-              ] as [Pile, string][]
-            ).map(([id, label]) => (
-              <button key={id} className={pile === id ? styles.subOn : ''} onClick={() => setPile(id)}>
-                {label}
-              </button>
-            ))}
-          </div>
-          {focus ? (
-            <button className={n.filterChip} onClick={() => setFocus(null)}>
-              Showing {reporterById(world, focus)?.name} ×
-            </button>
-          ) : null}
-        </div>
-        <div className={styles.scroll}>
-          {shown.map((a, i) => (
-            <ArticleSlip key={a.id} game={game} article={a} on={a.id === selectedId} tilt={i % 2 ? 0.25 : -0.2} onOpen={() => openArticle(a.id)} />
-          ))}
-          {shown.length === 0 ? <EmptyPile pile={pile} issue={game.issueNumber} /> : null}
-        </div>
-        <button className={styles.big} onClick={() => setTab('layout')}>
-          To the layout · {piles.print.length} for print ▸
-        </button>
-      </section>
+      {view === 'wire' ? <WireDesk game={game} /> : null}
 
-      {/* ---------- detail / wire ---------- */}
-      <section className={styles.col} style={{ left: 972, right: 14 }}>
-        <div className={`${styles.paper} ${n.sidePaper}`}>
-          <div className={styles.subTabs}>
-            <button className={side === 'wire' ? styles.subOn : ''} onClick={() => setSide('wire')}>
-              The wire
+      {/* ---------- article pile ---------- */}
+      {view === 'articles' ? (
+        <>
+          <section className={col} style={{ left: 346, width: 616 }}>
+            <div className={n.pileHead}>
+              <div className={styles.subTabs}>
+                {(
+                  [
+                    ['issue', `Filed this issue (${piles.issue.length})`],
+                    ['backlog', `Backlog (${piles.backlog.length})`],
+                    ['favorites', `★ Favorites (${piles.favorites.length})`],
+                    ['print', `For print (${piles.print.length})`],
+                  ] as [Pile, string][]
+                ).map(([id, label]) => (
+                  <button key={id} className={pile === id ? styles.subOn : ''} onClick={() => setPile(id)}>
+                    {label}
+                  </button>
+                ))}
+              </div>
+              {focus ? (
+                <button className={n.filterChip} onClick={() => setFocus(null)}>
+                  Showing {reporterById(world, focus)?.name} ×
+                </button>
+              ) : null}
+            </div>
+            <div className={styles.scroll}>
+              {shown.map((a, i) => (
+                <ArticleSlip key={a.id} game={game} article={a} on={a.id === selectedId} tilt={i % 2 ? 0.25 : -0.2} onOpen={() => openArticle(a.id)} />
+              ))}
+              {shown.length === 0 ? <EmptyPile pile={pile} issue={game.issueNumber} /> : null}
+            </div>
+            <button className={styles.big} onClick={() => setTab('layout')}>
+              To the layout · {piles.print.length} for print ▸
             </button>
-            <button className={side === 'details' ? styles.subOn : ''} onClick={() => setSide('details')}>
-              {selected ? 'Article' : focusMember ? 'Reporter' : 'Details'}
-            </button>
-          </div>
-          <div className={styles.scroll}>
-            {side === 'wire' ? (
-              <WireDesk game={game} />
-            ) : selected ? (
-              <ArticleDetail game={game} article={selected} />
-            ) : focusMember ? (
-              <ReporterProfile game={game} member={focusMember} />
-            ) : (
-              <p className={styles.note}>Click an article to read it and see its scouting report, or a reporter to see their file.</p>
-            )}
-          </div>
-        </div>
-      </section>
+          </section>
+
+          {/* ---------- detail ---------- */}
+          <section className={col} style={{ left: 972, right: 14 }}>
+            <div className={`${styles.paper} ${n.sidePaper}`}>
+              <div className={styles.colHead}>
+                <span className={styles.colTitle}>{selected ? 'Article' : focusMember ? 'Reporter' : 'Details'}</span>
+              </div>
+              <div className={styles.scroll}>
+                {selected ? (
+                  <ArticleDetail game={game} article={selected} />
+                ) : focusMember ? (
+                  <ReporterProfile game={game} member={focusMember} />
+                ) : (
+                  <p className={styles.note}>Click an article to read it and see its scouting report, or a reporter to see their file.</p>
+                )}
+              </div>
+            </div>
+          </section>
+        </>
+      ) : null}
     </>
   );
 }
@@ -327,7 +335,8 @@ function WireDesk({ game }: { game: GameState }) {
   const leads = localLeads(game, stories);
   const open = wire.filter((s) => !isCovered(game, s.id));
   const openLeads = leads.filter((s) => !isCovered(game, s.id));
-  const covered = [...wire, ...leads].filter((s) => isCovered(game, s.id));
+  const coveredWire = wire.filter((s) => isCovered(game, s.id));
+  const coveredLocal = leads.filter((s) => isCovered(game, s.id));
   const staff = activeStaff(game);
   const [pick, setPick] = useState<Record<string, string>>({});
   const hasLocal = staff.some((m) => isLocalPatch(m.assignment.patch));
@@ -371,38 +380,72 @@ function WireDesk({ game }: { game: GameState }) {
     );
   };
 
+  const col = `${styles.col} ${styles.belowNav}`;
   return (
     <>
-      <p className={styles.note}>
-        Stories nobody is covering. Commission one and the reporter writes it now, using their remaining copy for this issue. Or run the wire copy as-is (no
-        byline, straight).
-      </p>
-      <div className={styles.label}>National &amp; world wire</div>
-      {open.map(slip)}
-      {open.length === 0 ? <p className={n.empty}>Every story on the wire is covered.</p> : null}
-      <div className={styles.label}>Philadelphia leads</div>
-      {hasLocal ? (
-        <>
-          {openLeads.map(slip)}
-          {openLeads.length === 0 ? <p className={n.empty}>Your local reporters have covered every lead they found.</p> : null}
-        </>
-      ) : (
-        <p className={n.empty}>City news only turns up when a reporter works a Philadelphia or district patch. Set one on the Staff tab.</p>
-      )}
-      {covered.length ? (
-        <>
-          <div className={styles.label}>Already covered</div>
-          {covered.map((s) => {
-            const a = game.articles.find((x) => x.storyId === s.id && x.status !== 'spiked');
-            return (
-              <div key={s.id} className={n.coveredRow}>
-                <span>{s.wire_headline}</span>
-                <em>{a ? bylineOf(a) : ''}</em>
-              </div>
-            );
-          })}
-        </>
-      ) : null}
+      <section className={col} style={{ left: 346, width: 540 }}>
+        <div className={`${styles.paper} ${n.sidePaper}`}>
+          <div className={styles.colHead}>
+            <span className={styles.colTitle}>National &amp; world wire</span>
+            <span className={styles.colSub}>{open.length} uncovered</span>
+          </div>
+          <p className={styles.note}>
+            Real news from NPR, BBC News and PBS NewsHour. Commission a story and the reporter writes it now with their remaining copy, or run the wire copy
+            as-is (no byline, straight).
+          </p>
+          <div className={styles.scroll}>
+            {open.map(slip)}
+            {open.length === 0 ? <p className={styles.note}>Every story on the wire is covered.</p> : null}
+            {coveredWire.length ? (
+              <>
+                <div className={styles.label}>Already covered</div>
+                {coveredWire.map((s) => {
+                const a = game.articles.find((x) => x.storyId === s.id && x.status !== 'spiked');
+                return (
+                  <div key={s.id} className={n.coveredRow}>
+                    <span>{s.wire_headline}</span>
+                    <em>{a ? bylineOf(a) : ''}</em>
+                  </div>
+                );
+              })}
+              </>
+            ) : null}
+          </div>
+        </div>
+      </section>
+      <section className={col} style={{ left: 896, right: 14 }}>
+        <div className={`${styles.paper} ${n.sidePaper}`}>
+          <div className={styles.colHead}>
+            <span className={styles.colTitle}>Philadelphia leads</span>
+            <span className={styles.colSub}>{hasLocal ? `${openLeads.length} uncovered` : 'no local reporters'}</span>
+          </div>
+          <p className={styles.note}>City stories your reporters on a Philadelphia or district patch dug up. They sell best in their own neighborhood.</p>
+          <div className={styles.scroll}>
+            {hasLocal ? (
+              <>
+                {openLeads.map(slip)}
+                {openLeads.length === 0 ? <p className={styles.note}>Your local reporters have covered every lead they found.</p> : null}
+              </>
+            ) : (
+              <p className={styles.note}>No city news this issue: nobody works a local patch. Put a reporter on Philadelphia or a district on the Staff tab.</p>
+            )}
+            {coveredLocal.length ? (
+              <>
+                <div className={styles.label}>Already covered</div>
+                {coveredLocal.map((s) => {
+                const a = game.articles.find((x) => x.storyId === s.id && x.status !== 'spiked');
+                return (
+                  <div key={s.id} className={n.coveredRow}>
+                    <span>{s.wire_headline}</span>
+                    <em>{a ? bylineOf(a) : ''}</em>
+                  </div>
+                );
+              })}
+              </>
+            ) : null}
+          </div>
+        </div>
+      </section>
     </>
   );
 }

@@ -1,4 +1,5 @@
-// After the press run: the printed paper on the left, the results sheet on the right.
+// After the press run: the printed paper on the left, the results sheet on the
+// right, split into short tabs so nothing needs scrolling.
 import { useState } from 'react';
 import { displayName, loadGameData } from '../data/worldData.ts';
 import { activePages, pageLabel } from '../sim/layout.ts';
@@ -11,6 +12,15 @@ import { DeskSurface } from '../components/desk/DeskSurface.tsx';
 import { PageSheet } from '../components/paper/PageSheet.tsx';
 import styles from './PressRun.module.css';
 
+type ResultsTab = 'summary' | 'districts' | 'stories' | 'rival' | 'letters';
+const RESULTS_TABS: { id: ResultsTab; label: string }[] = [
+  { id: 'summary', label: 'The books' },
+  { id: 'districts', label: 'Districts' },
+  { id: 'stories', label: 'Your stories' },
+  { id: 'rival', label: 'The rival' },
+  { id: 'letters', label: 'Letters' },
+];
+
 function signed(n: number, prefix = ''): string {
   const r = Math.round(n);
   return `${r >= 0 ? '+' : '−'}${prefix}${Math.abs(r).toLocaleString()}`;
@@ -20,6 +30,7 @@ export function PressRun() {
   const game = useStore((s) => s.game);
   const nextIssue = useStore((s) => s.nextIssue);
   const [page, setPage] = useState<PageId>('front');
+  const [tab, setTab] = useState<ResultsTab>('summary');
   const printed = game?.archive[game.archive.length - 1];
   const result = game?.results[game.results.length - 1];
   if (!game || !printed || !result) return null;
@@ -56,23 +67,34 @@ export function PressRun() {
           </div>
           <div className={styles.stamp}>Printed</div>
         </div>
+        <Headline result={result} />
+        <nav className={styles.tabs}>
+          {RESULTS_TABS.map((t) => (
+            <button key={t.id} className={tab === t.id ? styles.on : ''} onClick={() => setTab(t.id)}>
+              {t.label}
+            </button>
+          ))}
+        </nav>
         <div className={styles.scroll}>
-          <Headline result={result} />
-          <Money result={result} />
-          <Districts result={result} />
-          <Revealed result={result} />
-          {result.events.length ? (
-            <section>
-              <h2>What happened</h2>
-              <ul className={styles.events}>
-                {result.events.map((e, i) => (
-                  <li key={i}>{e}</li>
-                ))}
-              </ul>
-            </section>
+          {tab === 'summary' ? (
+            <>
+              <Money result={result} />
+              {result.events.length ? (
+                <section>
+                  <h2>What happened</h2>
+                  <ul className={styles.events}>
+                    {result.events.map((e, i) => (
+                      <li key={i}>{e}</li>
+                    ))}
+                  </ul>
+                </section>
+              ) : null}
+            </>
           ) : null}
-          <Rival result={result} />
-          <Letters result={result} />
+          {tab === 'districts' ? <Districts result={result} /> : null}
+          {tab === 'stories' ? <Revealed result={result} /> : null}
+          {tab === 'rival' ? <Rival result={result} /> : null}
+          {tab === 'letters' ? <Letters result={result} /> : null}
         </div>
         <button className={styles.next} onClick={nextIssue}>
           {game.endReason ? 'The presses stop' : last ? 'Close the books' : 'Next issue ▸'}
@@ -170,7 +192,7 @@ function Districts({ result }: { result: IssueResult }) {
 
 function Revealed({ result }: { result: IssueResult }) {
   const { world, stories } = loadGameData();
-  if (!result.revealed.length) return null;
+  if (!result.revealed.length) return <p className={styles.quiet}>Nothing ran under a byline this issue.</p>;
   return (
     <section>
       <h2>The hidden half, revealed</h2>
@@ -215,7 +237,7 @@ function Rival({ result }: { result: IssueResult }) {
 }
 
 function Letters({ result }: { result: IssueResult }) {
-  if (!result.letters.length) return null;
+  if (!result.letters.length) return <p className={styles.quiet}>No letters this issue.</p>;
   return (
     <section>
       <h2>Letters to the editor</h2>

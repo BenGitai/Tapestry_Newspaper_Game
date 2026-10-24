@@ -30,8 +30,8 @@ export const TIPS: Record<string, Tip> = {
     id: 'newsroom',
     title: 'The newsroom: choose what to print',
     lines: [
-      'Middle: the articles your reporters filed this issue. The chips are a scouting report: readership, political heat, trust. Correction risk and award chance stay hidden until you print.',
-      'Right, “The wire”: real national and world news (NPR, BBC, PBS). Every story links to the original. Commission one, or run the wire copy as-is.',
+      '“Filed articles”: what your reporters wrote. The chips are a scouting report: readership, political heat, trust. Correction risk and award chance stay hidden until you print.',
+      '“The wire & local leads”: real national and world news (NPR, BBC, PBS), each linked to the original, plus the city stories your local reporters found. Commission one, or run the wire copy as-is.',
       'City news only turns up when a reporter works the Philadelphia patch or a district patch (Staff tab). Local stories sell best in their neighborhood.',
       'Mark the pieces you want with “For print”, then go to the layout.',
     ],
@@ -43,7 +43,7 @@ export const TIPS: Record<string, Tip> = {
     lines: [
       'Drag articles from the left onto the page. Above the fold sells papers; the front page counts most.',
       'Pick a size (lead, secondary, brief) and an angle: Puff, Straight or Hard-hitting. Angle changes who likes it and who trusts you.',
-      'The Ad desk sells space for money, but advertisers hate being hammered in print.',
+      'The Ad desk sells space for money. It says who will buy, who signs once you have more readers, and what makes an advertiser pull out (hard-hitting stories about them).',
       'When the page looks right, Send to press.',
     ],
     at: { left: 500, bottom: 40 },
@@ -61,7 +61,7 @@ export const TIPS: Record<string, Tip> = {
     id: 'staff',
     title: 'Staff: assignments and hiring',
     lines: [
-      'Set each reporter’s beat, focus, patch, style and workload. Changes take effect next issue.',
+      '“Your staff”: set each reporter’s beat, focus, patch, style and workload. Changes take effect next issue. “Help wanted” is the job market.',
       'Patch: “National wire” covers US and world news. “Philadelphia” or a district digs up city news, and nobody else will.',
       'Crunch files more copy but burns morale. Hire more as the paper grows; a desk with 3+ reporters can get a desk head.',
     ],

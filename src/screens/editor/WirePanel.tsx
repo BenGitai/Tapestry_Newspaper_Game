@@ -4,7 +4,10 @@ import { articleSource } from '../../data/ArticleSource.ts';
 import { displayName, loadGameData } from '../../data/worldData.ts';
 import { adPay, adSize, defaultShape, findAdBlock, findStoryBlock, pageLabel, placementLabel } from '../../sim/layout.ts';
 import { selectedForPrint } from '../../sim/newsroom.ts';
-import { adsAvailable } from '../../sim/simulate.ts';
+import { adStatus, likesLabel, nextAdvertiser } from '../../sim/ads.ts';
+import { ADVERTISERS, FRONT_PAGE_AD_MULTIPLIER } from '../../sim/balance.ts';
+import { totalReaders } from '../../sim/readers.ts';
+import { CATEGORY_LABEL } from '../../sim/staff.ts';
 import { useStore } from '../../state/store.ts';
 import { beginDrag, registerWirePanel } from '../../components/drag/drag.ts';
 import { ANGLE_LABEL, articleScorecard, bylineOf, ScoreChips } from '../../components/newsroom/ArticleParts.tsx';
@@ -23,6 +26,11 @@ export function WirePanel() {
   const pile = selectedForPrint(game);
   const placedCount = pile.filter((a) => findStoryBlock(game.draft, a.storyId)).length;
   const ads = world.entities;
+  // Open advertisers first, then those who pulled out, then those waiting for a bigger paper.
+  const order = { open: 0, pulled: 1, locked: 2 } as const;
+  const sortedAds = ads
+    .map((entity) => ({ entity, status: adStatus(game, entity) }))
+    .sort((x, y) => order[x.status.state] - order[y.status.state] || x.entity.min_readers - y.entity.min_readers);
 
   return (
     <div ref={ref} className={styles.wire}>
@@ -31,7 +39,7 @@ export function WirePanel() {
           For print <span className="mono">{pile.length - placedCount} to place</span>
         </button>
         <button className={tab === 'ads' ? styles.tabOn : ''} onClick={() => setTab('ads')}>
-          Ad desk <span className="mono">{ads.filter((a) => !findAdBlock(game.draft, a.id) && adsAvailable(game, a.id)).length} open</span>
+          Ad desk <span className="mono">{sortedAds.filter((a) => !findAdBlock(game.draft, a.entity.id) && a.status.state === 'open').length} open</span>
         </button>
       </div>
 
@@ -81,18 +89,18 @@ export function WirePanel() {
         </div>
       ) : (
         <div className={styles.slips}>
-          <p className={styles.adNote}>Ads pay when they run. Front-page ads pay more. Every inch you sell is an inch of news you don't run.</p>
-          {ads.map((a, i) => {
+          <AdRules />
+          {sortedAds.map(({ entity: a, status }, i) => {
             const placed = findAdBlock(game.draft, a.id);
             const size = adSize(a.id);
-            const pulled = !adsAvailable(game, a.id);
+            const usable = status.state === 'open';
             return (
               <div
                 key={a.id}
-                className={`${styles.slip} ${styles.adSlip} ${placed ? styles.slipPlaced : ''} ${pulled ? styles.slipPulled : ''}`}
+                className={`${styles.slip} ${styles.adSlip} ${placed ? styles.slipPlaced : ''} ${usable ? '' : styles.adLocked}`}
                 style={{ transform: `rotate(${i % 2 ? 0.3 : -0.25}deg)` }}
                 onPointerDown={(e) =>
-                  pulled ? undefined : beginDrag(e, { kind: 'ad', adId: a.id, fromBlock: !!placed }, size, { dc: size.cols / 2, dr: 0.5 }, placed ? () => { setPage(placed.page); select(placed.block.id); } : undefined)
+                  usable ? beginDrag(e, { kind: 'ad', adId: a.id, fromBlock: !!placed }, size, { dc: size.cols / 2, dr: 0.5 }, placed ? () => { setPage(placed.page); select(placed.block.id); } : undefined) : undefined
                 }
               >
                 <div className={styles.slipMeta}>
@@ -100,14 +108,13 @@ export function WirePanel() {
                   <span>{size.cols}×{size.rows} · {size.cols * size.rows} in</span>
                 </div>
                 <div className={styles.slipHead}>{displayName(a.name)}</div>
+                {status.state !== 'locked' ? <Goodwill value={status.relationship} /> : null}
+                <div className={`${styles.adReason} ${status.state === 'pulled' || status.mood === 'angry' ? styles.adBad : status.mood === 'uneasy' ? styles.adWarn : ''}`}>{status.reason}</div>
                 <div className={styles.slipStatus}>
-                  {pulled ? (
-                    <span className={styles.onPage}>Ads pulled through issue {game.advertisers[a.id]?.pulledThrough}</span>
-                  ) : placed ? (
-                    <span className={styles.onPage}>Running on {pageLabel(placed.page)}</span>
-                  ) : (
-                    <span>Drag to the page</span>
-                  )}
+                  <span>
+                    {placed ? <span className={styles.onPage}>Running on {pageLabel(placed.page)}</span> : usable ? 'Drag to the page' : status.state === 'locked' ? 'Not signed yet' : 'Not buying'}
+                    {' · '}likes {likesLabel(a.likes, CATEGORY_LABEL)}
+                  </span>
                   <span className={styles.pay}>${adPay(a, 'a2')} · front ${adPay(a, 'front')}</span>
                 </div>
               </div>
@@ -115,6 +122,52 @@ export function WirePanel() {
           })}
         </div>
       )}
+    </div>
+  );
+}
+
+/** How the ad desk works, and who signs up next. */
+function AdRules() {
+  const game = useStore((s) => s.game)!;
+  const { world } = loadGameData();
+  const next = nextAdvertiser(game, world);
+  const readers = totalReaders(game.districts);
+  return (
+    <div className={styles.adRules}>
+      <div className={styles.adRulesHead}>How the ad desk works</div>
+      <p>
+        <b>Getting more ads.</b> Advertisers pay each issue their ad runs (front page ×{FRONT_PAGE_AD_MULTIPLIER}). Bigger advertisers only sign once you have
+        enough readers.{' '}
+        {next ? (
+          <>
+            Next: <b>{displayName(next.name)}</b> at {next.min_readers.toLocaleString('en-US')} readers (you have {readers.toLocaleString('en-US')}).
+          </>
+        ) : (
+          'Every advertiser in town has signed.'
+        )}
+      </p>
+      <p>
+        <b>Losing them.</b> A hard-hitting story about an advertiser costs up to {ADVERTISERS.hitPenalty} goodwill (most on the front page). Under{' '}
+        {ADVERTISERS.pullBelow} they pull their ads for {ADVERTISERS.pullIssues} issues.
+      </p>
+      <p>
+        <b>Winning them back.</b> Goodwill returns {ADVERTISERS.recovery} an issue, {ADVERTISERS.recovery + ADVERTISERS.likedBonus} when you run (not hard-hitting)
+        coverage from a desk they like.
+      </p>
+    </div>
+  );
+}
+
+/** Goodwill bar with a mark where they pull out. */
+function Goodwill({ value }: { value: number }) {
+  return (
+    <div className={styles.goodwill} title={`Goodwill ${value}/100; they pull out below ${ADVERTISERS.pullBelow}`}>
+      <span>Goodwill</span>
+      <div className={styles.goodwillBar}>
+        <i style={{ width: `${value}%` }} className={value < ADVERTISERS.pullBelow ? styles.goodwillLow : ''} />
+        <b style={{ left: `${ADVERTISERS.pullBelow}%` }} />
+      </div>
+      <span>{value}</span>
     </div>
   );
 }

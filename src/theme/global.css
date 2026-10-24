@@ -54,3 +54,29 @@ button:disabled {
 .display {
   font-family: var(--f-display);
 }
+
+/* Scrollbars: a thin ink rule with no arrow buttons, like a pencil line in the
+   margin. (The standard scrollbar-width/color properties would switch these
+   styles off in Chromium, so they are not used anywhere.) */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--c-proof-grey);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--c-ink-muted);
+}
+
+::-webkit-scrollbar-button,
+::-webkit-scrollbar-corner {
+  display: none;
+  background: transparent;
+}
