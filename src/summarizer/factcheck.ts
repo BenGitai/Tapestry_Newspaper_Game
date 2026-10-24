@@ -197,7 +197,9 @@ export function factCheck(article: ArticleText, story: Story, tier: Tier, extraN
   const target = TIERS[tier].words;
   const bodyWords = wc(article.body);
   if (bodyWords > target * BODY_LENGTH_RANGE.max) problems.push(`Body has ${bodyWords} words (target ${target})`);
-  if (bodyWords < target * BODY_LENGTH_RANGE.min) problems.push(`Body has only ${bodyWords} words (target ${target})`);
+  // A story with few facts cannot fill a long slot without padding, so the minimum shrinks with the facts.
+  const factWords = story.facts.reduce((a, f) => a + wc(f), 0);
+  if (bodyWords < Math.min(target * BODY_LENGTH_RANGE.min, factWords * 0.5)) problems.push(`Body has only ${bodyWords} words (target ${target})`);
   for (const i of article.facts_used) {
     if (!Number.isInteger(i) || i < 0 || i >= story.facts.length) problems.push(`facts_used index ${i} is not a fact of this story`);
   }

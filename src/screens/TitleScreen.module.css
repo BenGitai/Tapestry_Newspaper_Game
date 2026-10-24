@@ -171,6 +171,22 @@
   margin: 6px 0;
 }
 
+.classLink {
+  display: block;
+  width: 100%;
+  text-align: left;
+  background: none;
+  border: none;
+  border-bottom: 1px solid var(--c-ink);
+  padding: 0 0 6px;
+  font-size: inherit;
+  line-height: inherit;
+}
+
+.classLink:hover {
+  background: var(--c-tiger);
+}
+
 .classTitle {
   font-family: var(--f-display);
   font-weight: 700;

@@ -62,6 +62,11 @@ export function TitleScreen() {
             <div className={styles.classifieds}>
               <div className={styles.classTitle}>Classifieds</div>
               <p>
+                <button className={styles.classLink} onClick={() => goto('techdemo')}>
+                  <b>TECH DEMO.</b> The summarizer: wire facts in, three angles out, with the prompt, cost and fact check on show. See how the copy is written. <i>(Click to open.)</i>
+                </button>
+              </p>
+              <p>
                 <b>SETTINGS.</b> Sound, text size, which wire services to trust. Inquire within. <i>(Coming soon.)</i>
               </p>
               <p>

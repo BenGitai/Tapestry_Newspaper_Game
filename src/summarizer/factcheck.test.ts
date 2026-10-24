@@ -159,3 +159,12 @@ describe('every story passes its own template', () => {
     }
   });
 });
+
+describe('body length', () => {
+  it('does not ask a thin story to fill a long slot', () => {
+    // d1-phillies has about 45 words of facts; a lead target of 120 words must not demand padding.
+    const short: ArticleText = { headline: 'Phillies win Game 1', deck: '', body: story.facts.slice(0, 3).join(' '), facts_used: [0, 1, 2] };
+    expect(factCheck(short, story, 'lead').problems).toEqual([]);
+    expect(factCheck({ ...short, body: 'Won.' }, story, 'lead').problems.some((p) => p.startsWith('Body has only'))).toBe(true);
+  });
+});

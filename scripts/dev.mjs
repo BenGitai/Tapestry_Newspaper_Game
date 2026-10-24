@@ -1,5 +1,6 @@
 // npm run dev: start the Vite dev server, then open the game in the desktop window.
 // Closing the window stops the server. Use `npm run dev:web` for a browser tab instead.
+// `npm run techdemo` passes --techdemo, which opens straight into the summarizer tech demo.
 import { spawn } from 'node:child_process';
 import { createRequire } from 'node:module';
 import { createServer } from 'vite';
@@ -13,7 +14,7 @@ const url = server.resolvedUrls?.local[0];
 if (!url) throw new Error('Vite dev server did not report a URL');
 console.log(`Dev server at ${url}, opening the game window…`);
 
-const child = spawn(electronPath, ['.'], {
+const child = spawn(electronPath, ['.', ...process.argv.slice(2).filter((a) => a === '--techdemo')], {
   stdio: 'inherit',
   env: { ...process.env, VITE_DEV_SERVER_URL: url },
 });

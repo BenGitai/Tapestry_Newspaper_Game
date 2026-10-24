@@ -60,7 +60,7 @@ export function buildPrompt(input: PromptInput): Prompt {
       ? `Paper: ${input.paper.name}.${input.paper.stance ? ` Editorial stance: ${input.paper.stance} (a light influence on framing only, never on facts).` : ''}`
       : 'Paper: do not name the newspaper anywhere in the text.',
   );
-  lines.push(`Length: body of about ${words} words (never more than ${Math.round(words * 1.25)}). Headline of at most ${HEADLINE_MAX_WORDS[tier]} words.`);
+  lines.push(`Length: body of about ${words} words (never more than ${Math.round(words * 1.25)}). If the facts do not support that length, write less. Never pad with background or guesses. Headline of at most ${HEADLINE_MAX_WORDS[tier]} words.`);
   lines.push(tier === 'lead' ? 'Deck: one sentence under the headline, using only the facts.' : 'Deck: return an empty string.');
   lines.push('');
   lines.push('Facts:');

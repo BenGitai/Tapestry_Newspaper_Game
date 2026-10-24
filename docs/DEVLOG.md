@@ -1,5 +1,30 @@
 # Devlog
 
+## 2026-10-24 · Summarizer: tech demo and offline pre-generated articles
+
+**What changed**
+- **Tech demo** (`src/screens/TechDemo.tsx`, replaces the lab stub). Title screen classified "TECH DEMO", or `npm run techdemo` (opens the desktop app straight into it; `npm run techdemo:start` does the same from a build; in a browser use `npm run dev:web` and open `/#techdemo`). Pick a story, see the wire facts, compare Puff / Straight / Hard-hitting for a chosen reporter voice and length tier, with the exact prompt, tokens, cost per article and the fact check (flagged numbers and names highlighted). Sensitive stories show no Puff column.
+- **Live mode in the tech demo** only under the dev server and only with a key: `server/devEndpoint.ts` (Vite middleware) calls the model. The key never leaves Node. Without a key the demo shows pre-generated articles, then templates.
+- **`npm run summarize`** (`scripts/summarize.ts`, Node `--env-file-if-exists=.env`): writes `data/generated/summaries.cache.json`. Flags `--dry-run`, `--story <id>`, `--force`, `--limit <n>`, `--concurrency <n>`, `--verbose`. Saves as it goes and skips cached articles, so it can be stopped and re-run. Prints per-call tokens and cost, totals, and an extrapolation to 200 stories/day for 30 days.
+- **Game reads articles through `ArticleSource`** (unchanged for game code): session-fetched, then cache (exact reporter, then the neutral desk voice), then templates. `RemoteArticleProvider` is the stub for the final game's shared server (generate once, share with everyone). No server built.
+- **Rules in code:** `src/summarizer/prompt.ts` (facts only, uncertainty kept, angle changes emphasis not facts, sensitive stories plain and never Puff, write as the paper, never mention AI), `factcheck.ts` (numbers normalized: commas, $, million/billion/thousand, number words; names checked against facts, wire text and game data: paper, reporters, city, districts, neighborhoods, wire sources), `config.ts` (model, prices, headline word limits). Model is `claude-haiku-5-5`, set only in `config.ts`, overridable with `SUMMARIZER_MODEL`.
+- **API use** (`server/generate.ts`): `@anthropic-ai/sdk` `messages.parse` with a Zod structured output, thinking disabled, effort low, no sampling parameters, no prefill. A refusal or truncated answer is left out of the cache (the game uses the template). A failed fact check is retried once; if it fails again it is also left out.
+- Tests: 169 passing (was 117). New: fact check, prompt builder, cache and article source layers, plan, cost, generator with a fake client.
+
+**Which articles are pre-generated** (`src/summarizer/plan.ts`): the 542 stories a 10-issue game can show: the full daily wire of days 1-10 and the top `WEEKLY_WIRE_SIZE` stories of weeks 1-10 (taken from `wireForIssue`, so it matches the game). Per story: angle x length tier (Puff skipped when sensitive). The 30 hand-written stories are also written in each matching desk reporter's voice (their voice line from the staff pool); generated stories use the neutral desk voice only, and any reporter without their own entry gets the desk voice. That is 5,541 articles. Pre-generated copy never names the paper (the player picks the name).
+
+**Cost** (`npm run summarize -- --dry-run`, estimates): 5,541 calls, about 3.0M input and 0.8M output tokens, about $0.69 at $0.10 / $0.50 per million. Allow 5-10% more for retries. At that average, 200 stories/day for 30 days is about $0.75 for one article per story, or about $6.75 if every angle and length is written.
+
+**Needs the owner:** the cloud run had no API key, so **the committed cache is empty** and the game runs on templates. Add `ANTHROPIC_API_KEY` to `.env` (gitignored), run `npm run summarize` locally (try `-- --limit 20` first), review a few articles in the tech demo, and commit `data/generated/summaries.cache.json` before shipping the offline demo. Prices were last checked 2026-10-24; recheck.
+
+**Small decisions**
+- The cache is about 5,500 articles, so the committed file will be around 3-4 MB and ships inside the app bundle.
+- Body length: the minimum shrinks for stories with few facts (a four-fact story cannot honestly fill a 120-word lead), and the prompt tells the model to write less rather than pad.
+- Sentence-initial single words are not name-checked (they can't be told from "Residents"); sentence-initial capitalized pairs and all mid-sentence capitals are.
+- The cache has no paper-stance variants. Stance would multiply the set by three for a small framing change.
+
+**What's next:** run `npm run summarize` with a key and review; decide whether any flagged-and-dropped articles need a prompt tweak; later, the shared server behind `RemoteArticleProvider`.
+
 ## 2026-10-23 · Renamed to the placeholder "Tapestry Newspaper Game" (game title, window, package, app id, save keys). "Above the fold" stays where it means the newspaper fold.
 
 ## 2026-10-23 · Page unlocks

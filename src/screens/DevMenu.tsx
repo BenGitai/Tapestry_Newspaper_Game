@@ -6,7 +6,7 @@ import { loadGameData } from '../data/worldData.ts';
 import { useStore, type Screen } from '../state/store.ts';
 import styles from './Dev.module.css';
 
-const SCREENS: Screen[] = ['title', 'setup', 'hub', 'press', 'end', 'lab'];
+const SCREENS: Screen[] = ['title', 'setup', 'hub', 'press', 'end', 'techdemo'];
 
 /** Skip setup and hiring: default paper, suggested staff on their home desks. */
 export function quickStart(): void {
