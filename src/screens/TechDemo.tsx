@@ -77,7 +77,8 @@ export function TechDemo() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    void liveStatus().then(setStatus);
+    // Live writing only exists under the dev server; the packaged offline game never calls out.
+    if (import.meta.env.DEV) void liveStatus().then(setStatus);
   }, []);
 
   const story = stories.storyById(storyId) as Story;

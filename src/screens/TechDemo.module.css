@@ -64,7 +64,8 @@
 
 .controls {
   display: flex;
-  gap: 18px;
+  flex-wrap: wrap;
+  gap: 8px 18px;
   align-items: flex-end;
 }
 
@@ -98,15 +99,15 @@
   margin-left: -1.5px;
 }
 
+/* Its own line under the controls, so it never squeezes them. */
 .status {
-  margin-left: auto;
-  text-align: right;
+  flex-basis: 100%;
+  text-align: left;
   font-family: var(--f-mono);
   font-size: 10.5px;
   text-transform: uppercase;
   letter-spacing: 0.06em;
   line-height: 1.5;
-  max-width: 300px;
 }
 
 .main {
