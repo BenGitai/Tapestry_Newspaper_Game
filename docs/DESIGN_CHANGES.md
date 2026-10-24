@@ -8,7 +8,7 @@ These decisions from the studio lead change or extend `GAME_DESIGN.md`. Where th
 ## Core loop: a newsroom you manage (replaces spec section 4, steps 1–2)
 One turn = one issue (daily: one wire day; weekly: the whole week).
 
-1. **Form 1-A setup**: paper name, city, origin, **kind of paper** (paper of record / neighborhood paper / tabloid), frequency, **coverage split across seven categories** (Politics, Economy, Social, Sports, Culture, **Science & Tech**, **World & National**), stated stance.
+1. **Form 1-A setup**: paper name, city, origin, **kind of paper** (paper of record / neighborhood paper / tabloid), frequency, **coverage split across seven categories** (Politics, Economy, Social, Sports, Culture, **Science & Tech**, **World**), stated stance.
 2. **Hiring day**: pick 2–4 starting reporters from the pool within a payroll budget set by origin, and give each an **assignment**.
 3. Each issue, the **hub** has three tabs:
    - **Newsroom**: every reporter, their strengths and weaknesses, and what they filed this issue plus their **unpublished backlog**. Star favorites, pick articles **for print**, spike the rest. The wire side panel lets you **commission** an uncovered story from a reporter (it uses their remaining copy) or run raw wire copy.
@@ -94,3 +94,8 @@ Changes how many stories come through per issue. Daily gets one wire day per iss
 
 ## Future (not in the demo)
 - **Generated local news.** The full game should generate local sports and local politics rather than take them from real news. Real news remains the source for everything else.
+
+## News: real wire, local patches (2026-10-24)
+- **The wire is national and international real news** (NPR, BBC News, PBS NewsHour snapshot; links to the original on every story). **World** is international only; US national news lives in the other desks.
+- **City news only when asked for.** A reporter's patch is *National wire* (default), *Philadelphia* or one district. Philadelphia stories (still fictional) appear only as local leads for reporters on a local patch, and sell best in their neighborhood. Nobody on a local patch means no city news.
+- **How-to-play guide** (Form 1-A item 8, on by default) and a **real city map** (City of Philadelphia open data) with colored layers.

@@ -1,3 +1,5 @@
+// AI-CONTENT-REVIEW: the memo text below was written by an AI model for the demo
+// (see docs/AI_CONTENT_REVIEW.md). Rewrite in the team's voice before release.
 // How-to-play guide: one pinned memo per screen, shown the first time the player
 // gets there while the guide is on (Form 1-A, item 8; on by default). "Got it"
 // hides that memo; "Turn the guide off" hides them all.

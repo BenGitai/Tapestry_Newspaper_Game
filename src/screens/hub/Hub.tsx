@@ -28,6 +28,7 @@ export function Hub() {
   const setTab = useStore((s) => s.setHubTab);
   const goto = useStore((s) => s.goto);
   const saveGame = useStore((s) => s.saveGame);
+  const setTutorial = useStore((s) => s.setTutorial);
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -69,6 +70,9 @@ export function Hub() {
           <Stat label="Trust" value={`${Math.round(averageTrust(game.districts))}`} />
           <Stat label="Seen as" value={leanLabel(game.perceivedLean)} />
         </div>
+        <button className={styles.lab} onClick={() => setTutorial(true)} title="Show the how-to-play memos again">
+          Guide
+        </button>
         <button className={styles.lab} onClick={() => saveGame('slot1')} title="Save to slot 1 (the game also autosaves every issue)">
           Save
         </button>

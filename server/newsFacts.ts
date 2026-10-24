@@ -1,3 +1,4 @@
+// AI-CONTENT-REVIEW: model-tagged real news (tooling; see docs/AI_CONTENT_REVIEW.md).
 // Turns one real headline + feed summary into a game story: category, subtopic,
 // importance, sensitivity, lean signal and a short list of facts. Server-side
 // only (the Anthropic SDK never runs in the game). Facts are restricted to what

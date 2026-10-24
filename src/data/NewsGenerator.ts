@@ -2,7 +2,8 @@
 // and name lists below were written by an AI model as placeholders (approved for
 // the demo only). Every event, person and organization is invented; real
 // neighborhoods and teams appear for flavor only. The full game replaces this
-// with real wire news, plus generated local sports and politics.
+// with generated local sports and politics; the national and world wire is real
+// news (src/data/RealNewsSource.ts). Templates here are local Philadelphia only.
 //
 // Generation is deterministic: the same day always produces the same stories.
 // Every number and name in a story's text also appears in its facts.

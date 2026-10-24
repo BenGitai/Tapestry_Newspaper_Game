@@ -134,7 +134,8 @@ export const useStore = create<Store>((set, get) => {
     },
     setTutorial: (on) => {
       const { game, pendingSetup } = get();
-      if (game) set({ game: { ...game, setup: { ...game.setup, tutorial: on } } });
+      // Turning the guide on again shows every memo again.
+      if (game) set({ game: { ...game, setup: { ...game.setup, tutorial: on }, ...(on ? { tutorialSeen: [] } : {}) } });
       else if (pendingSetup) set({ pendingSetup: { ...pendingSetup, tutorial: on } });
     },
     setHubTab: (hubTab) => set({ hubTab }),
