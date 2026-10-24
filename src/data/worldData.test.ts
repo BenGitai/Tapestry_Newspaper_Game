@@ -114,14 +114,19 @@ describe('generated news', () => {
     }
   });
 
-  it('only references real districts and entities, and every category appears each day', () => {
+  it('only references real districts and entities, and every local category appears each day', () => {
     const districtIds = new Set(world.districts.map((d) => d.id));
     const entityIds = new Set(world.entities.map((e) => e.id));
     for (const s of generated) {
       for (const d of s.districts) expect(districtIds.has(d)).toBe(true);
       for (const t of s.targets) expect(entityIds.has(t)).toBe(true);
     }
-    for (let d = 5; d <= 12; d++) expect(new Set(stories.storiesForDay(d).map((s) => s.category)).size).toBe(7);
+    for (let d = 5; d <= 12; d++) {
+      const cats = new Set(stories.storiesForDay(d).map((s) => s.category));
+      expect(cats.size).toBe(6);
+      expect(cats.has('world')).toBe(false); // World is real international news only
+    }
+    expect(generated.every((s) => s.scope === 'local')).toBe(true);
   });
 
   it('left and right lean stay balanced across the whole demo, also weighted by importance', () => {

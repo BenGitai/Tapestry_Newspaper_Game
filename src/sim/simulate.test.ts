@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import type { CityWorld, Story } from '../data/schemas.ts';
 import type { StorySource } from '../data/StorySource.ts';
 import { loadGameData } from '../data/worldData.ts';
-import { ADVERTISERS, GENERATED_PER_DAY, WEEKLY_WIRE_SIZE } from './balance.ts';
+import { ADVERTISERS, DAILY_WIRE_SIZE, WEEKLY_WIRE_SIZE } from './balance.ts';
 import { newStoryBlock, putBlock } from './layout.ts';
 import { writeLetters } from './letters.ts';
 import { advanceIssue, createGame, defaultSetup, issueCount, type Hire } from './newGame.ts';
@@ -12,12 +12,13 @@ import { leanFit, totalReaders } from './readers.ts';
 import { rivalFrontPage } from './rival.ts';
 import { adsAvailable, resolveIssue } from './simulate.ts';
 import { defaultAssignment, reporterById } from './staff.ts';
-import type { Angle, GameState, PaperSetup, Stance } from './types.ts';
+import { CITY_PATCH, type Angle, type GameState, type PaperSetup, type Stance } from './types.ts';
 
 const { world, stories } = loadGameData();
 
-function hires(ids: string[], w: CityWorld = world): Hire[] {
-  return ids.map((id) => ({ reporterId: id, assignment: defaultAssignment(w, reporterById(w, id)!) }));
+/** Hires on their default (national) patch, except the ids listed in `local`, who work the whole city. */
+function hires(ids: string[], w: CityWorld = world, local: string[] = []): Hire[] {
+  return ids.map((id) => ({ reporterId: id, assignment: { ...defaultAssignment(w, reporterById(w, id)!), ...(local.includes(id) ? { patch: CITY_PATCH } : {}) } }));
 }
 
 /** Put every filed article on the page (front first), with an optional forced angle. */
@@ -51,6 +52,8 @@ function mirrorStories(): StorySource {
   const flip = (s: Story | undefined): Story | undefined => s && { ...s, hard_hitting_lean: -s.hard_hitting_lean };
   return {
     wireSources: () => stories.wireSources(),
+    wireForIssue: (f, i) => stories.wireForIssue(f, i).map((s) => flip(s)!),
+    localForIssue: (f, i) => stories.localForIssue(f, i).map((s) => flip(s)!),
     storiesForDay: (d) => stories.storiesForDay(d).map((s) => flip(s)!),
     allStories: () => stories.allStories().map((s) => flip(s)!),
     dayCount: () => stories.dayCount(),
@@ -89,7 +92,7 @@ describe('political symmetry (mirror test)', () => {
 });
 
 describe('resolving an issue', () => {
-  const base = () => createGame(defaultSetup(), world, stories, hires(['okafor', 'kowalczyk', 'tran']), 7);
+  const base = () => createGame(defaultSetup(), world, stories, hires(['okafor', 'kowalczyk', 'tran'], world, ['okafor']), 7);
 
   it('is deterministic for a seed', () => {
     const g = printAll(base());
@@ -115,7 +118,7 @@ describe('resolving an issue', () => {
   it('missing the big story the rival led with is noticed', () => {
     const g = base();
     const { result } = resolveIssue(g, world, stories);
-    expect(result.rivalFront[0]).toBe(rivalFrontPage(stories.storiesForDay(1))[0]);
+    expect(result.rivalFront[0]).toBe(rivalFrontPage(wireForIssue(g, stories))[0]);
     expect(result.missed.length).toBeGreaterThan(0);
     expect(result.events.some((e) => e.includes('The Herald led with'))).toBe(true);
   });
@@ -188,12 +191,12 @@ describe('a full game', () => {
   for (const frequency of ['daily', 'weekly'] as const) {
     it(`a ${frequency} paper plays all 10 issues`, () => {
       const setup: PaperSetup = { ...defaultSetup(), frequency, origin: 'inherited' };
-      let g = createGame(setup, world, stories, hires(['okafor', 'kowalczyk', 'tran', 'hale']), 5);
+      let g = createGame(setup, world, stories, hires(['okafor', 'kowalczyk', 'tran', 'hale'], world, ['okafor']), 5);
       const seen = new Set<string>();
       for (let i = 1; i <= 10; i++) {
         expect(g.issueNumber).toBe(i);
         const wire = wireForIssue(g, stories);
-        expect(wire.length).toBe(frequency === 'daily' ? GENERATED_PER_DAY : WEEKLY_WIRE_SIZE);
+        expect(wire.length).toBe(frequency === 'daily' ? DAILY_WIRE_SIZE : WEEKLY_WIRE_SIZE);
         for (const s of wire) {
           expect(seen.has(s.id)).toBe(false); // every issue brings new news
           seen.add(s.id);
@@ -209,7 +212,7 @@ describe('a full game', () => {
 
   it('there is more news than space: four reporters file more than fits on two pages', () => {
     for (const frequency of ['daily', 'weekly'] as const) {
-      const g = createGame({ ...defaultSetup(), frequency }, world, stories, hires(['okafor', 'kowalczyk', 'tran', 'hale']), 5);
+      const g = createGame({ ...defaultSetup(), frequency }, world, stories, hires(['okafor', 'kowalczyk', 'tran', 'hale'], world, ['okafor']), 5);
       const filedArea = g.articles.reduce((a, x) => a + x.inches * 1.4, 0); // text plus headline and gutter
       const twoPages = 6 * 17 + 6 * 19;
       if (frequency === 'weekly') expect(filedArea).toBeGreaterThan(twoPages);

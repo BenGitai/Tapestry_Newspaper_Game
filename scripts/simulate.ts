@@ -10,6 +10,7 @@ import { averageTrust, totalReaders } from '../src/sim/readers.ts';
 import { adsAvailable, resolveIssue } from '../src/sim/simulate.ts';
 import { advanceIssue } from '../src/sim/newGame.ts';
 import { defaultAssignment, hire, payroll } from '../src/sim/staff.ts';
+import { CITY_PATCH } from '../src/sim/types.ts';
 import { promote, setDuties } from '../src/sim/desks.ts';
 import type { Angle, GameState, PageId, PaperSetup, Tier } from '../src/sim/types.ts';
 
@@ -90,7 +91,8 @@ function makeUpPaper(game: GameState, s: Strategy): GameState {
 
 function play(s: Strategy, origin: PaperSetup['origin']): GameState {
   const setup: PaperSetup = { ...defaultSetup(), origin, ...s.setup };
-  const hires = suggestStartingStaff(world, setup).map((r) => ({ reporterId: r.id, assignment: defaultAssignment(world, r) }));
+  // A sensible player splits the staff: half work the national wire, half dig up city news.
+  const hires = suggestStartingStaff(world, setup).map((r, i) => ({ reporterId: r.id, assignment: { ...defaultAssignment(world, r), ...(i % 2 === 0 ? { patch: CITY_PATCH } : {}) } }));
   let g = createGame(setup, world, stories, hires, 12345);
   const issues = issueCount(setup.frequency, stories.dayCount());
   for (let i = 0; i < issues; i++) {

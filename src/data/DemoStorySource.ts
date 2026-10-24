@@ -4,7 +4,8 @@
 import { DEMO_DAYS, GENERATED_PER_DAY } from '../sim/balance.ts';
 import { generateDay, HAND_DAY_CAP } from './NewsGenerator.ts';
 import type { CityWorld, Story, WireSource } from './schemas.ts';
-import type { StorySource } from './StorySource.ts';
+import { localPool, type StorySource } from './StorySource.ts';
+import type { Frequency } from '../sim/types.ts';
 
 export class DemoStorySource implements StorySource {
   private readonly cache = new Map<number, Story[]>();
@@ -19,11 +20,21 @@ export class DemoStorySource implements StorySource {
     return this.hand.wireSources();
   }
 
+  /** Local news only; the national wire comes from the real-news source. */
+  wireForIssue(): Story[] {
+    return [];
+  }
+
+  localForIssue(frequency: Frequency, issue: number): Story[] {
+    return localPool(this, frequency, issue);
+  }
+
   storiesForDay(day: number): Story[] {
     if (day < 1 || day > this.days) return [];
     const hit = this.cache.get(day);
     if (hit) return hit;
-    const handStories = this.hand.storiesForDay(day);
+    // Only Philadelphia stories: national and world news is real, from the wire.
+    const handStories = this.hand.storiesForDay(day).filter((s) => s.scope === 'local');
     // Every day has GENERATED_PER_DAY stories in total; hand-written days are topped up.
     const generated = generateDay(
       this.world,

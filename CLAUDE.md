@@ -6,7 +6,8 @@ A newspaper-manager game by Tapestry Games (student indie studio). This repo is 
 - **Print only.** There are no digital articles in this game. Page layout is the core mechanic.
 - **Placeholder art only.** Labelled boxes, simple shapes and halftone patterns drawn in code. Never add AI-generated images or stock illustration. Real art comes from the team later.
 - **No invented content in the summarizer.** It uses only the facts provided for each story. No invented quotes, names, numbers or events.
-- **Demo stories are fiction.** Real Philadelphia places and teams for flavor, but no real people. Don't add real people when editing story data.
+- **Local stories are fiction; the national and world wire is real news.** Philadelphia stories (`data/stories.philly.json` and the generator) use real places and teams for flavor but no real people. Don't add real people there. The wire (`data/news/`) is built from public RSS headlines and feed summaries (NPR, BBC News, PBS NewsHour) with `npm run news:fetch` and `npm run news:build`. Keep only the headline, the feed's own summary and the link, never article text. Facts restate only those, and every story links to the original coverage.
+- **City news only through local patches.** The wire is national and international (World is international only). Philadelphia stories reach the paper only when a reporter works the Philadelphia or a district patch.
 - **API key safety.** Read `ANTHROPIC_API_KEY` from the environment (`.env`, gitignored). Never commit it, never send it to the browser, never call the model from client code.
 - **The demo must run with no API key**, from cached summaries or template fallbacks.
 - **Political symmetry.** Lean mechanics must treat left and right identically. Lean changes who trusts you, never whether the game treats a side as right.

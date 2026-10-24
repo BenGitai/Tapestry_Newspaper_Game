@@ -134,7 +134,7 @@ export function resolveIssue(game: GameState, world: CityWorld, stories: StorySo
     const fit = leanFit(d, game.perceivedLean);
     const pool = game.printPool * d.population_share;
     const appeal = sat * (0.5 + fit) * (0.6 + (0.4 * st.trust) / 100);
-    const scooped = pieces.some((p) => scoopSet.has(p.story.id) && p.story.districts.includes(d.id));
+    const scooped = pieces.some((p) => scoopSet.has(p.story.id) && inDistrict(p.story, d.id));
     const target = pool * reach(world, d, st, game.setup.coverage) * appeal * (1 - st.rivalShare * CIRCULATION.rivalCompetition) * (scooped ? 1 + CIRCULATION.scoopBonus : 1);
     let delta = (target - st.readers) * CIRCULATION.adjustRate;
     if (delta < 0) delta *= 1 - (CIRCULATION.trustCushion * st.trust) / 100;
@@ -229,7 +229,7 @@ export function resolveIssue(game: GameState, world: CityWorld, stories: StorySo
     const st = districts[d.id]!;
     let shift = 0;
     for (const id of missed) if (inDistrict(stories.storyById(id)!, d.id)) shift += RIVAL_SIM.shift;
-    for (const id of scoops) if (stories.storyById(id)!.districts.includes(d.id)) shift -= RIVAL_SIM.shift;
+    for (const id of scoops) if (inDistrict(stories.storyById(id)!, d.id)) shift -= RIVAL_SIM.shift;
     districts[d.id] = { ...st, rivalShare: clamp(st.rivalShare + shift, RIVAL_SIM.minShare, RIVAL_SIM.maxShare) };
   }
 

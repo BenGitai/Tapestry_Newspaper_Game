@@ -234,10 +234,19 @@
       "day": 1,
       "filed_at": "11:50",
       "wire_source": "natwire",
-      "category": "world",
-      "subtopic": "national",
-      "scope": "national",
-      "districts": [],
+      "category": "economy",
+      "subtopic": "transit",
+      "scope": "local",
+      "districts": [
+        "center_city",
+        "south_philly",
+        "river_wards",
+        "west_philly",
+        "north_philly",
+        "northeast",
+        "northwest",
+        "southwest"
+      ],
       "wire_headline": "Pennsylvania awarded $410 million in federal bridge repair grants",
       "wire_text": "Pennsylvania will receive $410 million in federal grants to repair aging bridges, the U.S. Department of Transportation announced Wednesday. The state has more structurally deficient bridges than all but two other states. Philadelphia-area projects account for about $95 million of the total. Work on the first projects is expected to begin next spring.",
       "facts": [

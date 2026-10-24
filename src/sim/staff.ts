@@ -18,7 +18,7 @@ import {
   TRAINING_PER_ISSUE,
   WORKLOAD,
 } from './balance.ts';
-import type { Category, Frequency, GameState, OriginId, StaffAssignment, StaffMember } from './types.ts';
+import { NATIONAL_PATCH, type Category, type Frequency, type GameState, type OriginId, type StaffAssignment, type StaffMember } from './types.ts';
 
 export const DESK_LABEL: Record<Desk, string> = {
   city_hall: 'City Hall',
@@ -36,7 +36,7 @@ export const CATEGORY_LABEL: Record<Category, string> = {
   sports: 'Sports',
   culture: 'Culture',
   science: 'Science & Tech',
-  world: 'World & National',
+  world: 'World',
 };
 
 export const ATTRIBUTE_LABEL: Record<keyof Attributes, string> = {
@@ -137,7 +137,7 @@ export function defaultAssignment(world: CityWorld, reporter: Reporter): StaffAs
   const beat = homeBeat(world, reporter);
   // Start them on their own interest if it belongs to their beat.
   const focus = categoryOfSubtopic(reporter.interest) === beat ? reporter.interest : 'none';
-  return { beat, focus, patch: 'citywide', style: 'news', workload: 'normal', training: 'none' };
+  return { beat, focus, patch: NATIONAL_PATCH, style: 'news', workload: 'normal', training: 'none' };
 }
 
 export function newStaffMember(world: CityWorld, reporter: Reporter, issue: number, morale: number, assignment?: StaffAssignment): StaffMember {

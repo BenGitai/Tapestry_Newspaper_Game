@@ -12,7 +12,7 @@ import {
   scoutedRange,
   strengthsAndWeaknesses,
 } from '../../sim/staff.ts';
-import type { Frequency, StaffAssignment, StaffMember, Workload, WritingStyle } from '../../sim/types.ts';
+import { CITY_PATCH, NATIONAL_PATCH, type Frequency, type StaffAssignment, type StaffMember, type Workload, type WritingStyle } from '../../sim/types.ts';
 import styles from './StaffParts.module.css';
 
 const STYLE_LABEL: Record<WritingStyle, string> = { news: 'News', feature: 'Feature', investigative: 'Investigative' };
@@ -32,7 +32,8 @@ const ANGLE_LABEL = { puff: 'Puff', straight: 'Straight', hard: 'Hard-hitting' }
 export { STYLE_LABEL, WORKLOAD_LABEL };
 
 export function patchLabel(patch: string): string {
-  if (patch === 'citywide') return 'Citywide';
+  if (patch === NATIONAL_PATCH) return 'National wire';
+  if (patch === CITY_PATCH) return 'Philadelphia';
   return loadGameData().world.districts.find((d) => d.id === patch)?.name ?? patch;
 }
 
@@ -158,7 +159,8 @@ export function AssignmentEditor({ reporter, value, member, onChange, compact, f
       <label className={styles.row}>
         <span>Patch</span>
         <select value={value.patch} onChange={(e) => onChange({ ...value, patch: e.target.value })}>
-          <option value="citywide">Citywide (more stories)</option>
+          <option value={NATIONAL_PATCH}>National wire (US and world news)</option>
+          <option value={CITY_PATCH}>Philadelphia (all city news)</option>
           {world.districts.map((d) => (
             <option key={d.id} value={d.id}>
               {d.name} (local knowledge)

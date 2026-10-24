@@ -18,7 +18,8 @@ export interface SaveStore {
   list(): SaveMeta[];
 }
 
-const VERSION = 3;
+// v4: reporter patches are now national / philadelphia / a district.
+const VERSION = 4;
 const KEY = (slot: SlotId) => `tapestry-newspaper-game.save.v${VERSION}.${slot}`;
 const SLOTS: SlotId[] = ['autosave', 'slot1', 'slot2', 'slot3'];
 

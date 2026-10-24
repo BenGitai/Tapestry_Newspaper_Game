@@ -1,11 +1,11 @@
 import { describe, expect, it } from 'vitest';
 import { loadGameData } from '../data/worldData.ts';
-import { COMMISSION_RESERVE, GENERATED_PER_DAY, STALENESS_PER_ISSUE, STYLE } from './balance.ts';
+import { COMMISSION_RESERVE, DAILY_WIRE_SIZE, STALENESS_PER_ISSUE, STYLE, WEEKLY_WIRE_SIZE } from './balance.ts';
 import { createGame, defaultSetup, type Hire } from './newGame.ts';
-import { angleFor, articleInches, hasRoomFor, backlog, commission, fileBeatArticles, freshness, inchesFiled, isCovered, remainingCapacity, settleAfterPrint, updateArticle, wireForIssue } from './newsroom.ts';
+import { angleFor, articleInches, hasRoomFor, backlog, commission, fileBeatArticles, freshness, inchesFiled, isCovered, remainingCapacity, settleAfterPrint, updateArticle, availableStories, localLeads, wireForIssue } from './newsroom.ts';
 import { newStoryBlock, putBlock } from './layout.ts';
 import { defaultAssignment, filingCapacity, reporterById } from './staff.ts';
-import type { GameState, StaffAssignment } from './types.ts';
+import { CITY_PATCH, NATIONAL_PATCH, type GameState, type StaffAssignment } from './types.ts';
 
 import storiesRaw from '../../data/stories.philly.json';
 import { JsonStorySource } from '../data/StorySource.ts';
@@ -15,8 +15,8 @@ const { world } = loadGameData();
 const stories = new JsonStorySource(storiesRaw);
 
 function game(staff: [string, Partial<StaffAssignment>?][], issue = 1): GameState {
-  // Tests about specific stories pin focus off unless they set it.
-  const hires: Hire[] = staff.map(([id, asg]) => ({ reporterId: id, assignment: { ...defaultAssignment(world, reporterById(world, id)!), focus: 'none', ...asg } }));
+  // Tests about specific stories pin focus off and work the whole city unless they set it.
+  const hires: Hire[] = staff.map(([id, asg]) => ({ reporterId: id, assignment: { ...defaultAssignment(world, reporterById(world, id)!), focus: 'none', patch: CITY_PATCH, ...asg } }));
   const g = createGame(defaultSetup(), world, stories, hires);
   if (issue === 1) return g;
   return fileBeatArticles({ ...g, issueNumber: issue, articles: [] }, world, stories);
@@ -114,7 +114,7 @@ describe('commissions', () => {
     const g = game([['okafor'], ['tran']]);
     expect(commission(g, world, stories, 'd1-library', 'tran').ok).toBe(false); // already covered
     expect(commission(g, world, stories, 'd2-fire', 'tran').ok).toBe(false);
-    const open = wireForIssue(g, stories).filter((s) => !isCovered(g, s.id));
+    const open = availableStories(g, stories).filter((s) => !isCovered(g, s.id));
     if (open.length) {
       const busy = { ...g, articles: [...g.articles, { ...g.articles[0]!, id: 'x', storyId: 'zz', reporterId: 'tran', inches: 99 }] };
       expect(commission(busy, world, stories, open[0]!.id, 'tran').ok).toBe(false);
@@ -123,7 +123,7 @@ describe('commissions', () => {
 
   it('wire copy needs no reporter and runs straight', () => {
     const g = game([['okafor', { workload: 'light' }]]);
-    const open = wireForIssue(g, stories).find((s) => !isCovered(g, s.id))!;
+    const open = availableStories(g, stories).find((s) => !isCovered(g, s.id))!;
     const r = commission(g, world, stories, open.id, null);
     if (!r.ok) throw new Error(r.reason);
     const a = r.game.articles.find((x) => x.storyId === open.id)!;
@@ -165,16 +165,32 @@ describe('backlog', () => {
     expect(freshness(pickles, later, stories).value).toBe(1 - STALENESS_PER_ISSUE);
   });
 
-  it('wire for an issue follows frequency', () => {
+  it('the wire is national and world news; a weekly gets more of it', () => {
     const g = game([['okafor']]);
     const demo = loadGameData().stories;
-    expect(wireForIssue(g, demo)).toHaveLength(GENERATED_PER_DAY);
+    const daily = wireForIssue(g, demo);
+    expect(daily).toHaveLength(DAILY_WIRE_SIZE);
+    expect(daily.every((s) => s.scope !== 'local')).toBe(true);
     const weekly = wireForIssue({ ...g, setup: { ...g.setup, frequency: 'weekly' } }, demo);
-    expect(weekly).toHaveLength(40);
-    // A weekly wire is the week's biggest stories.
-    const week = [1, 2, 3, 4, 5, 6, 7].flatMap((d) => demo.storiesForDay(d));
-    const cutoff = Math.min(...weekly.map((s) => s.importance));
-    expect(week.filter((s) => s.importance > cutoff).every((s) => weekly.includes(s))).toBe(true);
+    expect(weekly.length).toBeGreaterThan(DAILY_WIRE_SIZE);
+    expect(weekly.length).toBeLessThanOrEqual(WEEKLY_WIRE_SIZE);
+    // Every desk gets something on the wire.
+    for (const cat of ['politics', 'economy', 'sports', 'world']) expect(daily.some((s) => s.category === cat), cat).toBe(true);
+  });
+
+  it('city news only turns up for reporters on a local patch', () => {
+    const demo = loadGameData().stories;
+    const hire = (patch: string): Hire => ({ reporterId: 'okafor', assignment: { ...defaultAssignment(world, reporterById(world, 'okafor')!), patch } });
+    const national = createGame(defaultSetup(), world, demo, [hire(NATIONAL_PATCH)], 1);
+    expect(localLeads(national, demo)).toEqual([]);
+    expect(national.articles.every((a) => demo.storyById(a.storyId)!.scope !== 'local')).toBe(true);
+    const city = createGame(defaultSetup(), world, demo, [hire(CITY_PATCH)], 1);
+    expect(localLeads(city, demo).length).toBeGreaterThan(0);
+    expect(city.articles.every((a) => demo.storyById(a.storyId)!.scope === 'local')).toBe(true);
+    const district = createGame(defaultSetup(), world, demo, [hire('north_philly')], 1);
+    const leads = localLeads(district, demo);
+    expect(leads.length).toBeGreaterThan(0);
+    expect(leads.every((s) => s.districts.includes('north_philly'))).toBe(true);
   });
 
   it('a weekly paper gives reporters a week of filing', () => {

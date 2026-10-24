@@ -1,6 +1,7 @@
-// Which articles the demo ships pre-generated. The demo plays a 10-issue game:
-// daily = the full wire of days 1-10, weekly = the top WEEKLY_WIRE_SIZE stories of
-// weeks 1-10. Both come from wireForIssue, so the set cannot drift from the game.
+// Which articles the demo ships pre-generated. The demo plays a 10-issue game, so
+// the set is the national wire and the local Philadelphia pool of issues 1-10, for
+// both daily and weekly papers. Both come from the same calls the game uses, so
+// the set cannot drift from the game.
 //
 // Combinations per story: angle x length tier (Puff is skipped for sensitive
 // stories). Hand-written stories are written in each matching desk reporter's
@@ -9,7 +10,7 @@
 import type { Angle, CityWorld, Story } from '../data/schemas.ts';
 import { ANGLES } from '../data/schemas.ts';
 import type { StorySource } from '../data/StorySource.ts';
-import { wireForIssue } from '../sim/newsroom.ts';
+import { localPoolForIssue, wireForIssue } from '../sim/newsroom.ts';
 import type { Frequency, PaperSetup, Tier } from '../sim/types.ts';
 import { cacheKey } from './cache.ts';
 import { DESK_VOICE_ID } from './config.ts';
@@ -18,15 +19,16 @@ import type { ArticleRequest } from './types.ts';
 export const DEMO_ISSUES = 10;
 export const TIER_LIST: Tier[] = ['lead', 'secondary', 'brief'];
 
-/** Ids of the hand-written stories (generated ones look like g12-3). */
-export const isHandWritten = (storyId: string): boolean => !/^g\d+-\d+$/.test(storyId);
+/** Ids of the hand-written stories (generated ones look like g12-3, real news like n-1a2b3c4d5e). */
+export const isHandWritten = (storyId: string): boolean => !/^g\d+-\d+$/.test(storyId) && !storyId.startsWith('n-');
 
 /** Every story in the demo's fixed set, in id order. */
 export function demoStories(stories: StorySource, issues = DEMO_ISSUES): Story[] {
   const byId = new Map<string, Story>();
   for (const frequency of ['daily', 'weekly'] as Frequency[]) {
     for (let issueNumber = 1; issueNumber <= issues; issueNumber++) {
-      for (const s of wireForIssue({ setup: { frequency } as PaperSetup, issueNumber }, stories)) byId.set(s.id, s);
+      const game = { setup: { frequency } as PaperSetup, issueNumber };
+      for (const s of [...wireForIssue(game, stories), ...localPoolForIssue(game, stories)]) byId.set(s.id, s);
     }
   }
   return [...byId.values()].sort((a, b) => a.id.localeCompare(b.id));

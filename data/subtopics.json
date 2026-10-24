@@ -1,5 +1,5 @@
 {
-  "_note": "Sub-focuses within each category. Every story has one; every reporter has a personal interest; the player can set each reporter's focus. City-independent.",
+  "_note": "Sub-focuses within each category. World is purely international (by continent); US national news lives in the other categories. Every story has one; every reporter has a personal interest; the player can set each reporter's focus. City-independent.",
   "subtopics": {
     "politics": [
       { "id": "council", "name": "City Council & City Hall" },
@@ -45,7 +45,6 @@
       { "id": "cyber", "name": "Cybersecurity & data" }
     ],
     "world": [
-      { "id": "national", "name": "National" },
       { "id": "americas", "name": "The Americas" },
       { "id": "europe", "name": "Europe" },
       { "id": "africa", "name": "Africa" },
