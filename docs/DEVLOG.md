@@ -15,7 +15,7 @@
   - *Philadelphia* (any city story).
   - A district.
   Philadelphia stories (hand-written plus generator) show up only as "Philadelphia leads" for reporters on a local patch. The wire desk, map pins and commissions follow the same rule. National scoops count everywhere; local stories still get the neighborhood boost. Saves are now v4, because the patch values changed.
-- **AI summaries in the game:** `npm run summarize` now covers both the wire and the local pool of issues 1–10. Real news is written in the neutral desk voice.
+- **AI summaries in the game:** `npm run summarize` now covers both the wire and the local pool of issues 1–10 (777 stories, 7,440 articles). 7,026 (94%) are cached, about $0.85 this session. The rest failed the fact check (mostly the model adding places or titles not in the feed summary) and use templates. Real news is written in the neutral desk voice. The name check no longer flags a sentence opener followed by a comma ("Separately, ...").
 - **Color.**
   - One spot ink per desk (`categoryInk` in `src/theme/tokens.ts`) on slips, kickers and layout cards.
   - Placeholder photos are code-drawn two-color scenes per desk: a dome for politics, a pitch for sports, a globe for world, and so on.
