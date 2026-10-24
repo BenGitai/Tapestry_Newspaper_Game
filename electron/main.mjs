@@ -15,7 +15,7 @@ function createWindow() {
     height: 900,
     minWidth: 960,
     minHeight: 600,
-    title: 'Above the Fold',
+    title: 'Tapestry Newspaper Game',
     show: false,
     autoHideMenuBar: true,
     webPreferences: {

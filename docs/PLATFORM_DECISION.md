@@ -96,7 +96,7 @@ Left out on purpose: React Router (screens are a small state machine in the stor
 ## 3. Folder structure
 
 ```
-above-the-fold/
+tapestry-newspaper-game/
 ├─ CLAUDE.md
 ├─ .env                      (gitignored: ANTHROPIC_API_KEY)
 ├─ .env.example

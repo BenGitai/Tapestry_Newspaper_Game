@@ -26,7 +26,7 @@ export function TitleScreen() {
           <span>Late city edition</span>
           <span>Price: your integrity</span>
         </div>
-        <h1 className={styles.masthead}>Above the Fold</h1>
+        <h1 className={styles.masthead}>Tapestry Newspaper Game</h1>
         <div className={styles.dateline}>
           <span>Philadelphia</span>
           <span>A demo · every story in it is fiction</span>

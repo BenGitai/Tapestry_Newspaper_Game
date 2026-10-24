@@ -39,9 +39,10 @@
 .masthead {
   font-family: var(--f-display);
   font-weight: 700;
-  font-size: 96px;
+  font-size: 58px;
   line-height: 1;
   text-align: center;
+  white-space: nowrap;
   margin: 14px 0 10px;
   letter-spacing: -0.01em;
 }

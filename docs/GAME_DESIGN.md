@@ -1,4 +1,5 @@
-# Above the Fold — Demo Design Spec (v0.1)
+<!-- Placeholder game name: Tapestry Newspaper Game (formerly "Above the Fold"). -->
+# Tapestry Newspaper Game — Demo Design Spec (v0.1)
 
 Working title. Tapestry Games. Everything here is a starting point for a playable demo; art, writing and balance get redone once the team is assembled.
 

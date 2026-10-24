@@ -1,5 +1,7 @@
 # Devlog
 
+## 2026-10-23 · Renamed to the placeholder "Tapestry Newspaper Game" (game title, window, package, app id, save keys). "Above the fold" stays where it means the newspaper fold.
+
 ## 2026-10-23 · Page unlocks
 
 - Pages A4–A6 unlock permanently with readers plus newsstands (`src/sim/pages.ts`, `PAGE_UNLOCKS` in balance). A3 is open from the start. Extra pages carry over between issues. Locked tabs show their requirements, and progress shows in the Layout notes and the map's paper panel.

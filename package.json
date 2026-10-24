@@ -1,8 +1,8 @@
 {
-  "name": "above-the-fold",
+  "name": "tapestry-newspaper-game",
   "private": true,
   "version": "0.1.0",
-  "description": "Above the Fold: newspaper-manager demo by Tapestry Games",
+  "description": "Tapestry Newspaper Game (placeholder name): newspaper-manager demo by Tapestry Games",
   "type": "module",
   "engines": {
     "node": ">=24"
@@ -53,8 +53,8 @@
   },
   "main": "electron/main.mjs",
   "build": {
-    "appId": "com.tapestrygames.abovethefold",
-    "productName": "Above the Fold",
+    "appId": "com.tapestrygames.newspapergame",
+    "productName": "Tapestry Newspaper Game",
     "directories": {
       "output": "release"
     },

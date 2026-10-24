@@ -19,7 +19,7 @@ export interface SaveStore {
 }
 
 const VERSION = 3;
-const KEY = (slot: SlotId) => `above-the-fold.save.v${VERSION}.${slot}`;
+const KEY = (slot: SlotId) => `tapestry-newspaper-game.save.v${VERSION}.${slot}`;
 const SLOTS: SlotId[] = ['autosave', 'slot1', 'slot2', 'slot3'];
 
 /** Browser storage (in the desktop app it lives in the app's user-data folder). */

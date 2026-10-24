@@ -1,4 +1,4 @@
-# Above the Fold — project rules for Claude Code
+# Tapestry Newspaper Game (placeholder name) — project rules for Claude Code
 
 A newspaper-manager game by Tapestry Games (student indie studio). This repo is a playable demo, shipped as a desktop app (Electron). Read `docs/GAME_DESIGN.md` and then `docs/DESIGN_CHANGES.md` (which overrides it where they differ) before making design decisions, and `docs/PLATFORM_DECISION.md` for the tech stack.
 
