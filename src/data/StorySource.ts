@@ -52,3 +52,8 @@ export class JsonStorySource implements StorySource {
     return this.stories.find((s) => s.id === id);
   }
 }
+
+/** True if a story's original-coverage link is a real web address we can open (https only). */
+export function isOriginalStoryUrl(url: string): boolean {
+  return /^https:\/\/[^\s]+$/.test(url);
+}

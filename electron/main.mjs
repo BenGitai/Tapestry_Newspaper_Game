@@ -8,6 +8,8 @@ import { app, BrowserWindow, Menu, shell } from 'electron';
 import { join } from 'node:path';
 
 const devUrl = process.env.VITE_DEV_SERVER_URL;
+// `npm run techdemo` opens straight into the summarizer tech demo.
+const hash = process.argv.includes('--techdemo') ? 'techdemo' : '';
 
 function createWindow() {
   const win = new BrowserWindow({
@@ -48,8 +50,8 @@ function createWindow() {
     }
   });
 
-  if (devUrl) win.loadURL(devUrl);
-  else win.loadFile(join(import.meta.dirname, '..', 'dist', 'index.html'));
+  if (devUrl) win.loadURL(hash ? `${devUrl}#${hash}` : devUrl);
+  else win.loadFile(join(import.meta.dirname, '..', 'dist', 'index.html'), hash ? { hash } : {});
 }
 
 Menu.setApplicationMenu(null);

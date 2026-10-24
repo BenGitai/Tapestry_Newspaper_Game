@@ -4,9 +4,9 @@ import { DevMenu } from './screens/DevMenu.tsx';
 import { EndScreen } from './screens/EndScreen.tsx';
 import { HiringScreen } from './screens/HiringScreen.tsx';
 import { Hub } from './screens/hub/Hub.tsx';
-import { LabPlaceholder } from './screens/LabPlaceholder.tsx';
 import { PressRun } from './screens/PressRun.tsx';
 import { SetupScreen } from './screens/SetupScreen.tsx';
+import { TechDemo } from './screens/TechDemo.tsx';
 import { TitleScreen } from './screens/TitleScreen.tsx';
 import { useStore } from './state/store.ts';
 
@@ -20,7 +20,7 @@ export function App() {
       {screen === 'hub' ? <Hub /> : null}
       {screen === 'press' ? <PressRun /> : null}
       {screen === 'end' ? <EndScreen /> : null}
-      {screen === 'lab' ? <LabPlaceholder /> : null}
+      {screen === 'techdemo' ? <TechDemo /> : null}
       <DragLayer />
       {import.meta.env.DEV ? <DevMenu /> : null}
     </Stage>

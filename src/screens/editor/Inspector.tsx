@@ -26,7 +26,7 @@ import { nextUnlock, totalNewsstands } from '../../sim/pages.ts';
 import { totalReaders } from '../../sim/readers.ts';
 import type { PageId, StoryBlock, Tier } from '../../sim/types.ts';
 import { useStore } from '../../state/store.ts';
-import { ANGLE_LABEL, articleScorecard, bylineOf, ScoutingReport, STYLE_SHORT } from '../../components/newsroom/ArticleParts.tsx';
+import { ANGLE_LABEL, articleScorecard, bylineOf, OriginalStoryLink, ScoutingReport, STYLE_SHORT } from '../../components/newsroom/ArticleParts.tsx';
 import styles from './Editor.module.css';
 
 const TIER_LABEL: Record<Tier, string> = { lead: 'Lead', secondary: 'Secondary', brief: 'Brief' };
@@ -75,6 +75,7 @@ function StoryNotes({ block, page }: { block: StoryBlock; page: PageId }) {
     <>
       <div className={styles.kicker}>Selected · {placementLabel(page, block)}</div>
       <h2 className={styles.noteHead}>{copy.headline}</h2>
+      <OriginalStoryLink story={story} />
       <div className={styles.smallRow}>
         <span>
           {bylineOf(article)} · {STYLE_SHORT[article.style]}

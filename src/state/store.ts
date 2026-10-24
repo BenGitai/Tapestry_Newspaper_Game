@@ -13,7 +13,7 @@ import { addNewsstand as buyNewsstand, openBureau as buyBureau, type DistrictEdi
 import { resolveIssue } from '../sim/simulate.ts';
 import { saves, type SlotId } from './save.ts';
 
-export type Screen = 'title' | 'setup' | 'hiring' | 'hub' | 'press' | 'end' | 'lab';
+export type Screen = 'title' | 'setup' | 'hiring' | 'hub' | 'press' | 'end' | 'techdemo';
 export type HubTab = 'newsroom' | 'layout' | 'staff' | 'map';
 
 const HISTORY_LIMIT = 100;
@@ -105,7 +105,8 @@ export const useStore = create<Store>((set, get) => {
   };
 
   return {
-    screen: 'title',
+    // `npm run techdemo` opens the app with #techdemo; everything else starts on the title screen.
+    screen: typeof location !== 'undefined' && location.hash === '#techdemo' ? 'techdemo' : 'title',
     hubTab: 'newsroom',
     pendingSetup: null,
     game: null,

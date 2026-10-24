@@ -30,7 +30,8 @@ A newspaper-manager game by Tapestry Games (student indie studio). This repo is 
 - `npm run smoke`: build, then play through the desktop app with Playwright (screenshots in `.tmp/smoke/`)
 - `npm test`: run tests (Vitest)
 - `npm run typecheck`, `npm run lint`, `npm run build`
-- `npm run summarize`: pre-generate article text for all stories and print the cost report (added in milestone 3)
+- `npm run summarize`: pre-generate articles for the demo's story set into `data/generated/summaries.cache.json` and print the cost report. Flags: `--dry-run`, `--story <id>`, `--force`, `--limit <n>`. Needs `ANTHROPIC_API_KEY` in `.env` (except with `--dry-run`)
+- `npm run techdemo`: open the desktop app straight into the summarizer tech demo (live generation when a key is set)
 - `npm run simulate`: play the demo headlessly with fixed strategies (per origin) and print readers, cash, trust and lean, for balance work
 
 ## AI-written content

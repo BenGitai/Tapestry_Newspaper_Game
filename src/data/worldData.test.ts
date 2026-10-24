@@ -3,7 +3,7 @@ import worldRaw from '../../data/districts.philly.json';
 import storiesRaw from '../../data/stories.philly.json';
 import { DEMO_DAYS, EXTRA_CANDIDATES, GENERATED_PER_DAY } from '../sim/balance.ts';
 import { storySchema } from './schemas.ts';
-import { JsonStorySource } from './StorySource.ts';
+import { isOriginalStoryUrl, JsonStorySource } from './StorySource.ts';
 import { displayName, loadGameData, parseWorld, validateSubtopics } from './worldData.ts';
 
 describe('demo data', () => {
@@ -136,5 +136,18 @@ describe('generated news', () => {
     for (let d = 1; d <= 4; d++) {
       for (const s of stories.storiesForDay(d).filter((x) => x.id.startsWith('g'))) expect(s.importance).toBeLessThanOrEqual(3);
     }
+  });
+});
+
+describe('original story links', () => {
+  it('only real https addresses become links', () => {
+    expect(isOriginalStoryUrl('https://example.org/news/123')).toBe(true);
+    expect(isOriginalStoryUrl('#placeholder')).toBe(false);
+    expect(isOriginalStoryUrl('http://example.org')).toBe(false);
+    expect(isOriginalStoryUrl('javascript:alert(1)')).toBe(false);
+  });
+
+  it('every demo story carries a link field (placeholders, since the demo is fiction)', () => {
+    for (const s of loadGameData().stories.storiesForDay(1)) expect(typeof s.real_story_url).toBe('string');
   });
 });

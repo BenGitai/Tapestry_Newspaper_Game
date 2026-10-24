@@ -8,7 +8,7 @@ import { articleInches, backlog, hasRoomFor, isCovered, remainingCapacity, selec
 import { activeStaff, CATEGORY_LABEL, currentAttributes, filingCapacity, reporterById, shownAssignment } from '../../sim/staff.ts';
 import type { Article, GameState, StaffMember } from '../../sim/types.ts';
 import { useStore } from '../../state/store.ts';
-import { ANGLE_LABEL, articleScorecard, bylineOf, ScoreChips, ScoutingReport, STYLE_SHORT } from '../../components/newsroom/ArticleParts.tsx';
+import { ANGLE_LABEL, articleScorecard, bylineOf, OriginalStoryLink, ScoreChips, ScoutingReport, STYLE_SHORT } from '../../components/newsroom/ArticleParts.tsx';
 import { assignmentSummary, AttributeTable, ReporterHeader, StrengthsLine } from '../../components/staff/StaffParts.tsx';
 import styles from './Hub.module.css';
 import n from './Newsroom.module.css';
@@ -247,6 +247,7 @@ function ArticleDetail({ game, article }: { game: GameState; article: Article })
       <div className={n.detailMeta}>
         {bylineOf(article)} · {STYLE_SHORT[article.style]} · {article.inches} column inches · filed issue {article.issueFiled}
       </div>
+      <OriginalStoryLink story={story} />
 
       <div className={styles.label}>Angle</div>
       <div className={n.seg}>
@@ -344,6 +345,7 @@ function WireDesk({ game }: { game: GameState }) {
             </div>
             <div className={n.wireHead}>{s.wire_headline}</div>
             {s.sensitivity === 'high' ? <div className={n.sensitive}>Sensitive</div> : null}
+            <OriginalStoryLink story={s} />
             <div className={n.commissionRow}>
               <select value={chosen} onChange={(e) => setPick({ ...pick, [s.id]: e.target.value })}>
                 <option value="">Commission…</option>

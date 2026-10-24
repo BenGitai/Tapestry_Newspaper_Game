@@ -1,6 +1,7 @@
 // Article slips and their scouting-report scorecard.
 import type { Story } from '../../data/schemas.ts';
 import { loadGameData } from '../../data/worldData.ts';
+import { isOriginalStoryUrl } from '../../data/StorySource.ts';
 import { freshness } from '../../sim/newsroom.ts';
 import { editorEffect } from '../../sim/desks.ts';
 import { grade, heatLabel, scorecard, trustLabel, type Scorecard } from '../../sim/scorecard.ts';
@@ -103,6 +104,28 @@ function Bar({ v, warn, centered }: { v: number; warn?: boolean; centered?: bool
     <span className={styles.bar}>
       {centered ? <span className={styles.mid} /> : null}
       <span className={warn ? styles.barWarn : styles.barFill} style={{ width: `${Math.max(0, Math.min(1, v)) * 100}%` }} />
+    </span>
+  );
+}
+
+/**
+ * Link to the original coverage a story is based on. Real links open in the
+ * system browser (the desktop shell only lets https:// out). Demo stories are
+ * fiction, so their link is a placeholder and says so instead of going nowhere.
+ */
+export function OriginalStoryLink({ story }: { story: Pick<Story, 'real_story_url' | 'wire_source'> }) {
+  const { stories } = loadGameData();
+  const source = stories.wireSources().find((w) => w.id === story.wire_source)?.name ?? 'the wire';
+  if (isOriginalStoryUrl(story.real_story_url)) {
+    return (
+      <a className={styles.original} href={story.real_story_url} target="_blank" rel="noopener noreferrer" onPointerDown={(e) => e.stopPropagation()}>
+        Read the original story ({source}) ↗
+      </a>
+    );
+  }
+  return (
+    <span className={styles.originalPlaceholder} title="Every story in the demo is fiction. In the full game this links to the real coverage.">
+      Original story: placeholder in the demo (fictional {source} report)
     </span>
   );
 }
