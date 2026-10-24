@@ -2,21 +2,48 @@
 // commissions extra pieces, and unpublished work waits in the backlog.
 import type { Angle, CityWorld, Story } from '../data/schemas.ts';
 import type { StorySource } from '../data/StorySource.ts';
-import { COMMISSION_RESERVE, FOCUS, GENERAL_ASSIGNMENT, STALENESS_FLOOR, STALENESS_PER_ISSUE, STYLE, SUPERSEDED_VALUE, WEEKLY_WIRE_SIZE } from './balance.ts';
+import { COMMISSION_RESERVE, FOCUS, GENERAL_ASSIGNMENT, STALENESS_FLOOR, STALENESS_PER_ISSUE, STYLE, SUPERSEDED_VALUE } from './balance.ts';
 import { findStoryBlock } from './layout.ts';
-import { issueDays } from './calendar.ts';
 import { activeStaff, filingCapacity, reporterById } from './staff.ts';
-import type { Article, GameState, StaffMember, WritingStyle } from './types.ts';
+import { CITY_PATCH, NATIONAL_PATCH, type Article, type GameState, type Patch, type StaffMember, type WritingStyle } from './types.ts';
+
+/** The national and international wire for this issue (everyone sees it). */
+export function wireForIssue(game: Pick<GameState, 'setup' | 'issueNumber'>, stories: StorySource): Story[] {
+  return stories.wireForIssue(game.setup.frequency, game.issueNumber);
+}
+
+/** All of this issue's Philadelphia stories, whether or not anyone has found them. */
+export function localPoolForIssue(game: Pick<GameState, 'setup' | 'issueNumber'>, stories: StorySource): Story[] {
+  return stories.localForIssue(game.setup.frequency, game.issueNumber);
+}
+
+/** Is a local patch: the whole city or one district (not the national wire). */
+export function isLocalPatch(patch: Patch): boolean {
+  return patch !== NATIONAL_PATCH;
+}
 
 /**
- * The wire for an issue. A daily sees the whole day. A weekly sees the week's
- * most important stories (WEEKLY_WIRE_SIZE), shown in the order they were filed.
+ * Local leads: the Philadelphia stories your reporters on local patches can dig
+ * up this issue. Nobody on a local patch means no city news at all.
  */
-export function wireForIssue(game: Pick<GameState, 'setup' | 'issueNumber'>, stories: StorySource): Story[] {
-  const all = issueDays(game.setup.frequency, game.issueNumber).flatMap((d) => stories.storiesForDay(d));
-  if (game.setup.frequency === 'daily') return all;
-  const top = [...all].sort((a, b) => b.importance - a.importance || a.day - b.day || a.filed_at.localeCompare(b.filed_at)).slice(0, WEEKLY_WIRE_SIZE);
-  return top.sort((a, b) => a.day - b.day || a.filed_at.localeCompare(b.filed_at));
+export function localLeads(game: Pick<GameState, 'setup' | 'issueNumber' | 'staff'>, stories: StorySource): Story[] {
+  const patches = activeStaff(game)
+    .map((m) => m.assignment.patch)
+    .filter(isLocalPatch);
+  if (!patches.length) return [];
+  return localPoolForIssue(game, stories).filter((s) => patches.some((p) => patchCovers(p, s)));
+}
+
+/** Every story the paper could run this issue: the wire plus the local leads. */
+export function availableStories(game: Pick<GameState, 'setup' | 'issueNumber' | 'staff'>, stories: StorySource): Story[] {
+  return [...wireForIssue(game, stories), ...localLeads(game, stories)];
+}
+
+/** Does a patch reach this story? National reaches the wire; Philadelphia reaches every local story; a district its own. */
+export function patchCovers(patch: Patch, story: Pick<Story, 'scope' | 'districts'>): boolean {
+  if (patch === NATIONAL_PATCH) return story.scope !== 'local';
+  if (story.scope !== 'local') return false;
+  return patch === CITY_PATCH || story.districts.includes(patch);
 }
 
 export function articleId(storyId: string, issue: number): string {
@@ -36,9 +63,7 @@ export function articleInches(story: Pick<Story, 'base_column_inches'>, style: W
 /** Is this story inside the reporter's assignment? */
 export function onAssignment(member: StaffMember, story: Story): { beat: boolean; patch: boolean } {
   const a = member.assignment;
-  const beat = story.category === a.beat;
-  const patch = a.patch === 'citywide' || story.districts.includes(a.patch);
-  return { beat, patch };
+  return { beat: story.category === a.beat, patch: patchCovers(a.patch, story) };
 }
 
 export function inchesFiled(game: Pick<GameState, 'articles' | 'issueNumber'>, reporterId: string): number {
@@ -74,7 +99,8 @@ export function isCovered(game: Pick<GameState, 'articles'>, storyId: string): b
  * reporters pick first. Deterministic, so the same choices give the same paper.
  */
 export function fileBeatArticles(game: GameState, world: CityWorld, stories: StorySource): GameState {
-  const wire = wireForIssue(game, stories);
+  // National reporters work the wire; local reporters dig up the city's stories.
+  const wire = [...wireForIssue(game, stories), ...localPoolForIssue(game, stories)];
   let state = game;
   const order = [...activeStaff(game)].sort((a, b) => {
     const ra = reporterById(world, a.reporterId);
@@ -125,7 +151,7 @@ function makeArticle(game: GameState, world: CityWorld, member: StaffMember, sto
     inches: articleInches(story, style),
     issueFiled: game.issueNumber,
     commissioned,
-    onPatch: member.assignment.patch !== 'citywide' && story.districts.includes(member.assignment.patch),
+    onPatch: isLocalPatch(member.assignment.patch) && member.assignment.patch !== CITY_PATCH && story.districts.includes(member.assignment.patch),
     onFocus: member.assignment.focus !== 'none' && story.subtopic === member.assignment.focus,
     onInterest: story.subtopic === interest,
     favorite: false,
@@ -140,7 +166,7 @@ export type NewsroomEdit = { ok: true; game: GameState } | { ok: false; reason: 
 export function commission(game: GameState, world: CityWorld, stories: StorySource, storyId: string, reporterId: string | null, angle?: Angle): NewsroomEdit {
   const story = stories.storyById(storyId);
   if (!story) return { ok: false, reason: 'Unknown story' };
-  if (!wireForIssue(game, stories).some((s) => s.id === storyId)) return { ok: false, reason: 'That story is not on this issue’s wire' };
+  if (!availableStories(game, stories).some((s) => s.id === storyId)) return { ok: false, reason: 'That story is not on this issue’s wire or local leads' };
   if (isCovered(game, storyId)) return { ok: false, reason: 'Someone has already filed that story' };
   if (angle === 'puff' && story.sensitivity === 'high') return { ok: false, reason: 'Sensitive stories cannot take the Puff angle' };
 
@@ -198,7 +224,7 @@ export function freshness(article: Article, game: Pick<GameState, 'setup' | 'iss
   const story = stories.storyById(article.storyId);
   let superseded = false;
   if (story?.storyline && story.storyline_step !== undefined) {
-    superseded = wireForIssue(game, stories).some((s) => s.storyline === story.storyline && (s.storyline_step ?? 0) > (story.storyline_step ?? 0));
+    superseded = [...wireForIssue(game, stories), ...localPoolForIssue(game, stories)].some((s) => s.storyline === story.storyline && (s.storyline_step ?? 0) > (story.storyline_step ?? 0));
     if (superseded) value *= SUPERSEDED_VALUE;
   }
   return { value, superseded };

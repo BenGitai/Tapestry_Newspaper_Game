@@ -15,12 +15,22 @@ const step = async (name, fn) => {
   await fn();
   await page.waitForTimeout(250);
   await page.screenshot({ path: `${out}/${name}.png` });
+  // The how-to-play guide is on by default: read the memo, then put it away.
+  const memo = page.getByRole('button', { name: 'Got it' });
+  if (await memo.count()) {
+    tips++;
+    await memo.click();
+  }
 };
+let tips = 0;
 
 await page.waitForLoadState('domcontentloaded');
 await step('01-title', async () => {});
 await step('02-setup', () => page.getByText('Upstart launches paper on a shoestring').click());
 await step('03-hiring', () => page.getByRole('button', { name: /Approved/i }).click());
+await step('03b-hired', async () => {
+  for (const name of ['Rosa Okafor', 'Marty Kowalczyk', 'June Tran']) await page.getByRole('button', { name: new RegExp(name) }).first().click();
+});
 await step('04-newsroom', () => page.getByRole('button', { name: 'Open the newsroom' }).click());
 await step('05-picked', async () => {
   const pick = page.getByRole('button', { name: 'For print', exact: true });
@@ -44,12 +54,13 @@ await step('08-results', () => page.getByRole('button', { name: 'Send to press' 
 await step('09-next', () => page.getByRole('button', { name: /Next issue/ }).click());
 await step('10-staff', () => page.getByRole('button', { name: 'Staff', exact: true }).click());
 await step('11-map', () => page.getByRole('button', { name: 'City map', exact: true }).click());
-await step('12-district', () => page.locator('polygon').nth(4).click({ force: true }));
+await step('12-district', () => page.locator('path[class*="district"]').nth(4).click({ force: true }));
 await step('13-saved', () => page.getByRole('button', { name: 'Save', exact: true }).click());
 await step('14-title', () => page.getByRole('button', { name: 'Menu', exact: true }).click());
 await step('15-continue', () => page.getByText(/reaches issue 2/).click());
 
 await app.close();
+if (tips < 6) errors.push(`Expected a how-to-play memo on each screen, saw ${tips}`);
 if (errors.length) {
   console.error('Page errors:\n' + errors.join('\n'));
   process.exit(1);

@@ -1,5 +1,40 @@
 # Devlog
 
+## 2026-10-24 · Real news, local patches, color, real map, how-to-play guide
+
+**What changed**
+- **Real news on the wire.**
+  - National and world stories come from a snapshot of public RSS feeds: NPR, BBC News and PBS NewsHour, 35 feeds.
+  - `npm run news:fetch` refreshes the snapshot (`data/news/snapshot.json`). Only the headline, the feed's own summary and the link are kept, never article text.
+  - `npm run news:build` (`server/newsFacts.ts`, `claude-haiku-5-5`) tags each item (desk, sub-focus, importance, sensitivity, lean) and restates it as facts. It then drops any fact whose numbers or names aren't in the source.
+  - 604 items gave 554 stories, about 55 per issue. Cost about $0.12. Results are cached in `data/news/extractions.json`, so re-runs only pay for new items.
+  - Every story links to the original. The Guardian is on hold until its API is set up.
+- **The wire is national and international only.** World is international only. An issue's wire is the 20 most important stories (40 for a weekly), taken a desk at a time so every beat has something.
+- **City news only through local patches.** Patches are now:
+  - *National wire* (the default).
+  - *Philadelphia* (any city story).
+  - A district.
+  Philadelphia stories (hand-written plus generator) show up only as "Philadelphia leads" for reporters on a local patch. The wire desk, map pins and commissions follow the same rule. National scoops count everywhere; local stories still get the neighborhood boost. Saves are now v4, because the patch values changed.
+- **AI summaries in the game:** `npm run summarize` now covers both the wire and the local pool of issues 1–10 (777 stories, 7,440 articles). 7,026 (94%) are cached, about $0.85 this session. The rest failed the fact check (mostly the model adding places or titles not in the feed summary) and use templates. Real news is written in the neutral desk voice. The name check no longer flags a sentence opener followed by a comma ("Separately, ...").
+- **Color.**
+  - One spot ink per desk (`categoryInk` in `src/theme/tokens.ts`) on slips, kickers and layout cards.
+  - Placeholder photos are code-drawn two-color scenes per desk: a dome for politics, a pitch for sports, a globe for world, and so on.
+  - Still no images, gradients or drop shadows.
+- **Real map.** `npm run map:build` turns City of Philadelphia open data into `data/map.philly.json`, credited on the map:
+  - The 18 planning districts, grouped into the 8 game districts.
+  - Rivers and large parks.
+  Layers are now colored single-hue choropleths; political fit uses violet, never party red or blue. Hollow pins are city stories nobody is digging up.
+- **How-to-play guide.** Item 8 on Form 1-A, on by default. It shows a memo on each screen the first time you reach it: hiring, newsroom, layout, results, staff and map. "Got it" hides one memo; "Turn the guide off" hides them all. The hub's Guide button brings them back.
+- **Hiring day starts empty:** the player picks every hire.
+
+**Balance** (`npm run simulate`; the runner now puts half the starting staff on the Philadelphia patch): a grown paper reaches about 18–22k readers (inherited or bought), as before. A paper with nobody on local patches grows much less: city news matters.
+
+**Next**
+- Re-run `npm run news:fetch` and `news:build` over a few days for a bigger pool; add the Guardian once its key is set up.
+- Spot-check the model's lean tags on real stories.
+- Real art from the team.
+
+
 ## 2026-10-24 · Offline article cache filled; tested in the desktop app
 
 - **Article cache filled** with `claude-haiku-5-5`: 5,455 of 5,541 planned articles (98.4%) are pre-generated in `data/generated/summaries.cache.json`. The game reads them offline through `ArticleSource` (newsroom, layout, printed pages, tech demo). The other 86 failed the fact check (for example "two decades" for 19 years, invented weekdays and cities) and use templates.

@@ -49,8 +49,12 @@ export interface IssueDraft {
 export type WritingStyle = 'news' | 'feature' | 'investigative';
 /** How hard you push a reporter. More copy, more mistakes, lower morale. */
 export type Workload = 'light' | 'normal' | 'crunch';
-/** 'citywide' or a district id. */
+/** NATIONAL_PATCH (the wire), CITY_PATCH (all of Philadelphia) or a district id. */
 export type Patch = string;
+/** Works the national and international wire. */
+export const NATIONAL_PATCH = 'national';
+/** Digs up local stories anywhere in Philadelphia. */
+export const CITY_PATCH = 'philadelphia';
 
 export interface StaffAssignment {
   beat: Category;
@@ -133,6 +137,8 @@ export interface PaperSetup {
   /** Slider weights, 0-10 each. Shown as percentages. */
   coverage: Record<CoverageCategory, number>;
   stance: Stance;
+  /** Show the how-to-play guide (tip cards on each screen). */
+  tutorial?: boolean;
 }
 
 export interface PrintedIssue {
@@ -214,6 +220,8 @@ export interface IssueResult {
 
 export interface GameState {
   setup: PaperSetup;
+  /** How-to-play tips the player has dismissed. */
+  tutorialSeen?: string[];
   /** Seed for every random roll, so a game can be replayed. */
   seed: number;
   districts: Record<string, DistrictState>;

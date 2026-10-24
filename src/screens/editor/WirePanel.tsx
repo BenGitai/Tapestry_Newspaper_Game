@@ -47,7 +47,7 @@ export function WirePanel() {
               <div
                 key={a.id}
                 className={`${styles.slip} ${placed ? styles.slipPlaced : ''}`}
-                style={{ transform: `rotate(${i % 2 ? 0.35 : -0.3}deg)` }}
+                style={{ transform: `rotate(${i % 2 ? 0.35 : -0.3}deg)`, borderLeft: `5px solid var(--c-cat-${sc.story.category})` }}
                 onPointerDown={(e) =>
                   placed
                     ? beginDrag(e, { kind: 'story', storyId: a.storyId, tier: placed.block.tier, fromBlock: true }, { cols: placed.block.cols, rows: placed.block.rows }, { dc: placed.block.cols / 2, dr: 0.5 }, () => {

@@ -23,7 +23,10 @@
     "simulate": "tsx scripts/simulate.ts",
     "summarize": "node --env-file-if-exists=.env node_modules/tsx/dist/cli.mjs scripts/summarize.ts",
     "techdemo": "node --env-file-if-exists=.env scripts/dev.mjs --techdemo",
-    "techdemo:start": "npm run build && electron . --techdemo"
+    "techdemo:start": "npm run build && electron . --techdemo",
+    "news:fetch": "tsx scripts/fetch-news.ts",
+    "map:build": "tsx scripts/build-map.ts",
+    "news:build": "node --env-file-if-exists=.env node_modules/tsx/dist/cli.mjs scripts/build-news.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^1.3.0",

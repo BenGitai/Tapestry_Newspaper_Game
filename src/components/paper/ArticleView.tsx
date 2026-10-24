@@ -79,7 +79,7 @@ export function ArticleView({ story, block, article, byline }: Props) {
       <div className={styles.bodyRow}>
         {photoCols ? (
           <div className={styles.photoCol} style={{ width: photoW + GUTTER }}>
-            <PhotoBox width={photoW} height={photoH} label="Photo" />
+            <PhotoBox width={photoW} height={photoH} label={story.photo ?? "Photo"} category={story.category} seed={story.id} />
             <div className={styles.cutline}>{story.photo?.replace(/^Placeholder:\s*/i, '') ?? ''}</div>
             {leftText ? <div className={styles.body} style={{ columnCount: photoCols }}>{leftText}</div> : null}
           </div>

@@ -66,6 +66,11 @@ describe('unknownNames', () => {
     expect(names('Residents were told to wait.')).toEqual([]);
   });
 
+  it('skips a sentence opener followed by a comma, but still checks the name after it', () => {
+    expect(names('Separately, Danny Ocasio homered.')).toEqual([]);
+    expect(names('Elsewhere, Hargrove homered.')).toEqual(['Hargrove']);
+  });
+
   it('ignores possessives and hyphen parts', () => {
     expect(names("The Phillies' win and Ocasio's double beat the Mets-friendly crowd.")).toEqual([]);
   });

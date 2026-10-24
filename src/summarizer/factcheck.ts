@@ -160,7 +160,8 @@ export function unknownNames(text: string, allowed: Set<string>): { text: string
     if (isNumberWord(t.text)) return;
     if (t.sentenceStart) {
       const next = tokens[i + 1];
-      const nextIsCapital = next !== undefined && isCapital(next.text) && !/[.!?]\s*$/.test(text.slice(t.end, next.start));
+      // "Separately, Mayor ...": a sentence opener followed by a comma is not part of a name.
+      const nextIsCapital = next !== undefined && isCapital(next.text) && !/[.!?,;]\s*$/.test(text.slice(t.end, next.start));
       if (!nextIsCapital) return;
     }
     // In "Mets-friendly" only the capitalized part is a name candidate.

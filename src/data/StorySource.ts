@@ -1,17 +1,38 @@
 // Stories come through this interface so a live news source can replace the
 // fixed JSON file later without the game noticing.
+//
+// Two kinds of news: the WIRE (national and international, real news in the
+// demo) that everyone sees, and the LOCAL pool (Philadelphia) that only reporters
+// on a city or district patch dig up.
+import { WEEKLY_LOCAL_SIZE } from '../sim/balance.ts';
+import type { Frequency } from '../sim/types.ts';
 import { storyFileSchema, type Story, type WireSource } from './schemas.ts';
 
 export interface StorySource {
+  /** National and international wire for an issue. */
+  wireForIssue(frequency: Frequency, issue: number): Story[];
+  /** Philadelphia stories for an issue. Only reporters on a local patch find these. */
+  localForIssue(frequency: Frequency, issue: number): Story[];
   /** All wire sources this feed can credit. */
   wireSources(): WireSource[];
-  /** Stories that arrive on the wire for one in-game day (1-based). */
+  /** Local stories for one in-game day (1-based). */
   storiesForDay(day: number): Story[];
   /** Every story the source knows about (used by the summarizer script and lab). */
   allStories(): Story[];
   /** Number of in-game days this source can supply. */
   dayCount(): number;
   storyById(id: string): Story | undefined;
+}
+
+/** The local pool for an issue: one day for a daily, the week's top stories for a weekly. */
+export function localPool(source: Pick<StorySource, 'storiesForDay'>, frequency: Frequency, issue: number): Story[] {
+  const local = (d: number) => source.storiesForDay(d).filter((s) => s.scope === 'local');
+  if (frequency === 'daily') return local(issue);
+  const week = Array.from({ length: 7 }, (_, i) => (issue - 1) * 7 + i + 1).flatMap(local);
+  return [...week]
+    .sort((a, b) => b.importance - a.importance || a.day - b.day || a.filed_at.localeCompare(b.filed_at))
+    .slice(0, WEEKLY_LOCAL_SIZE)
+    .sort((a, b) => a.day - b.day || a.filed_at.localeCompare(b.filed_at));
 }
 
 export class JsonStorySource implements StorySource {
@@ -34,6 +55,15 @@ export class JsonStorySource implements StorySource {
 
   wireSources(): WireSource[] {
     return this.sources;
+  }
+
+  /** The hand-written file has no national wire. */
+  wireForIssue(): Story[] {
+    return [];
+  }
+
+  localForIssue(frequency: Frequency, issue: number): Story[] {
+    return localPool(this, frequency, issue);
   }
 
   storiesForDay(day: number): Story[] {

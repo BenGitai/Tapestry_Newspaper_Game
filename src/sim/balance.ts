@@ -335,8 +335,12 @@ export const MORALE_EVENTS = { correction: -8 } as const;
 export const MAX_ISSUES = 10;
 /** Days of wire the demo can supply (10 weekly issues). */
 export const DEMO_DAYS = 70;
-/** Wire stories per day (hand-written days are topped up to this with generated news). */
-export const GENERATED_PER_DAY = 20;
+/** Philadelphia stories per day in the local pool (hand-written days are topped up to this with generated local news). */
+export const GENERATED_PER_DAY = 12;
+/** National and international wire stories per issue (the most important of the issue's real news). */
+export const DAILY_WIRE_SIZE = 20;
+/** A weekly issue's local pool: the week's most important Philadelphia stories, up to this many. */
+export const WEEKLY_LOCAL_SIZE = 30;
 /**
  * Once their beat is covered, reporters with copy left over pick up other
  * uncovered stories (general assignment), at the off-desk quality penalty.
@@ -344,7 +348,7 @@ export const GENERATED_PER_DAY = 20;
 export const GENERAL_ASSIGNMENT = true;
 /** Share of each reporter's copy that their own filing leaves free for the editor's commissions. */
 export const COMMISSION_RESERVE = 0.3;
-/** A weekly issue's wire is the week's most important stories, up to this many. */
+/** A weekly issue's national and international wire, up to this many stories. */
 export const WEEKLY_WIRE_SIZE = 40;
 /** Reporters file this many times more copy for a weekly issue (a week of work). */
 export const FREQUENCY_CAPACITY = { daily: 1, weekly: 2.5, monthly: 6 } as const;

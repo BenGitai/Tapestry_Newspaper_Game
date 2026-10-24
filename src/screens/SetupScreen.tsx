@@ -156,6 +156,16 @@ export function SetupScreen() {
               ))}
             </div>
             <span className={styles.hint}>This is only what you claim. Readers decide what you really are from what you print.</span>
+
+            <span className={styles.label} style={{ marginTop: 10 }}>8. How-to-play guide</span>
+            <div className={styles.segmented}>
+              {[true, false].map((on) => (
+                <button key={String(on)} className={(s.tutorial ?? true) === on ? styles.on : ''} onClick={() => setS({ ...s, tutorial: on })}>
+                  {on ? 'On: show me how it works' : 'Off: I know the ropes'}
+                </button>
+              ))}
+            </div>
+            <span className={styles.hint}>A short memo on each screen the first time you get there. You can turn it off from any memo.</span>
           </div>
         </div>
       </div>

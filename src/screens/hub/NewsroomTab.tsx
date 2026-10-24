@@ -2,14 +2,15 @@
 // ones, pick what goes to print, and commission extra stories off the wire.
 import { useState } from 'react';
 import { articleSource } from '../../data/ArticleSource.ts';
-import { ANGLES, type Angle, type Reporter } from '../../data/schemas.ts';
+import { ANGLES, type Angle, type Reporter, type Story } from '../../data/schemas.ts';
 import { loadGameData, subtopicName } from '../../data/worldData.ts';
-import { articleInches, backlog, hasRoomFor, isCovered, remainingCapacity, selectedForPrint, wireForIssue } from '../../sim/newsroom.ts';
+import { articleInches, backlog, hasRoomFor, isCovered, isLocalPatch, localLeads, remainingCapacity, selectedForPrint, wireForIssue } from '../../sim/newsroom.ts';
 import { activeStaff, CATEGORY_LABEL, currentAttributes, filingCapacity, reporterById, shownAssignment } from '../../sim/staff.ts';
 import type { Article, GameState, StaffMember } from '../../sim/types.ts';
 import { useStore } from '../../state/store.ts';
 import { ANGLE_LABEL, articleScorecard, bylineOf, OriginalStoryLink, ScoreChips, ScoutingReport, STYLE_SHORT } from '../../components/newsroom/ArticleParts.tsx';
 import { assignmentSummary, AttributeTable, ReporterHeader, StrengthsLine } from '../../components/staff/StaffParts.tsx';
+import { PhotoBox } from '../../components/paper/Halftone.tsx';
 import styles from './Hub.module.css';
 import n from './Newsroom.module.css';
 
@@ -198,7 +199,7 @@ function ArticleSlip({ game, article, on, tilt, onOpen }: { game: GameState; art
   if (!sc) return null;
   const age = game.issueNumber - article.issueFiled;
   return (
-    <div className={`${n.slip} ${on ? n.slipOn : ''} ${article.selected ? n.slipPrint : ''}`} style={{ transform: `rotate(${tilt}deg)` }} onClick={onOpen}>
+    <div className={`${n.slip} ${on ? n.slipOn : ''} ${article.selected ? n.slipPrint : ''}`} style={{ transform: `rotate(${tilt}deg)`, borderLeft: `5px solid var(--c-cat-${sc.story.category})` }} onClick={onOpen}>
       <div className={n.slipMeta}>
         <span>
           {bylineOf(article)} · {STYLE_SHORT[article.style]} · {ANGLE_LABEL[article.angle]} · {article.inches} in
@@ -240,7 +241,8 @@ function ArticleDetail({ game, article }: { game: GameState; article: Article })
   const editable = article.status === 'backlog';
   return (
     <>
-      <div className={styles.kicker}>
+      <PhotoBox width={404} height={120} label={story.photo ?? subtopicName(story.subtopic)} category={story.category} seed={story.id} />
+      <div className={styles.kicker} style={{ color: `var(--c-cat-${story.category})` }}>
         {CATEGORY_LABEL[story.category]} · {subtopicName(story.subtopic)} · via {src?.name} · importance {story.importance}/5
       </div>
       <div className={n.detailHead}>{copy.headline}</div>
@@ -322,10 +324,52 @@ function WireDesk({ game }: { game: GameState }) {
   const commission = useStore((s) => s.commission);
   const { world, stories } = loadGameData();
   const wire = wireForIssue(game, stories);
+  const leads = localLeads(game, stories);
   const open = wire.filter((s) => !isCovered(game, s.id));
-  const covered = wire.filter((s) => isCovered(game, s.id));
+  const openLeads = leads.filter((s) => !isCovered(game, s.id));
+  const covered = [...wire, ...leads].filter((s) => isCovered(game, s.id));
   const staff = activeStaff(game);
   const [pick, setPick] = useState<Record<string, string>>({});
+  const hasLocal = staff.some((m) => isLocalPatch(m.assignment.patch));
+
+  const slip = (s: Story) => {
+    const chosen = pick[s.id] ?? '';
+    return (
+      <div key={s.id} className={n.wireSlip} style={{ borderLeftColor: `var(--c-cat-${s.category})` }}>
+        <div className={n.slipMeta}>
+          <span style={{ color: `var(--c-cat-${s.category})` }}>
+            {CATEGORY_LABEL[s.category]} · {subtopicName(s.subtopic)} · {s.base_column_inches} in
+          </span>
+          <span>{'■'.repeat(s.importance)}{'□'.repeat(5 - s.importance)}</span>
+        </div>
+        <div className={n.wireHead}>{s.wire_headline}</div>
+        {s.sensitivity === 'high' ? <div className={n.sensitive}>Sensitive</div> : null}
+        <OriginalStoryLink story={s} />
+        <div className={n.commissionRow}>
+          <select value={chosen} onChange={(e) => setPick({ ...pick, [s.id]: e.target.value })}>
+            <option value="">Commission…</option>
+            {staff.map((m) => {
+              const r = reporterById(world, m.reporterId);
+              const room = Math.floor(remainingCapacity(game, world, m));
+              const need = articleInches(s, m.assignment.style);
+              const ok = hasRoomFor(game, world, m, need);
+              return (
+                <option key={m.reporterId} value={m.reporterId} disabled={!ok}>
+                  {r?.name} ({Math.max(0, room)} in left{!ok ? `, needs ${need}` : ''})
+                </option>
+              );
+            })}
+          </select>
+          <button className={styles.btn} disabled={!chosen} onClick={() => commission(s.id, chosen)}>
+            Assign
+          </button>
+          <button className={styles.linkBtn} onClick={() => commission(s.id, null)}>
+            Wire copy
+          </button>
+        </div>
+      </div>
+    );
+  };
 
   return (
     <>
@@ -333,45 +377,18 @@ function WireDesk({ game }: { game: GameState }) {
         Stories nobody is covering. Commission one and the reporter writes it now, using their remaining copy for this issue. Or run the wire copy as-is (no
         byline, straight).
       </p>
-      {open.map((s) => {
-        const chosen = pick[s.id] ?? '';
-        return (
-          <div key={s.id} className={n.wireSlip}>
-            <div className={n.slipMeta}>
-              <span>
-                {CATEGORY_LABEL[s.category]} · {subtopicName(s.subtopic)} · {s.base_column_inches} in
-              </span>
-              <span>{'■'.repeat(s.importance)}{'□'.repeat(5 - s.importance)}</span>
-            </div>
-            <div className={n.wireHead}>{s.wire_headline}</div>
-            {s.sensitivity === 'high' ? <div className={n.sensitive}>Sensitive</div> : null}
-            <OriginalStoryLink story={s} />
-            <div className={n.commissionRow}>
-              <select value={chosen} onChange={(e) => setPick({ ...pick, [s.id]: e.target.value })}>
-                <option value="">Commission…</option>
-                {staff.map((m) => {
-                  const r = reporterById(world, m.reporterId);
-                  const room = Math.floor(remainingCapacity(game, world, m));
-                  const need = articleInches(s, m.assignment.style);
-                  const ok = hasRoomFor(game, world, m, need);
-                  return (
-                    <option key={m.reporterId} value={m.reporterId} disabled={!ok}>
-                      {r?.name} ({Math.max(0, room)} in left{!ok ? `, needs ${need}` : ''})
-                    </option>
-                  );
-                })}
-              </select>
-              <button className={styles.btn} disabled={!chosen} onClick={() => commission(s.id, chosen)}>
-                Assign
-              </button>
-              <button className={styles.linkBtn} onClick={() => commission(s.id, null)}>
-                Wire copy
-              </button>
-            </div>
-          </div>
-        );
-      })}
+      <div className={styles.label}>National &amp; world wire</div>
+      {open.map(slip)}
       {open.length === 0 ? <p className={n.empty}>Every story on the wire is covered.</p> : null}
+      <div className={styles.label}>Philadelphia leads</div>
+      {hasLocal ? (
+        <>
+          {openLeads.map(slip)}
+          {openLeads.length === 0 ? <p className={n.empty}>Your local reporters have covered every lead they found.</p> : null}
+        </>
+      ) : (
+        <p className={n.empty}>City news only turns up when a reporter works a Philadelphia or district patch. Set one on the Staff tab.</p>
+      )}
       {covered.length ? (
         <>
           <div className={styles.label}>Already covered</div>

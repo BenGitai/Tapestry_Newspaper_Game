@@ -36,6 +36,9 @@ export const storySchema = z.object({
   storyline_step: z.number().int().optional(),
   photo: z.string().optional(),
   real_story_url: z.string(),
+  /** Real news only: when the original was published (ISO), and the feed it came from. */
+  published: z.string().optional(),
+  feed: z.string().optional(),
 });
 export type Story = z.infer<typeof storySchema>;
 

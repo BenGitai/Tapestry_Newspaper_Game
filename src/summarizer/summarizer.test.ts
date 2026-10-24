@@ -6,7 +6,7 @@ import { DEFAULT_SUMMARIZER_MODEL, summarizerModel } from './config.ts';
 import { callCost, estimateInputTokens, estimateOutputTokens, extrapolate } from './cost.ts';
 import { buildPrompt } from './prompt.ts';
 import { anglesFor, demoStories, isHandWritten, plannedRequests, voicesFor } from './plan.ts';
-import { wireForIssue } from '../sim/newsroom.ts';
+import { localPoolForIssue, wireForIssue } from '../sim/newsroom.ts';
 import { WEEKLY_WIRE_SIZE } from '../sim/balance.ts';
 import type { PaperSetup } from '../sim/types.ts';
 
@@ -100,14 +100,23 @@ describe('cache and article source', () => {
 describe('plan', () => {
   const plan = plannedRequests(stories, world);
 
-  it('covers the daily wire of days 1-10 and the weekly top stories of weeks 1-10', () => {
+  it('covers the national wire and the local pool of issues 1-10, daily and weekly', () => {
     const ids = new Set(demoStories(stories).map((s) => s.id));
-    for (let d = 1; d <= 10; d++) for (const s of stories.storiesForDay(d)) expect(ids.has(s.id), s.id).toBe(true);
-    for (let w = 1; w <= 10; w++) {
-      const wire = wireForIssue({ setup: { frequency: 'weekly' } as PaperSetup, issueNumber: w }, stories);
-      expect(wire.length).toBeLessThanOrEqual(WEEKLY_WIRE_SIZE);
-      for (const s of wire) expect(ids.has(s.id), s.id).toBe(true);
+    for (const frequency of ['daily', 'weekly'] as const) {
+      for (let i = 1; i <= 10; i++) {
+        const game = { setup: { frequency } as PaperSetup, issueNumber: i };
+        const wire = wireForIssue(game, stories);
+        expect(wire.length).toBeGreaterThan(0);
+        expect(wire.length).toBeLessThanOrEqual(WEEKLY_WIRE_SIZE);
+        for (const s of [...wire, ...localPoolForIssue(game, stories)]) expect(ids.has(s.id), s.id).toBe(true);
+      }
     }
+  });
+
+  it('writes real news in the desk voice only', () => {
+    const real = demoStories(stories).find((s) => s.id.startsWith('n-'))!;
+    expect(isHandWritten(real.id)).toBe(false);
+    expect(plan.filter((p) => p.story.id === real.id).every((p) => p.req.journalistId === null)).toBe(true);
   });
 
   it('has unique keys, no Puff for sensitive stories, and every angle and tier otherwise', () => {

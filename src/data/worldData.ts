@@ -7,6 +7,8 @@ import subtopicsRaw from '../../data/subtopics.json';
 import { cityListSchema, cityWorldSchema, reporterSchema, subtopicFileSchema, type Category, type City, type CityWorld, type SubtopicMap } from './schemas.ts';
 import { JsonStorySource, type StorySource } from './StorySource.ts';
 import { DemoStorySource } from './DemoStorySource.ts';
+import { GameNewsSource, RealNewsSource } from './RealNewsSource.ts';
+import realNewsRaw from '../../data/news/stories.json';
 import { generateCandidates } from './CandidateGenerator.ts';
 import { EXTRA_CANDIDATES } from '../sim/balance.ts';
 
@@ -78,7 +80,7 @@ export function loadGameData(): GameData {
   validateStoryRefs(hand, world);
   const subtopics = parseSubtopics(subtopicsRaw);
   validateSubtopics(hand, world, subtopics, hand.dayCount());
-  const stories = new DemoStorySource(hand, world);
+  const stories = new GameNewsSource(new RealNewsSource(realNewsRaw), new DemoStorySource(hand, world));
   const cities = cityListSchema.parse(citiesRaw).cities;
   // Grow the hiring market with generated candidates (validated like the rest).
   const extra = generateCandidates(world, subtopics, EXTRA_CANDIDATES).map((c) => reporterSchema.parse(c));

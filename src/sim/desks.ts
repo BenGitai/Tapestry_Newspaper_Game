@@ -4,7 +4,7 @@
 import type { CityWorld, Desk, Reporter, Story } from '../data/schemas.ts';
 import type { StorySource } from '../data/StorySource.ts';
 import { HEAD } from './balance.ts';
-import { articleInches, backlog, commission, freshness, isCovered, remainingCapacity, updateArticle, wireForIssue } from './newsroom.ts';
+import { articleInches, availableStories, backlog, commission, freshness, isCovered, remainingCapacity, updateArticle } from './newsroom.ts';
 import { scorecard } from './scorecard.ts';
 import { activeStaff, currentAttributes, deskForCategory, reporterById } from './staff.ts';
 import type { Category, DeskDuties, GameState, StaffMember } from './types.ts';
@@ -134,7 +134,7 @@ export function setDuties(game: GameState, reporterId: string, duties: DeskDutie
 /**
  * Run the desk (before filing): give the desk's reporters focuses that cover the
  * beat. Each reporter keeps their own interest if nobody else has it; otherwise
- * they get the next uncovered subtopic. Patches go citywide.
+ * they get the next uncovered subtopic. Patches are left as the player set them.
  */
 export function runDeskAssignments(game: GameState, world: CityWorld, subtopicsOf: (c: Category) => string[]): GameState {
   let staff = game.staff;
@@ -160,7 +160,7 @@ export function runDeskAssignments(game: GameState, world: CityWorld, subtopicsO
       plan.set(m.reporterId, next);
       if (next !== 'none') taken.add(next);
     }
-    staff = staff.map((m) => (plan.has(m.reporterId) ? { ...m, assignment: { ...m.assignment, focus: plan.get(m.reporterId)!, patch: 'citywide' }, pendingAssignment: undefined } : m));
+    staff = staff.map((m) => (plan.has(m.reporterId) ? { ...m, assignment: { ...m.assignment, focus: plan.get(m.reporterId)! }, pendingAssignment: undefined } : m));
   }
   return { ...game, staff };
 }
@@ -171,7 +171,7 @@ export function runDeskCommissions(game: GameState, world: CityWorld, stories: S
   for (const head of game.staff.filter((m) => m.role === 'head' && m.headOf)) {
     const desk = head.headOf!;
     if (!(head.duties ?? DEFAULT_DUTIES).runDesk || !headActive(state, world, desk)) continue;
-    const open = wireForIssue(state, stories)
+    const open = availableStories(state, stories)
       .filter((s) => !isCovered(state, s.id) && deskForCategory(world, s.category) === desk && s.importance >= HEAD.commissionMinImportance)
       .sort((a, b) => b.importance - a.importance);
     for (const s of open) {

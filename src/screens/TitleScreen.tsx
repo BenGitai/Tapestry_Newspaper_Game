@@ -15,7 +15,7 @@ export function TitleScreen() {
   const metas = saves.list();
   const auto = metas.find((m) => m.slot === 'autosave');
   const slot1 = metas.find((m) => m.slot === 'slot1');
-  const headlines = stories.storiesForDay(1).slice(0, 3);
+  const headlines = [...stories.wireForIssue('daily', 1)].sort((a, b) => b.importance - a.importance).slice(0, 3);
 
   return (
     <DeskSurface>

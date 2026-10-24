@@ -32,8 +32,14 @@ interface Store {
   currentPage: PageId;
   layoutTab: 'print' | 'ads';
   notice: { text: string; at: number } | null;
+  /** Tips dismissed before the game exists (hiring); copied into the game when it starts. */
+  tutorialSeen: string[];
 
   goto(screen: Screen): void;
+  /** Hide one how-to-play tip. */
+  dismissTip(id: string): void;
+  /** Turn the how-to-play guide on or off. */
+  setTutorial(on: boolean): void;
   setHubTab(tab: HubTab): void;
   submitSetup(setup: PaperSetup): void;
   startGame(setup: PaperSetup, hires: Hire[]): void;
@@ -118,13 +124,25 @@ export const useStore = create<Store>((set, get) => {
     currentPage: 'front',
     layoutTab: 'print',
     notice: null,
+    tutorialSeen: [],
 
     goto: (screen) => set({ screen }),
+    dismissTip: (id) => {
+      const { game, tutorialSeen } = get();
+      set({ tutorialSeen: [...tutorialSeen, id] });
+      if (game) set({ game: { ...game, tutorialSeen: [...(game.tutorialSeen ?? []), id] } });
+    },
+    setTutorial: (on) => {
+      const { game, pendingSetup } = get();
+      // Turning the guide on again shows every memo again.
+      if (game) set({ game: { ...game, setup: { ...game.setup, tutorial: on }, ...(on ? { tutorialSeen: [] } : {}) } });
+      else if (pendingSetup) set({ pendingSetup: { ...pendingSetup, tutorial: on } });
+    },
     setHubTab: (hubTab) => set({ hubTab }),
-    submitSetup: (pendingSetup) => set({ pendingSetup, screen: 'hiring' }),
+    submitSetup: (pendingSetup) => set({ pendingSetup, screen: 'hiring', tutorialSeen: [] }),
     startGame: (setup, hires) => {
       const { world, stories } = loadGameData();
-      const game = createGame(setup, world, stories, hires);
+      const game = { ...createGame(setup, world, stories, hires), tutorialSeen: get().tutorialSeen };
       saves.save('autosave', game);
       set({
         game,

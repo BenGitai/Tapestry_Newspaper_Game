@@ -21,6 +21,7 @@ export function defaultSetup(): PaperSetup {
     style: 'neighborhood',
     coverage: { politics: 5, economy: 3, social: 3, sports: 4, culture: 2, science: 2, world: 1 },
     stance: 'neutral',
+    tutorial: true,
   };
 }
 
